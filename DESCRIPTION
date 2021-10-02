@@ -18,7 +18,8 @@ Imports:
     logger
 Suggests: 
     withr,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    webmockr
 Config/testthat/edition: 3
 URL: https://github.com/mdneuzerling/lambdr
 BugReports: https://github.com/mdneuzerling/lambdr/issues

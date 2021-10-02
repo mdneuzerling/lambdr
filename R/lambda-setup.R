@@ -40,6 +40,8 @@ reset_lambda <- function() {
 }
 
 get_lambda_environment_variable <- function(env_var) {
+  setup_logging()
+
   value <- Sys.getenv(env_var)
   if (value == "") {
     stop(env_var, " environment variable is not set. This ",

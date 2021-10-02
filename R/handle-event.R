@@ -71,7 +71,7 @@ parse_event_content <- function(event) {
 
 wait_for_event <- function(endpoint) {
   logger::log_debug("Waiting for event")
-  event <- httr::GET(url = get_next_invocation_endpoint)
+  event <- httr::GET(url = get_next_invocation_endpoint())
   logger::log_debug("Event received")
 
   tryCatch(
@@ -100,7 +100,7 @@ handle_event <- function(event) {
   event_arguments <- event_content$arguments
   request_type <- event_content$request_type
 
-  result <- do.call(lambda$handler, event_content)
+  result <- do.call(lambda$handler, event_arguments)
   logger::log_debug("Result:", as.character(result))
 
   # AWS API Gateway is a bit particular about the response format
@@ -108,19 +108,26 @@ handle_event <- function(event) {
     list(
       isBase64Encoded = FALSE,
       statusCode = 200L,
-      body =  as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
+      body = as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
     )
   } else {
-    result
+    as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
   }
 
   httr::POST(
     url = get_response_endpoint(request_id),
     body = body,
-    encode = "json"
+    encode = "raw"
   )
 }
 
-start_listening <- function() {
-  while (TRUE) wait_for_event()
+start_listening <- function(timeout_seconds = NULL) {
+  if (!is.null(timeout_seconds)) {
+    expire_after <- Sys.time() + timeout_seconds
+    while (Sys.time() < expire_after) {
+      wait_for_event()
+    }
+  } else {
+    while (TRUE) wait_for_event()
+  }
 }

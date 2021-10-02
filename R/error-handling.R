@@ -37,8 +37,8 @@ stop_lambda <- function(message, code = 500, call = sys.call(-1), ...) {
 }
 
 handle_api_error <- function(event) {
-  headers <- extract_event_headers(headers)
-  request_id <- extract_request_id_from_headers(headers)
+  event_headers <- extract_event_headers(event)
+  request_id <- extract_request_id_from_headers(event_headers)
   logger::log_debug("POSTing invocation error for ID:", request_id)
 
   error_handling_function <- function(e) {
@@ -57,8 +57,8 @@ handle_api_error <- function(event) {
 }
 
 handle_invocation_error <- function(event) {
-  headers <- extract_event_headers(headers)
-  request_id <- extract_request_id_from_headers(headers)
+  event_headers <- extract_event_headers(event)
+  request_id <- extract_request_id_from_headers(event_headers)
 
   error_handling_function <- function(e) {
     error_message <- as.character(e)
