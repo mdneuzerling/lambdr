@@ -26,7 +26,7 @@ assert_status_code_is_good <- function(status_code) {
   TRUE
 }
 
-parse_event_content <- function(event) {
+parse_event_content <- function(event, deserialiser = NULL) {
   # we need to parse the event in four contexts before sending to the lambda fn:
   # 1a) direct invocation with no function args (empty event)
   # 1b) direct invocation with function args (parse and send entire event)
@@ -36,6 +36,15 @@ parse_event_content <- function(event) {
   #   element; extract and send it)
 
   unparsed_content <- httr::content(event, "text", encoding = "UTF-8")
+
+  if (!is.null(deserialiser)) {
+    return(
+      list(
+        arguments = deserialiser(unparsed_content),
+        request_type = "custom"
+      )
+    )
+  }
 
   # Thank you to Menno Schellekens for this fix for Cloudwatch events
   # I'm getting conflicting information about whether or not scheduled events
@@ -82,7 +91,7 @@ wait_for_event <- function(endpoint) {
   )
 }
 
-handle_event <- function(event) {
+handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
 
   event_headers <- extract_event_headers(event)
   request_id <- extract_request_id_from_headers(event_headers)
@@ -96,15 +105,18 @@ handle_event <- function(event) {
     Sys.setenv("_X_AMZN_TRACE_ID" = runtime_trace_id)
   }
 
-  event_content <- parse_event_content(event)
+  event_content <- parse_event_content(event, deserialiser)
   event_arguments <- event_content$arguments
   request_type <- event_content$request_type
 
   result <- do.call(lambda$handler, args = event_arguments)
   logger::log_debug("Result:", as.character(result))
 
+
+  body <- if (!is.null(serialiser)) {
+    serialiser(result)
   # AWS API Gateway is a bit particular about the response format
-  body <- if (request_type == "HTML") {
+  } else if (request_type == "HTML") {
     list(
       isBase64Encoded = FALSE,
       statusCode = 200L,
