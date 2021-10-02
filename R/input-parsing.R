@@ -15,7 +15,3 @@ prettify_list <- function(x) {
     collapse = ", "
   )
 }
-
-parse_headers <- function(header) {
-  NULL #TODO
-}

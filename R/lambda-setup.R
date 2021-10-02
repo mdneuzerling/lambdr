@@ -3,9 +3,26 @@ setup_logging <- function(log_threshold = logger::INFO) {
   logger::log_threshold(log_threshold)
 }
 
+#' Retrieve the Lambda Runtime API value
+#'
+#' This value is set once per Lambda instance. It is used to construct the
+#' various endpoints required to connect with the Lambda service.
+#'
+#' @return character
+#' @keywords internal
 get_lambda_runtime_api <- function() {
   assert_lambda_is_setup()
   lambda$runtime_api
+}
+
+get_lambda_task_root <- function() {
+  assert_lambda_is_setup()
+  lambda$task_root
+}
+
+get_handler <- function() {
+  assert_lambda_is_setup()
+  lambda$handler
 }
 
 assert_lambda_is_setup <- function() {
@@ -22,7 +39,17 @@ reset_lambda <- function() {
   lambda$is_setup <- FALSE
 }
 
-#' Set up endpoints and logging for AWS Lambda
+get_lambda_environment_variable <- function(env_var) {
+  value <- Sys.getenv(env_var)
+  if (value == "") {
+    stop(env_var, " environment variable is not set. This ",
+         "environment variable is set by AWS when Lambda is instantiated. It ",
+         "will not appear when running local tests.")
+  }
+  value
+}
+
+#' Set up endpoints, variables and logging for AWS Lambda
 #'
 #' @details
 #' As a rule of thumb, it takes longer to retrieve a value from an environment
@@ -33,14 +60,14 @@ reset_lambda <- function() {
 #'
 #' @export
 setup_lambda <- function() {
-  env_var <- "AWS_LAMBDA_RUNTIME_API"
-  lambda_runtime_api <- Sys.getenv(env_var)
-  if (lambda_runtime_api == "") {
-    stop(env_var, " environment variable is not set. This environment ",
-         "variable is set by AWS when Lambda is instantiated. It will not ",
-         "appear when running local tests.")
-  }
-
-  lambda$runtime_api <- lambda_runtime_api
+  lambda$runtime_api <- get_lambda_environment_variable(
+    "AWS_LAMBDA_RUNTIME_API"
+  )
+  lambda$task_root <- get_lambda_environment_variable(
+    "LAMBDA_TASK_ROOT"
+  )
+  lambda$handler <- get_lambda_environment_variable(
+    "_HANDLER"
+  )
   lambda$is_setup <- TRUE
 }

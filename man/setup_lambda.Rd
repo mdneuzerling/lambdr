@@ -2,12 +2,12 @@
 % Please edit documentation in R/lambda-setup.R
 \name{setup_lambda}
 \alias{setup_lambda}
-\title{Set up endpoints and logging for AWS Lambda}
+\title{Set up endpoints, variables and logging for AWS Lambda}
 \usage{
 setup_lambda()
 }
 \description{
-Set up endpoints and logging for AWS Lambda
+Set up endpoints, variables and logging for AWS Lambda
 }
 \details{
 As a rule of thumb, it takes longer to retrieve a value from an environment
