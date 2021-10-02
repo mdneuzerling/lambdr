@@ -1,13 +1,15 @@
 Package: lambdr
-Title: What the Package Does (One Line, Title Case)
+Title: Create a Runtime for Serving Containerised R Functions on AWS Lambda
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "David",
+           family = "Neuzerling",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "david@neuzerling.com")
+Description: Runtime for serving containers that can execute R code on the 
+    'AWS Lambda' serverless compute service <\https://aws.amazon.com/lambda/>.
+    Provides the necessary functionality for handling the various endpoints
+    required for accepting new input and sending responses.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
