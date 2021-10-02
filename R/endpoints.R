@@ -5,9 +5,12 @@
 #' is provided in the "lambda-runtime-aws-request-id" header of the event.
 #'
 #' @description
-#' These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API" environment variable set by AWS
-#' Lambda during initialisation. They generally won't be available locally. The "AWS_LAMBDA_RUNTIME_API" environment variable
-#' can be retrieved with `get_lambda_runtime_api`, and is used in the following functions:
+#' These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API"
+#' environment variable set by AWS Lambda during initialisation. They generally
+#' won't be available locally. The "AWS_LAMBDA_RUNTIME_API" environment variable
+#' can be retrieved with \code{\link{get_lambda_runtime_api}} after
+#' \verb{\code{setup_lambda}} has been run, and is used in the following
+#' functions:
 #'
 #' * `get_next_invocation_endpoint` returns the endpoint which R must query for
 #' the next input. R must send a `GET` request to this endpoint and will wait
@@ -34,19 +37,6 @@
 #'
 #' @name endpoints
 NULL
-
-#' @rdname endpoints
-#' @export
-get_lambda_runtime_api <- function() {
-  env_var <- "AWS_LAMBDA_RUNTIME_API"
-  lambda_runtime_api <- Sys.getenv(env_var)
-  if (lambda_runtime_api == "") {
-    stop(env_var, " environment variable is not set. This environment ",
-         "variable is set by AWS when Lambda is instantiated. It will not ",
-         "appear when running local tests.")
-  }
-  lambda_runtime_api
-}
 
 #' @rdname endpoints
 #' @export

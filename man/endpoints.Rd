@@ -2,15 +2,12 @@
 % Please edit documentation in R/endpoints.R
 \name{endpoints}
 \alias{endpoints}
-\alias{get_lambda_runtime_api}
 \alias{get_next_invocation_endpoint}
 \alias{get_initialisation_error_endpoint}
 \alias{get_response_endpoint}
 \alias{get_invocation_error_endpoint}
 \title{AWS Lambda endpoints}
 \usage{
-get_lambda_runtime_api()
-
 get_next_invocation_endpoint()
 
 get_initialisation_error_endpoint()
@@ -28,9 +25,12 @@ is provided in the "lambda-runtime-aws-request-id" header of the event.}
 character
 }
 \description{
-These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API" environment variable set by AWS
-Lambda during initialisation. They generally won't be available locally. The "AWS_LAMBDA_RUNTIME_API" environment variable
-can be retrieved with \code{get_lambda_runtime_api}, and is used in the following functions:
+These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API"
+environment variable set by AWS Lambda during initialisation. They generally
+won't be available locally. The "AWS_LAMBDA_RUNTIME_API" environment variable
+can be retrieved with \code{\link{get_lambda_runtime_api}} after
+\verb{\code{setup_lambda}} has been run, and is used in the following
+functions:
 \itemize{
 \item \code{get_next_invocation_endpoint} returns the endpoint which R must query for
 the next input. R must send a \code{GET} request to this endpoint and will wait
