@@ -58,6 +58,11 @@ get_lambda_environment_variable <- function(env_var) {
 
 #' Set up endpoints, variables and logging for AWS Lambda
 #'
+#' @param log_threshold Threshold for recording and displaying log entries.
+#' Passed to logger::log_threshold. Defaults to `logger::INFO`. To debug a
+#' failing Lambda container, set this to `logger::DEBUG` to log verbose
+#' information about how each request is processed.
+#'
 #' @details
 #' As a rule of thumb, it takes longer to retrieve a value from an environment
 #' variable than it does to retrieve a value from R. This is because retrieving

@@ -4,7 +4,13 @@
 \alias{setup_lambda}
 \title{Set up endpoints, variables and logging for AWS Lambda}
 \usage{
-setup_lambda()
+setup_lambda(log_threshold = logger::INFO)
+}
+\arguments{
+\item{log_threshold}{Threshold for recording and displaying log entries.
+Passed to logger::log_threshold. Defaults to \code{logger::INFO}. To debug a
+failing Lambda container, set this to \code{logger::DEBUG} to log verbose
+information about how each request is processed.}
 }
 \description{
 Set up endpoints, variables and logging for AWS Lambda
