@@ -44,20 +44,28 @@ reset_lambda <- function() {
   lambda$is_setup <- FALSE
 }
 
-get_lambda_environment_variable <- function(env_var) {
+get_lambda_environment_variable <- function(env_var, default = NULL) {
   setup_logging()
 
   value <- Sys.getenv(env_var)
-  if (value == "") {
+  if (value == "" && is.null(default)) {
     stop(env_var, " environment variable is not set. This ",
          "environment variable is set by AWS when Lambda is instantiated. It ",
          "will not appear when running local tests.")
   }
-  value
+
+  if (value != "") {
+    value
+  } else {
+    default
+  }
 }
 
 #' Set up endpoints, variables and logging for AWS Lambda
 #'
+#' @param character. Name of function to use for processing inputs from events.
+#' This argument is provided for debugging and testing only. The handler as
+#' configured in AWS, if present, will always overwrite this value.
 #' @param log_threshold Threshold for recording and displaying log entries.
 #' Passed to logger::log_threshold. Defaults to `logger::INFO`. To debug a
 #' failing Lambda container, set this to `logger::DEBUG` to log verbose
@@ -71,12 +79,13 @@ get_lambda_environment_variable <- function(env_var) {
 #' to a package environment.
 #'
 #' @export
-setup_lambda <- function(log_threshold = logger::INFO) {
+setup_lambda <- function(handler = NULL, log_threshold = logger::INFO) {
 
   setup_logging(log_threshold = log_threshold)
 
   handler_character <- get_lambda_environment_variable(
-    "_HANDLER"
+    "_HANDLER",
+    handler
   )
 
   if (!exists(handler_character, envir = parent.frame())) {
