@@ -26,6 +26,7 @@ test_that("Lambda task root retrieval fails before setup", {
 
 test_that("Lambda handler fails before setup", {
   expect_setup_failure(get_handler)
+  expect_setup_failure(get_handler_character)
 })
 
 test_that("we can retrieve the Lambda runtime API variable", {
@@ -45,9 +46,34 @@ test_that("we can retrieve the Lambda task root variable", {
 })
 
 test_that("we can retrieve the Lambda handler", {
-  use_basic_lambda_setup()
+  use_basic_lambda_setup(handler = "sqrt")
   expect_equal(
-    get_handler(),
+    get_handler_character(),
     "sqrt"
   )
+  expect_equal(
+    get_handler(),
+    sqrt
+  )
+})
+
+test_that("bad handlers are caught", {
+  expect_error(
+    use_basic_lambda_setup(handler = "doesntexist"),
+    "doesntexist not found"
+  )
+  expect_error(
+    use_basic_lambda_setup(handler = "mtcars"),
+    "mtcars is not a function"
+  )
+})
+
+test_that("handler can be a custom function", {
+  plus_one <- function(x) x + 1
+  withr::defer(rm(plus_one))
+
+  use_basic_lambda_setup(handler = "plus_one")
+  withr::defer(reset_lambda(), envir = parent.frame())
+
+  expect_equal(get_handler()(1), 2)
 })

@@ -25,6 +25,11 @@ get_handler <- function() {
   lambda$handler
 }
 
+get_handler_character <- function() {
+  assert_lambda_is_setup()
+  lambda$handler_character
+}
+
 assert_lambda_is_setup <- function() {
   if (is.null(lambda$is_setup) || !lambda$is_setup) {
     stop("The AWS Lambda runtime is not configured. Run `setup_lambda()` once ",
@@ -62,14 +67,29 @@ get_lambda_environment_variable <- function(env_var) {
 #'
 #' @export
 setup_lambda <- function() {
+
+  handler_character <- get_lambda_environment_variable(
+    "_HANDLER"
+  )
+
+  if (!exists(handler_character, envir = parent.frame())) {
+    stop(handler_character, " not found")
+  }
+
+  handler <- get(handler_character, envir = parent.frame())
+  if (!is.function(handler)) {
+    stop(handler_character, " is not a function")
+  }
+  lambda$handler_character <- handler_character
+  lambda$handler <- handler
+
   lambda$runtime_api <- get_lambda_environment_variable(
     "AWS_LAMBDA_RUNTIME_API"
   )
+
   lambda$task_root <- get_lambda_environment_variable(
     "LAMBDA_TASK_ROOT"
   )
-  lambda$handler <- get_lambda_environment_variable(
-    "_HANDLER"
-  )
+
   lambda$is_setup <- TRUE
 }

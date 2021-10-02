@@ -100,7 +100,7 @@ handle_event <- function(event) {
   event_arguments <- event_content$arguments
   request_type <- event_content$request_type
 
-  result <- do.call(lambda$handler, event_arguments)
+  result <- do.call(lambda$handler, args = event_arguments)
   logger::log_debug("Result:", as.character(result))
 
   # AWS API Gateway is a bit particular about the response format

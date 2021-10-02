@@ -12,7 +12,10 @@ use_basic_lambda_setup <- function(handler = "sqrt") {
     c("AWS_LAMBDA_RUNTIME_API" = "red_panda",
       "LAMBDA_TASK_ROOT" = "giraffe",
       "_HANDLER" = handler),
-    setup_lambda()
+    withr::with_environment(
+      parent.frame(),
+      setup_lambda()
+    )
   )
   withr::defer(reset_lambda(), envir = parent.frame())
 }
