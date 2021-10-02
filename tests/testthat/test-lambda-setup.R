@@ -70,7 +70,6 @@ test_that("bad handlers are caught", {
 
 test_that("handler can be a custom function", {
   plus_one <- function(x) x + 1
-  withr::defer(rm(plus_one))
 
   use_basic_lambda_setup(handler = "plus_one")
   withr::defer(reset_lambda(), envir = parent.frame())

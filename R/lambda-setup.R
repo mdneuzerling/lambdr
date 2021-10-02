@@ -66,7 +66,9 @@ get_lambda_environment_variable <- function(env_var) {
 #' to a package environment.
 #'
 #' @export
-setup_lambda <- function() {
+setup_lambda <- function(log_threshold = logger::INFO) {
+
+  setup_logging(log_threshold = log_threshold)
 
   handler_character <- get_lambda_environment_variable(
     "_HANDLER"
