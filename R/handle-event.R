@@ -1,3 +1,13 @@
+#' Extract the headers from a Lambda event
+#'
+#' This function is largely equivalent to \code{\link[httr]{headers}}, which it
+#' wraps. The only difference is that the names of the headers returned are
+#' converted to lower-case (these are meant to be case-insensitive) and the
+#' headers are logged at the DEBUG level.
+#'
+#' @inheritParams parse_event_content
+#'
+#' @keywords internal
 extract_event_headers <- function(event) {
   event_headers <- httr::headers(event)
   names(event_headers) <- tolower(names(event_headers))
@@ -5,6 +15,17 @@ extract_event_headers <- function(event) {
   event_headers
 }
 
+#' Extract the request ID from the headers of an event, or error otherwise
+#'
+#' The Request ID is unique for each input of a Lambda. It is carried by the
+#' "lambda-runtime-aws-request-id" header of the response from the next
+#' invocation endpoint (see \code{\link{endpoints}}).
+#'
+#' @param headers headers of a HTML response, as extracted by
+#'   \code{\link[httr]{headers}} or \code{\link{extract_event_headers}}
+#'
+#' @return character
+#' @keywords internal
 extract_request_id_from_headers <- function(headers) {
   if (!("lambda-runtime-aws-request-id" %in% names(headers))) {
     error_message <- paste(
@@ -16,6 +37,14 @@ extract_request_id_from_headers <- function(headers) {
   headers[["lambda-runtime-aws-request-id"]]
 }
 
+#' Check that the status code shows a success, and error otherwise
+#'
+#' @param status_code integer, usually returned by
+#'   \code{\link[httr]{status_code}}
+#'
+#' @return TRUE
+#'
+#' @keywords internal
 assert_status_code_is_good <- function(status_code) {
   logger::log_debug("Status code:", status_code)
   if (status_code != 200) {
@@ -26,6 +55,20 @@ assert_status_code_is_good <- function(status_code) {
   TRUE
 }
 
+#' Parse the body of the Lambda event
+#'
+#' @param event the response received from querying the next invocation
+#'   endpoint.
+#' @param deserialiser function for deserialising the body of the event.
+#'   By default, will attempt to deserialise the body as JSON, based on whether
+#'   the input is coming from an API Gateway, scheduled Cloudwatch event, or
+#'   direct. To use the body as is, pass the `identity` function.
+#'
+#' @return A list containing the "arguments" and "content_type", the latter of
+#'   which is either "HTML", "scheduled", or "direct". The content type may be
+#'   used in serialising the response to be sent back to Lambda.
+#'
+#' @keywords internal
 parse_event_content <- function(event, deserialiser = NULL) {
   # we need to parse the event in four contexts before sending to the lambda fn:
   # 1a) direct invocation with no function args (empty event)
@@ -78,19 +121,72 @@ parse_event_content <- function(event, deserialiser = NULL) {
   list(arguments = event_body, request_type = request_type)
 }
 
-wait_for_event <- function(endpoint) {
+#' Serialise a result and send it to Lambda
+#'
+#' @param result result to be sent back to Lambda
+#' @param request_id character request ID, as extracted by
+#'   \code{\link{extract_request_id_from_headers}} from the headers of an event.
+#' @param request_type one of "HTML", "scheduled", or "direct". The content type
+#'   may be used in serialising the response to be sent back to Lambda.
+#' @param serialiser function for serialising the result before sending.
+#'   By default, will attempt to serialise the body as JSON, based on the
+#'   request type. To send the result as is, pass the `identity` function.
+#'
+#' @keywords internal
+post_result <- function(result, request_id, request_type, serialiser = NULL) {
+  body <- if (!is.null(serialiser)) {
+    serialiser(result)
+    # AWS API Gateway is a bit particular about the response format
+  } else if (request_type == "HTML") {
+    list(
+      isBase64Encoded = FALSE,
+      statusCode = 200L,
+      body = as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
+    )
+  } else {
+    as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
+  }
+
+  httr::POST(
+    url = get_response_endpoint(request_id),
+    body = body,
+    encode = "raw"
+  )
+}
+
+#' Query the next invocation endpoint to get the next input
+#'
+#' The query will receive a response when an input is queued up. If there is no
+#' input waiting, the Lambda instance will be shut down after a period of
+#' inactivity.
+#'
+#' @inheritParams parse_event_content
+#' @inheritParams post_result
+#'
+#' @keywords internal
+wait_for_event <- function(
+  deserialiser = NULL,
+  serialiser = NULL
+) {
   logger::log_debug("Waiting for event")
   event <- httr::GET(url = get_next_invocation_endpoint())
   logger::log_debug("Event received")
 
   tryCatch(
-    handle_event(event),
+    handle_event(event, deserialiser = deserialiser, serialiser = serialiser),
     missing_request_id = handle_missing_request_id,
     api_error = handle_api_error(event),
     error = handle_invocation_error(event)
   )
 }
 
+
+#' Process the input of an event, and submit the result to Lambda
+#'
+#' @inheritParams parse_event_content
+#' @inheritParams post_result
+#'
+#' @keywords internal
 handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
 
   event_headers <- extract_event_headers(event)
@@ -112,32 +208,32 @@ handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
   result <- do.call(lambda$handler, args = event_arguments)
   logger::log_debug("Result:", as.character(result))
 
-
-  body <- if (!is.null(serialiser)) {
-    serialiser(result)
-  # AWS API Gateway is a bit particular about the response format
-  } else if (request_type == "HTML") {
-    list(
-      isBase64Encoded = FALSE,
-      statusCode = 200L,
-      body = as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
-    )
-  } else {
-    as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
-  }
-
-  httr::POST(
-    url = get_response_endpoint(request_id),
-    body = body,
-    encode = "raw"
-  )
+  post_result(result, request_id, request_type, serialiser = serialiser)
 }
 
-start_listening <- function(timeout_seconds = NULL) {
+#' Start listening for events, and process them as they come
+#'
+#' @inheritParams parse_event_content
+#' @inheritParams post_result
+#' @param timeout_seconds If set, the function will stop listening for events
+#' after this timeout. The timeout is checked between events, so this won't
+#' interrupt the function while it is waiting for a new event. This argument
+#' is provided for testing purposes, and shouldn't otherwise need to be set:
+#' AWS should handle the shutdown of idle Lambda instances.
+#'
+#' @export
+start_listening <- function(
+  deserialiser = NULL,
+  serialiser = NULL,
+  timeout_seconds = NULL
+) {
   if (!is.null(timeout_seconds)) {
     expire_after <- Sys.time() + timeout_seconds
     while (Sys.time() < expire_after) {
-      wait_for_event()
+      wait_for_event(
+        deserialiser = deserialiser,
+        serialiser = serialiser
+      )
     }
   } else {
     while (TRUE) wait_for_event()
