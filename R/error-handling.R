@@ -1,6 +1,29 @@
+# Content-Type: application/vnd.aws.lambda.error+json:
+# {
+#     "errorMessage": "...",
+#     "errorType": "...",
+#     "stackTrace": [],
+# }
+post_lambda_error <- function(e, endpoint) {
+  utils::dump.frames("current_error")
+  current_traceback <- names(current_error)
+  error_list <- list(
+    errorMessage = e$message,
+    errorType = class(e)[[1]],
+    stackTrace = current_traceback
+  )
+  error_json <- jsonlite::toJSON(error_list, auto_unbox = TRUE)
+  httr::POST(
+    url = endpoint,
+    body = error_json,
+    encode = "raw",
+    httr::content_type("application/vnd.aws.lambda.error+json")
+  )
+}
+
 # error handling with http codes
 # from http://adv-r.had.co.nz/Exceptions-Debugging.html
-condition <- function(subclass, message, code, call = sys.call(-1), ...) {
+condition <- function(subclass, message, code = NULL, call = sys.call(-1), ...) {
   structure(
     class = c(subclass, "condition"),
     list(message = message, code = code, call = call),
@@ -43,14 +66,7 @@ handle_api_error <- function(event) {
 
   error_handling_function <- function(e) {
     logger::log_error(as.character(e))
-    httr::POST(
-      url = get_invocation_error_endpoint(request_id),
-      body = list(
-        statusCode = e$code,
-        errorMessage = as.character(e$message)
-      ),
-      encode = "json"
-    )
+    post_lambda_error(e, endpoint = get_invocation_error_endpoint(request_id))
   }
 
   error_handling_function
@@ -64,11 +80,7 @@ handle_invocation_error <- function(event) {
     error_message <- as.character(e)
     logger::log_error(error_message)
     logger::log_debug("POSTing invocation error for request ID:", request_id)
-    httr::POST(
-      url = get_invocation_error_endpoint(request_id),
-      body = list(error_message = error_message),
-      encode = "json"
-    )
+    post_lambda_error(e, endpoint = get_invocation_error_endpoint(request_id))
   }
 
   error_handling_function
