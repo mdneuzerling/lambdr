@@ -4,7 +4,12 @@
 \alias{setup_lambda}
 \title{Set up endpoints, variables and logging for AWS Lambda}
 \usage{
-setup_lambda(handler = NULL, log_threshold = logger::INFO)
+setup_lambda(
+  log_threshold = logger::INFO,
+  handler = NULL,
+  runtime_api = NULL,
+  task_root = NULL
+)
 }
 \arguments{
 \item{log_threshold}{Threshold for recording and displaying log entries.
@@ -12,9 +17,20 @@ Passed to logger::log_threshold. Defaults to \code{logger::INFO}. To debug a
 failing Lambda container, set this to \code{logger::DEBUG} to log verbose
 information about how each request is processed.}
 
-\item{character.}{Name of function to use for processing inputs from events.
-This argument is provided for debugging and testing only. The handler as
-configured in AWS, if present, will always overwrite this value.}
+\item{handler}{character. Name of function to use for processing inputs from
+events. This argument is provided for debugging and testing only. The
+"_HANDLER" environment variable, as configured in AWS, as configured by
+AWS, will always override this value if present.}
+
+\item{runtime_api}{character. Used as the host in the various endpoints used
+by AWS Lambda. This argument is provided for debugging and testing only.
+The "AWS_LAMBDA_RUNTIME_API" environment variable, as configured by AWS,
+will always override this value if present.}
+
+\item{task_root}{character. Defines the path to the Lambda function code.
+This argument is provided for debugging and testing only. The
+"LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
+override this value if present.}
 }
 \description{
 Set up endpoints, variables and logging for AWS Lambda

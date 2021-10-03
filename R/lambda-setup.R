@@ -63,13 +63,22 @@ get_lambda_environment_variable <- function(env_var, default = NULL) {
 
 #' Set up endpoints, variables and logging for AWS Lambda
 #'
-#' @param character. Name of function to use for processing inputs from events.
-#' This argument is provided for debugging and testing only. The handler as
-#' configured in AWS, if present, will always overwrite this value.
 #' @param log_threshold Threshold for recording and displaying log entries.
-#' Passed to logger::log_threshold. Defaults to `logger::INFO`. To debug a
-#' failing Lambda container, set this to `logger::DEBUG` to log verbose
-#' information about how each request is processed.
+#'   Passed to logger::log_threshold. Defaults to `logger::INFO`. To debug a
+#'   failing Lambda container, set this to `logger::DEBUG` to log verbose
+#'   information about how each request is processed.
+#' @param handler character. Name of function to use for processing inputs from
+#'   events. This argument is provided for debugging and testing only. The
+#'   "_HANDLER" environment variable, as configured in AWS, as configured by
+#'   AWS, will always override this value if present.
+#' @param runtime_api character. Used as the host in the various endpoints used
+#'   by AWS Lambda. This argument is provided for debugging and testing only.
+#'   The "AWS_LAMBDA_RUNTIME_API" environment variable, as configured by AWS,
+#'   will always override this value if present.
+#' @param task_root character. Defines the path to the Lambda function code.
+#'   This argument is provided for debugging and testing only. The
+#'   "LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
+#'   override this value if present.
 #'
 #' @details
 #' As a rule of thumb, it takes longer to retrieve a value from an environment
@@ -79,7 +88,12 @@ get_lambda_environment_variable <- function(env_var, default = NULL) {
 #' to a package environment.
 #'
 #' @export
-setup_lambda <- function(handler = NULL, log_threshold = logger::INFO) {
+setup_lambda <- function(
+  log_threshold = logger::INFO,
+  handler = NULL,
+  runtime_api = NULL,
+  task_root = NULL
+  ) {
 
   setup_logging(log_threshold = log_threshold)
 
@@ -100,11 +114,13 @@ setup_lambda <- function(handler = NULL, log_threshold = logger::INFO) {
   lambda$handler <- handler
 
   lambda$runtime_api <- get_lambda_environment_variable(
-    "AWS_LAMBDA_RUNTIME_API"
+    "AWS_LAMBDA_RUNTIME_API",
+    runtime_api
   )
 
   lambda$task_root <- get_lambda_environment_variable(
-    "LAMBDA_TASK_ROOT"
+    "LAMBDA_TASK_ROOT",
+    task_root
   )
 
   lambda$is_setup <- TRUE
