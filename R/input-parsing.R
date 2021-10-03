@@ -9,6 +9,7 @@
 #' prettify_list(list("a" = 1, "b" = 2, "c" = 3))
 #' # "a=5, b=5, c=5"
 #'
+#' @keywords internal
 prettify_list <- function(x) {
   paste(
     paste(names(x), x, sep = "="),

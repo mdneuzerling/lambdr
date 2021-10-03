@@ -2,7 +2,7 @@
 % Please edit documentation in R/lambda-setup.R
 \name{start_lambda}
 \alias{start_lambda}
-\title{Set the environment up for AWS Lambda and listen for events}
+\title{Set-up Lambda and start listening for events}
 \usage{
 start_lambda(
   log_threshold = logger::INFO,
@@ -55,7 +55,10 @@ is provided for testing purposes, and shouldn't otherwise need to be set:
 AWS should handle the shutdown of idle Lambda instances.}
 }
 \description{
-Combines \verb{\link{setup_lambda}} and \verb{\link{start_listening}}.
+Set-up Lambda and start listening for events
+}
+\details{
+Runs \verb{\link{setup_lambda}} followed by \verb{\link{start_listening}}.
 }
 \section{AWS Lambda variables}{
 

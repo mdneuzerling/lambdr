@@ -54,3 +54,4 @@ by the \code{request_id} argument that these functions require, and so need to b
 recalculated for each event. The request ID is given in the
 "lambda-runtime-aws-request-id" header in the event.
 }
+\keyword{internal}

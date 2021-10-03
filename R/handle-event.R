@@ -221,7 +221,7 @@ handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
 #' is provided for testing purposes, and shouldn't otherwise need to be set:
 #' AWS should handle the shutdown of idle Lambda instances.
 #'
-#' @export
+#' @keywords internal
 start_listening <- function(
   deserialiser = NULL,
   serialiser = NULL,

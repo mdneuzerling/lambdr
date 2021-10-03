@@ -148,7 +148,7 @@ get_lambda_environment_variable <- function(env_var, default = NULL) {
 #'
 #' @inheritSection lambda_variables AWS Lambda variables
 #'
-#' @export
+#' @keywords internal
 setup_lambda <- function(
   log_threshold = logger::INFO,
   handler = NULL,
@@ -201,9 +201,10 @@ reset_lambda <- function() {
   lambda$is_setup <- FALSE
 }
 
-#' Set the environment up for AWS Lambda and listen for events
+#' Set-up Lambda and start listening for events
 #'
-#' Combines \verb{\link{setup_lambda}} and \verb{\link{start_listening}}.
+#' @details
+#' Runs \verb{\link{setup_lambda}} followed by \verb{\link{start_listening}}.
 #'
 #' @inheritParams setup_logging
 #' @inheritParams setup_lambda

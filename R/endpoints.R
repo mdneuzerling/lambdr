@@ -36,10 +36,11 @@
 #' @return character
 #'
 #' @name endpoints
+#' @keywords internal
 NULL
 
 #' @rdname endpoints
-#' @export
+#' @keywords internal
 get_next_invocation_endpoint <- function() {
   lambda_runtime_api <- get_lambda_runtime_api()
   next_invocation_endpoint <- paste0(
@@ -49,7 +50,7 @@ get_next_invocation_endpoint <- function() {
 }
 
 #' @rdname endpoints
-#' @export
+#' @keywords internal
 get_initialisation_error_endpoint <- function() {
   lambda_runtime_api <- get_lambda_runtime_api()
   initialisation_error_endpoint <- paste0(
@@ -59,7 +60,7 @@ get_initialisation_error_endpoint <- function() {
 }
 
 #' @rdname endpoints
-#' @export
+#' @keywords internal
 get_response_endpoint <- function(request_id) {
   lambda_runtime_api <- get_lambda_runtime_api()
   paste0(
@@ -69,7 +70,7 @@ get_response_endpoint <- function(request_id) {
 }
 
 #' @rdname endpoints
-#' @export
+#' @keywords internal
 get_invocation_error_endpoint <- function(request_id) {
   lambda_runtime_api <- get_lambda_runtime_api()
   paste0(
