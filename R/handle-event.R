@@ -1,3 +1,24 @@
+# From https://docs.aws.amazon.com/lambda/latest/dg/lambda-dg.pdf:
+#
+# Processing tasks
+# * Get an event – Call the next invocation (p. 187) API to get the next event.
+#   The response body contains the event data. Response headers contain the
+#   request ID and other information.
+# * Propagate the tracing header – Get the X-Ray tracing header from the
+#   Lambda-Runtime-Trace-Id header in the API response. Set the _X_AMZN_TRACE_ID
+#   environment variable locally with the same value. The X-Ray SDK uses this
+#   value to connect trace data between services.
+# * Create a context object – Create an object with context information from
+#   environment variables and headers in the API response.
+# * Invoke the function handler – Pass the event and context object to the
+#   handler.
+# * Handle the response – Call the invocation response (p. 188) API to post the
+#   response from the handler.
+# * Handle errors – If an error occurs, call the invocation error (p. 189) API.
+# * Cleanup – Release unused resources, send data to other services, or perform
+#   additional tasks before getting the next event.
+
+
 #' Extract the headers from a Lambda event
 #'
 #' This function is largely equivalent to \code{\link[httr]{headers}}, which it
@@ -79,6 +100,7 @@ parse_event_content <- function(event, deserialiser = NULL) {
   #   element; extract and send it)
 
   unparsed_content <- httr::content(event, "text", encoding = "UTF-8")
+  logger::log_debug("Raw body:", unparsed_content)
 
   if (!is.null(deserialiser)) {
     return(
@@ -117,6 +139,7 @@ parse_event_content <- function(event, deserialiser = NULL) {
       event_body <- list()
     }
   }
+  logger::log_debug("Parsed event body:", event_body)
 
   list(arguments = event_body, request_type = request_type)
 }
@@ -134,6 +157,7 @@ parse_event_content <- function(event, deserialiser = NULL) {
 #'
 #' @keywords internal
 post_result <- function(result, request_id, request_type, serialiser = NULL) {
+  logger::log_debug("Raw result:", result)
   body <- if (!is.null(serialiser)) {
     serialiser(result)
     # AWS API Gateway is a bit particular about the response format
@@ -147,6 +171,7 @@ post_result <- function(result, request_id, request_type, serialiser = NULL) {
     as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
   }
 
+  logger::log_debug("Result to be posted:", prettify_list(event_headers))
   httr::POST(
     url = get_response_endpoint(request_id),
     body = body,
@@ -193,6 +218,15 @@ handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
   request_id <- extract_request_id_from_headers(event_headers)
   status_code <- httr::status_code(event)
   assert_status_code_is_good(status_code)
+
+  context <- list(
+    event_headers[["content-type"]],
+    event_headers[["lambda-runtime-aws-request-id"]],
+    event_headers[["lambda-runtime-invoked-function-arn"]],
+    event_headers[["lambda-runtime-deadline-ms"]],
+    event_headers[["date"]],
+    event_headers[["content-length"]]
+  )
 
   # According to the AWS guide, we need to set the trace ID as an env var
   # https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html
