@@ -5,12 +5,10 @@
 #     "stackTrace": [],
 # }
 post_lambda_error <- function(e, endpoint) {
-  utils::dump.frames("current_error")
-  current_traceback <- names(current_error)
   error_list <- list(
     errorMessage = e$message,
     errorType = class(e)[[1]],
-    stackTrace = current_traceback
+    stackTrace = c()
   )
   error_json <- jsonlite::toJSON(error_list, auto_unbox = TRUE)
   httr::POST(
