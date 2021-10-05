@@ -108,7 +108,7 @@ aws ecr get-login-password | docker login --username AWS --password-stdin {URI}
 docker push {URI}/parity-lambda:latest
 ```
 
-In either the AWS console or the command line, a Lambda can be created from this image. Tests can be executed within the console. Alternatively the Lambda can be invoked from the CLI:
+In either the AWS console or the command line, a Lambda can be created from this image. Call the Lambda "parity" to match the function name. Tests can be executed within the console. Alternatively the Lambda can be invoked from the CLI:
 
 ```bash
 aws lambda invoke --function-name parity \
