@@ -1,16 +1,3 @@
-#' Set up logging with the `logger` package
-#'
-#' @param log_threshold Threshold for recording and displaying log entries.
-#'   Defaults to `logger::INFO`. To debug a failing Lambda container, set this
-#'   to `logger::DEBUG` to log verbose information about how each request is
-#'   processed.
-#'
-#' @keywords internal
-setup_logging <- function(log_threshold = logger::INFO) {
-  logger::log_formatter(logger::formatter_paste)
-  logger::log_threshold(log_threshold)
-}
-
 #' Assert that the Lambda runtime has been set up
 #'
 #' This package maintains a package-internal environment that, amongst other
@@ -122,8 +109,6 @@ get_lambda_environment_variable <- function(env_var, default = NULL) {
 }
 
 #' Set up endpoints, variables and logging for AWS Lambda
-#'
-#' @inheritParams setup_logging
 #' @param handler character. Name of function to use for processing inputs from
 #'   events. This argument is provided for debugging and testing only. The
 #'   "_HANDLER" environment variable, as configured in AWS, as configured by
@@ -148,16 +133,13 @@ get_lambda_environment_variable <- function(env_var, default = NULL) {
 #'
 #' @inheritSection lambda_variables AWS Lambda variables
 #'
-#' @keywords internal
+#' @export
 setup_lambda <- function(
-  log_threshold = logger::INFO,
   handler = NULL,
   runtime_api = NULL,
   task_root = NULL,
   environ = parent.frame()
   ) {
-
-  setup_logging(log_threshold = log_threshold)
 
   handler_character <- get_lambda_environment_variable(
     "_HANDLER",
@@ -199,41 +181,4 @@ reset_lambda <- function() {
   # delete all objects in Lambda environment
   rm(list = ls(envir = lambda), envir = lambda)
   lambda$is_setup <- FALSE
-}
-
-#' Set-up Lambda and start listening for events
-#'
-#' @details
-#' Runs \verb{\link{setup_lambda}} followed by \verb{\link{start_listening}}.
-#'
-#' @inheritParams setup_logging
-#' @inheritParams setup_lambda
-#' @inheritParams start_listening
-#'
-#' @inheritSection lambda_variables AWS Lambda variables
-#'
-#' @export
-start_lambda <- function(
-  log_threshold = logger::INFO,
-  handler = NULL,
-  runtime_api = NULL,
-  task_root = NULL,
-  environ = parent.frame(),
-  deserialiser = NULL,
-  serialiser = NULL,
-  timeout_seconds = NULL
-) {
-  setup_lambda(
-    log_threshold = log_threshold,
-    handler = handler,
-    runtime_api = runtime_api,
-    task_root = task_root,
-    environ = environ
-  )
-
-  start_listening(
-    deserialiser = deserialiser,
-    serialiser = serialiser,
-    timeout_seconds = timeout_seconds
-  )
 }
