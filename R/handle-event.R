@@ -171,7 +171,7 @@ post_result <- function(result, request_id, request_type, serialiser = NULL) {
     as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
   }
 
-  logger::log_debug("Result to be posted:", prettify_list(event_headers))
+  logger::log_debug("Result to be posted:", body)
   httr::POST(
     url = get_response_endpoint(request_id),
     body = body,
