@@ -90,6 +90,75 @@
 <p>This <code>runtime.R</code> file should be executed by the Docker image containing your Lambda code.</p>
 <p>The <code><a href="reference/start_lambda.html">lambdr::start_lambda()</a></code> function relies on environment variables configured by AWS. It will fail if run locally. In particular, the <em>handler</em> as configured by the user through AWS will determine which function handles the Lambda events. For debugging and testing, values can be provided to the function in the absence of environment variables. See <code><a href="reference/start_lambda.html">?lambdr::start_lambda</a></code> for details.</p>
 </div>
+<div id="example" class="section level2">
+<h2 class="hasAnchor">
+<a href="#example" class="anchor"></a>Example</h2>
+<p>Consider the following <code>runtime.R</code> file:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">parity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">{</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>parity <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">%%</span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="st">"even"</span> <span class="kw">else</span> <span class="st">"odd"</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="reference/start_lambda.html">start_lambda</a></span><span class="op">(</span>log_threshold <span class="op">=</span> <span class="fu">logger</span><span class="fu">::</span><span class="va"><a href="https://daroczig.github.io/logger/reference/log_levels.html">DEBUG</a></span><span class="op">)</span></code></pre></div>
+<p>The <code>parity</code> function accepts a <code>number</code> argument and returns its parity as a named list, for example:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">parity</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>
+<span class="co"># $parity</span>
+<span class="co"># [1] "odd"</span>
+
+
+<span class="fu">parity</span><span class="op">(</span><span class="fl">8</span><span class="op">)</span>
+<span class="co"># $parity</span>
+<span class="co"># [1] "even"</span></code></pre></div>
+<p>This function can then be placed into a Docker image. An <strong>example</strong> is provided below, but the key components are:</p>
+<ul>
+<li>Start from the <code>public.ecr.aws/lambda/provided</code> parent image, which provides the basic components necessary to serve a Lambda</li>
+<li>Install R and dependencies, both system dependencies and R packages, including the <code>lambdr</code> package</li>
+<li>Copy across <code>runtime.R</code> and any other necessary files</li>
+<li>Generate a simple bootstrap which runs <code>runtime.R</code> with R</li>
+<li>Set the handler as the <code>CMD</code>. The <code>lambdr</code> package interprets the handler as the name of the function to use, in this case, “parity”. The <code>CMD</code> can also be set (or overriden) when setting up the Lambda in AWS.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">FROM</span> public.ecr.aws/lambda/provided</a>
+<a class="sourceLine" id="cb5-2" title="2"></a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="kw">ENV</span> R_VERSION=4.0.3</a>
+<a class="sourceLine" id="cb5-4" title="4"></a>
+<a class="sourceLine" id="cb5-5" title="5"><span class="kw">RUN</span> yum -y install wget git tar</a>
+<a class="sourceLine" id="cb5-6" title="6"></a>
+<a class="sourceLine" id="cb5-7" title="7"><span class="kw">RUN</span> yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \</a>
+<a class="sourceLine" id="cb5-8" title="8">  &amp;&amp; wget https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \</a>
+<a class="sourceLine" id="cb5-9" title="9">  &amp;&amp; yum -y install R-${R_VERSION}-1-1.x86_64.rpm \</a>
+<a class="sourceLine" id="cb5-10" title="10">  &amp;&amp; rm R-${R_VERSION}-1-1.x86_64.rpm</a>
+<a class="sourceLine" id="cb5-11" title="11"></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="kw">ENV</span> PATH=<span class="st">"${PATH}:/opt/R/${R_VERSION}/bin/"</span></a>
+<a class="sourceLine" id="cb5-13" title="13"></a>
+<a class="sourceLine" id="cb5-14" title="14"><span class="co"># System requirements for R packages</span></a>
+<a class="sourceLine" id="cb5-15" title="15"><span class="kw">RUN</span> yum -y install openssl-devel</a>
+<a class="sourceLine" id="cb5-16" title="16"></a>
+<a class="sourceLine" id="cb5-17" title="17"><span class="kw">RUN</span> Rscript -e <span class="st">"install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"</span></a>
+<a class="sourceLine" id="cb5-18" title="18"><span class="kw">RUN</span> Rscript -e <span class="st">"remotes::install_github('mdneuzerling/lambdr')"</span></a>
+<a class="sourceLine" id="cb5-19" title="19"></a>
+<a class="sourceLine" id="cb5-20" title="20"><span class="kw">RUN</span> mkdir /lambda</a>
+<a class="sourceLine" id="cb5-21" title="21"><span class="kw">COPY</span> runtime.R /lambda</a>
+<a class="sourceLine" id="cb5-22" title="22"><span class="kw">RUN</span> chmod 755 -R /lambda</a>
+<a class="sourceLine" id="cb5-23" title="23"></a>
+<a class="sourceLine" id="cb5-24" title="24"><span class="kw">RUN</span> printf <span class="st">'#!/bin/sh\ncd /lambda\nRscript runtime.R'</span> &gt; /var/runtime/bootstrap \</a>
+<a class="sourceLine" id="cb5-25" title="25">  &amp;&amp; chmod +x /var/runtime/bootstrap</a>
+<a class="sourceLine" id="cb5-26" title="26"></a>
+<a class="sourceLine" id="cb5-27" title="27"><span class="kw">CMD</span> [<span class="st">"parity"</span>]</a></code></pre></div>
+<p>The image is built and uploaded to AWS Elastic Container Registry (ECR). First, a repository is created:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb6-1" title="1"><span class="ex">aws</span> ecr create-repository --repository-name parity-lambda --image-scanning-configuration scanOnPush=true</a></code></pre></div>
+<p>This provides a URI, the resource identifier of the created repository. The image can now be pushed:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" title="1"><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest <span class="dt">{URI}</span>/parity-lambda:latest</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login --username AWS --password-stdin <span class="dt">{URI}</span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="ex">docker</span> push <span class="dt">{URI}</span>/parity-lambda:latest</a></code></pre></div>
+<p>In either the AWS console or the command line, a Lambda can be created from this image. Call the Lambda “parity” to match the function name. Tests can be executed within the console. Alternatively the Lambda can be invoked from the CLI:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" title="1"><span class="ex">aws</span> lambda invoke --function-name parity \</a>
+<a class="sourceLine" id="cb8-2" title="2">  --invocation-type RequestResponse --payload <span class="st">'{"number": 8}'</span> \</a>
+<a class="sourceLine" id="cb8-3" title="3">  /tmp/response.json --cli-binary-format raw-in-base64-out</a></code></pre></div>
+<p>The output is now available in the generated file:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb9-1" title="1"><span class="fu">cat</span> /tmp/response.json            </a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb10-1" title="1"><span class="dt">{"parity":"even"}</span></a></code></pre></div>
+</div>
 </div>
   </div>
 
