@@ -30,19 +30,15 @@
 #' }
 #'
 #' start_lambda()
-#'
 #' }
-start_lambda <- function(
-  log_threshold = logger::INFO,
-  handler = NULL,
-  runtime_api = NULL,
-  task_root = NULL,
-  environ = parent.frame(),
-  deserialiser = NULL,
-  serialiser = NULL,
-  timeout_seconds = NULL
-) {
-
+start_lambda <- function(log_threshold = logger::INFO,
+                         handler = NULL,
+                         runtime_api = NULL,
+                         task_root = NULL,
+                         environ = parent.frame(),
+                         deserialiser = NULL,
+                         serialiser = NULL,
+                         timeout_seconds = NULL) {
   setup_logging(log_threshold = log_threshold)
 
   setup_lambda(

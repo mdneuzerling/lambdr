@@ -3,9 +3,11 @@ test_that("Lambda can be set up and reset", {
   expect_error(assert_lambda_is_setup(), "is not configured")
 
   withr::with_envvar(
-    c("AWS_LAMBDA_RUNTIME_API" = "red_panda",
+    c(
+      "AWS_LAMBDA_RUNTIME_API" = "red_panda",
       "LAMBDA_TASK_ROOT" = "giraffe",
-      "_HANDLER" = "sqrt"),
+      "_HANDLER" = "sqrt"
+    ),
     setup_lambda()
   )
   withr::defer(reset_lambda())

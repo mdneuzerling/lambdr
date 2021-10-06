@@ -40,8 +40,10 @@ stop_missing_request_id <- function(message) {
 }
 
 handle_missing_request_id <- function(e) {
-  error_message <- paste("lambda-runtime-aws-request-id not found.",
-                         "Can't process this request.")
+  error_message <- paste(
+    "lambda-runtime-aws-request-id not found.",
+    "Can't process this request."
+  )
   logger::log_error(error_message)
   stop(error_message)
 }

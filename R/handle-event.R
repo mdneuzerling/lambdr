@@ -97,8 +97,10 @@ extract_request_id_from_headers <- function(headers) {
 assert_status_code_is_good <- function(status_code) {
   logger::log_debug("Status code:", status_code)
   if (status_code != 200) {
-    error_message <- paste("Didn't get status code 200. Status code:",
-                           status_code)
+    error_message <- paste(
+      "Didn't get status code 200. Status code:",
+      status_code
+    )
     stop_lambda(error_message, code = status_code)
   }
   TRUE
@@ -220,7 +222,6 @@ post_result <- function(result, request_id, request_type, serialiser = NULL) {
 #'
 #' @keywords internal
 handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
-
   event_headers <- extract_event_headers(event)
   request_id <- extract_request_id_from_headers(event_headers)
   status_code <- httr::status_code(event)

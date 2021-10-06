@@ -8,10 +8,8 @@
 #' @inheritParams post_result
 #'
 #' @keywords internal
-wait_for_event <- function(
-  deserialiser = NULL,
-  serialiser = NULL
-) {
+wait_for_event <- function(deserialiser = NULL,
+                           serialiser = NULL) {
   logger::log_debug("Waiting for event")
   event <- httr::GET(url = get_next_invocation_endpoint())
   logger::log_debug("Event received")
@@ -35,11 +33,9 @@ wait_for_event <- function(
 #' AWS should handle the shutdown of idle Lambda instances.
 #'
 #' @export
-start_listening <- function(
-  deserialiser = NULL,
-  serialiser = NULL,
-  timeout_seconds = NULL
-) {
+start_listening <- function(deserialiser = NULL,
+                            serialiser = NULL,
+                            timeout_seconds = NULL) {
   assert_lambda_is_setup()
 
   if (!is.null(timeout_seconds)) {

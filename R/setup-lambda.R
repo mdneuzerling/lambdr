@@ -10,8 +10,10 @@
 #' @keywords internal
 assert_lambda_is_setup <- function() {
   if (is.null(lambda$is_setup) || !lambda$is_setup) {
-    stop("The AWS Lambda runtime is not configured. Run `setup_lambda()` once ",
-         "at the beginning of your runtime script.")
+    stop(
+      "The AWS Lambda runtime is not configured. Run `setup_lambda()` once ",
+      "at the beginning of your runtime script."
+    )
   }
   TRUE
 }
@@ -58,8 +60,10 @@ get_lambda_runtime_api <- function() {
   # This will happen if there's an error during setup. In this case, we need
   # the runtime API in order to report the initialisation error.
   if (is.null(lambda$runtime_api) || lambda$runtime_api == "") {
-    stop("The AWS Lambda runtime is not configured. Run `setup_lambda()` once ",
-         "at the beginning of your runtime script.")
+    stop(
+      "The AWS Lambda runtime is not configured. Run `setup_lambda()` once ",
+      "at the beginning of your runtime script."
+    )
   }
 
   lambda$runtime_api
@@ -107,9 +111,11 @@ get_handler_character <- function() {
 get_lambda_environment_variable <- function(env_var, default = NULL) {
   value <- Sys.getenv(env_var)
   if (value == "" && is.null(default)) {
-    stop(env_var, " environment variable is not set. This ",
-         "environment variable is set by AWS when Lambda is instantiated. It ",
-         "will not appear when running local tests.")
+    stop(
+      env_var, " environment variable is not set. This ",
+      "environment variable is set by AWS when Lambda is instantiated. It ",
+      "will not appear when running local tests."
+    )
   }
 
   if (value != "") {
@@ -174,12 +180,10 @@ function_accepts_context <- function(func) {
 #' @inheritSection extract_context Event context
 #'
 #' @export
-setup_lambda <- function(
-  handler = NULL,
-  runtime_api = NULL,
-  task_root = NULL,
-  environ = parent.frame()
-  ) {
+setup_lambda <- function(handler = NULL,
+                         runtime_api = NULL,
+                         task_root = NULL,
+                         environ = parent.frame()) {
 
   # There's no point in wrapping this in a TryCatch. If we don't have the
   # runtime API, we can't construct the endpoints to which to send errors.
@@ -189,30 +193,30 @@ setup_lambda <- function(
     runtime_api
   )
 
-  tryCatch({
-    handler_character <- get_lambda_environment_variable(
-      "_HANDLER",
-      handler
-    )
+  tryCatch(
+    {
+      handler_character <- get_lambda_environment_variable(
+        "_HANDLER",
+        handler
+      )
 
-    if (!exists(handler_character, envir = environ)) {
-      stop(handler_character, " not found")
-    }
+      if (!exists(handler_character, envir = environ)) {
+        stop(handler_character, " not found")
+      }
 
-    handler <- get(handler_character, envir = environ)
-    if (!is.function(handler)) {
-      stop(handler_character, " is not a function")
-    }
-    lambda$handler_character <- handler_character
-    lambda$handler <- handler
-    lambda$pass_context_argument <- function_accepts_context(handler)
+      handler <- get(handler_character, envir = environ)
+      if (!is.function(handler)) {
+        stop(handler_character, " is not a function")
+      }
+      lambda$handler_character <- handler_character
+      lambda$handler <- handler
+      lambda$pass_context_argument <- function_accepts_context(handler)
 
-    lambda$task_root <- get_lambda_environment_variable(
-      "LAMBDA_TASK_ROOT",
-      task_root
-    )
+      lambda$task_root <- get_lambda_environment_variable(
+        "LAMBDA_TASK_ROOT",
+        task_root
+      )
     },
-
     error = function(e) {
       post_lambda_error(e, get_initialisation_error_endpoint())
       stop(e)

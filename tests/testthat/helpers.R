@@ -15,16 +15,16 @@ expect_setup_failure <- function(endpoint_function, ...) {
   }))
 }
 
-use_basic_lambda_setup <- function(
-  handler = "sqrt",
-  runtime_api = "red_panda",
-  task_root = "giraffe"
-) {
+use_basic_lambda_setup <- function(handler = "sqrt",
+                                   runtime_api = "red_panda",
+                                   task_root = "giraffe") {
   setup_logging(log_threshold = logger::FATAL)
   withr::with_envvar(
-    c("AWS_LAMBDA_RUNTIME_API" = runtime_api,
+    c(
+      "AWS_LAMBDA_RUNTIME_API" = runtime_api,
       "LAMBDA_TASK_ROOT" = task_root,
-      "_HANDLER" = handler),
+      "_HANDLER" = handler
+    ),
     withr::with_environment(
       parent.frame(),
       setup_lambda()
@@ -33,16 +33,14 @@ use_basic_lambda_setup <- function(
   withr::defer(reset_lambda(), envir = parent.frame())
 }
 
-mock_response <- function(
-  input,
-  expected_response_body,
-  expected_response_headers = list(
-    'Accept' = 'application/json, text/xml, application/xml, */*',
-    'Content-Type' = ''
-  ),
-  request_id = "abc123",
-  timeout_seconds = 0.5
-  ) {
+mock_response <- function(input,
+                          expected_response_body,
+                          expected_response_headers = list(
+                            "Accept" = "application/json, text/xml, application/xml, */*",
+                            "Content-Type" = ""
+                          ),
+                          request_id = "abc123",
+                          timeout_seconds = 0.5) {
 
   # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
@@ -78,12 +76,10 @@ mock_response <- function(
   n_responses >= 1
 }
 
-mock_invocation_error <- function(
-  input,
-  expected_error_body,
-  request_id = "abc123",
-  timeout_seconds = 0.5
-) {
+mock_invocation_error <- function(input,
+                                  expected_error_body,
+                                  request_id = "abc123",
+                                  timeout_seconds = 0.5) {
 
   # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
@@ -104,8 +100,8 @@ mock_invocation_error <- function(
   webmockr::stub_request("post", invocation_error_endpoint) %>%
     webmockr::wi_th(
       headers = list(
-        'Accept' = 'application/json, text/xml, application/xml, */*',
-        'Content-Type' = 'application/vnd.aws.lambda.error+json'
+        "Accept" = "application/json, text/xml, application/xml, */*",
+        "Content-Type" = "application/vnd.aws.lambda.error+json"
       ),
       body = expected_error_body
     ) %>%
@@ -121,11 +117,9 @@ mock_invocation_error <- function(
   n_responses >= 1
 }
 
-mock_initialisation_error <- function(
-  expected_error_body,
-  request_id = "abc123",
-  timeout_seconds = 0.5
-) {
+mock_initialisation_error <- function(expected_error_body,
+                                      request_id = "abc123",
+                                      timeout_seconds = 0.5) {
 
   # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
@@ -146,8 +140,8 @@ mock_initialisation_error <- function(
   webmockr::stub_request("post", initialisation_error_endpoint) %>%
     webmockr::wi_th(
       headers = list(
-        'Accept' = 'application/json, text/xml, application/xml, */*',
-        'Content-Type' = 'application/vnd.aws.lambda.error+json'
+        "Accept" = "application/json, text/xml, application/xml, */*",
+        "Content-Type" = "application/vnd.aws.lambda.error+json"
       ),
       body = expected_error_body
     ) %>%
@@ -163,11 +157,9 @@ mock_initialisation_error <- function(
   # n_responses >= 1
 }
 
-trigger_initialisation_error <- function(
-  expected_error,
-  task_root = "giraffe",
-  handler = "sqrt"
-) {
+trigger_initialisation_error <- function(expected_error,
+                                         task_root = "giraffe",
+                                         handler = "sqrt") {
 
   # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
@@ -194,8 +186,8 @@ trigger_initialisation_error <- function(
   webmockr::stub_request("post", initialisation_error_endpoint) %>%
     webmockr::wi_th(
       headers = list(
-        'Accept' = 'application/json, text/xml, application/xml, */*',
-        'Content-Type' = 'application/vnd.aws.lambda.error+json'
+        "Accept" = "application/json, text/xml, application/xml, */*",
+        "Content-Type" = "application/vnd.aws.lambda.error+json"
       ),
       body = jsonlite::toJSON(
         list(
@@ -208,25 +200,24 @@ trigger_initialisation_error <- function(
     ) %>%
     webmockr::to_return(status = 202) # accepted
 
-    # Failure when task_root not set-up
-    error_message <- tryCatch(
-      use_basic_lambda_setup(
-        runtime_api = "red_panda",
-        task_root = task_root,
-        handler = handler
-      ),
-      error = function(e) e$message
-    )
+  # Failure when task_root not set-up
+  error_message <- tryCatch(
+    use_basic_lambda_setup(
+      runtime_api = "red_panda",
+      task_root = task_root,
+      handler = handler
+    ),
+    error = function(e) e$message
+  )
 
-    if (error_message != expected_error) {
-      stop(error_message)
-    }
+  if (error_message != expected_error) {
+    stop(error_message)
+  }
 
-    requests <- webmockr::request_registry()
-    request_pattern <- webmockr::RequestPattern$new(
-      "post",
-      initialisation_error_endpoint
-    )
-    return(requests$times_executed(request_pattern) == 1)
+  requests <- webmockr::request_registry()
+  request_pattern <- webmockr::RequestPattern$new(
+    "post",
+    initialisation_error_endpoint
+  )
+  return(requests$times_executed(request_pattern) == 1)
 }
-
