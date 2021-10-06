@@ -18,24 +18,6 @@
 # * Cleanup – Release unused resources, send data to other services, or perform
 #   additional tasks before getting the next event.
 
-#' Convert a list to a single character, preserving names
-#'
-#' @param x Named list.
-#'
-#' @return character
-#' @export
-#'
-#' @examples
-#' prettify_list(list("a" = 1, "b" = 2, "c" = 3))
-#' # "a=5, b=5, c=5"
-#' @keywords internal
-prettify_list <- function(x) {
-  paste(
-    paste(names(x), x, sep = "="),
-    collapse = ", "
-  )
-}
-
 #' Extract the headers from a Lambda event
 #'
 #' This function is largely equivalent to \code{\link[httr]{headers}}, which it
@@ -123,10 +105,41 @@ assert_status_code_is_good <- function(status_code) {
   TRUE
 }
 
+
+
+
+#' Determine if a Lambda event is coming via an API Gateway
+#'
+#' Events coming from an API Gateway need to be treated a little differently,
+#' both in parsing the event content and in posting the results. An event
+#' coming from an API Gateway will contain the `http_request_element`.
+#'
+#' @param event_content
+#'
+#' @return logical
+#' @keywords internal
+is_from_api_gateway <- function(event_content) {
+  http_request_element %in% names(event_content)
+}
+
+#' @rdname is_from_api_gateway
+#' @keywords internal
+http_request_element <- "queryStringParameters"
+
+#' Determine if a Lambda event is coming from a scheduled Cloudwatch event
+#'
+#' @param event_content
+#'
+#' @return logical
+#' @keywords internal
+is_scheduled_event_content <- function(event_content) {
+  grepl("Scheduled Event", event_content)
+}
+
 #' Parse the body of the Lambda event
 #'
-#' @param event the response received from querying the next invocation
-#'   endpoint.
+#' @param event_content the content of the response received from querying the
+#' text invocation endpoint, as a character
 #' @param deserialiser function for deserialising the body of the event.
 #'   By default, will attempt to deserialise the body as JSON, based on whether
 #'   the input is coming from an API Gateway, scheduled Cloudwatch event, or
@@ -137,58 +150,58 @@ assert_status_code_is_good <- function(status_code) {
 #'   used in serialising the response to be sent back to Lambda.
 #'
 #' @keywords internal
-parse_event_content <- function(event, deserialiser = NULL) {
-  # we need to parse the event in four contexts before sending to the lambda fn:
-  # 1a) direct invocation with no function args (empty event)
-  # 1b) direct invocation with function args (parse and send entire event)
-  # 2a) api endpoint with no args (parse HTTP request, confirm null request
-  #   element; send empty list)
-  # 2b) api endpoint with args (parse HTTP request, confirm non-null request
-  #   element; extract and send it)
+parse_event_content <- function(event_content, deserialiser = NULL) {
+  logger::log_debug("Raw event content:", event_content)
 
-  unparsed_content <- httr::content(event, "text", encoding = "UTF-8")
-  logger::log_debug("Raw body:", unparsed_content)
-
-  if (!is.null(deserialiser)) {
-    return(
-      list(
-        arguments = deserialiser(unparsed_content),
-        request_type = "custom"
-      )
-    )
-  }
-
-  # Thank you to Menno Schellekens for this fix for Cloudwatch events
-  # I'm getting conflicting information about whether or not scheduled events
-  # can have input. This needs further research, or really a reprex.
-  is_scheduled_event <- grepl("Scheduled Event", unparsed_content)
-  logger::log_debug("Unparsed content:", unparsed_content)
-
-  if (unparsed_content == "" || is_scheduled_event) {
-    event_body <- list()
+  parsed_event_content <- if (!is.null(deserialiser)) {
+    parse_custom_event_content(event_content, deserialiser)
+  } else if (is_scheduled_event_content(event_content)) {
+    parse_scheduled_event_content(event_content)
+  } else if (is_from_api_gateway(event_content)) {
+    parse_api_gateway_event_content(event_content[[http_request_element]])
   } else {
-    event_body <- jsonlite::fromJSON(unparsed_content)
+    parse_default_event_content(event_content)
   }
 
-  http_request_element <- "queryStringParameters"
-  request_type <- if (http_request_element %in% names(event_body)) {
-    "HTML"
-  } else if (is_scheduled_event) {
-    "scheduled"
-  } else {
-    "direct"
-  }
-  logger::log_debug("Request type:", request_type)
+  logger::log_debug("Parsed event body:", parsed_event_content)
 
-  if (request_type == "HTML") {
-    event_body <- event_body[[http_request_element]]
-    if (is.null(event_body)) {
-      event_body <- list()
-    }
-  }
-  logger::log_debug("Parsed event body:", event_body)
+  parsed_event_content
+}
 
-  list(arguments = event_body, request_type = request_type)
+#' @keywords internal
+#' @rdname parse_event_content
+parse_custom_event_content <- function(event_content, deserialiser) {
+  structure(
+    deserialiser(event_content),
+    from_api_gateway = is_from_api_gateway(event_content)
+  )
+}
+
+#' @keywords internal
+#' @rdname parse_event_content
+parse_scheduled_event_content <- function(event_content) {
+  structure(
+    list(),
+    from_api_gateway = FALSE
+  )
+}
+
+#' @keywords internal
+#' @rdname parse_event_content
+parse_api_gateway_event_content <- function(event_content) {
+  structure(
+    parse_json_or_empty(event_content),
+    from_api_gateway = TRUE
+  )
+}
+
+#' @keywords internal
+#' @rdname parse_event_content
+parse_default_event_content <- function(event_content) {
+  structure(
+    parse_json_or_empty(event_content),
+    from_api_gateway = FALSE
+  )
 }
 
 #' Serialise a result and send it to Lambda
@@ -203,12 +216,12 @@ parse_event_content <- function(event, deserialiser = NULL) {
 #'   request type. To send the result as is, pass the `identity` function.
 #'
 #' @keywords internal
-post_result <- function(result, request_id, request_type, serialiser = NULL) {
+post_result <- function(result, request_id, serialiser = NULL) {
   logger::log_debug("Raw result:", result)
   body <- if (!is.null(serialiser)) {
     serialiser(result)
-    # AWS API Gateway is a bit particular about the response format
-  } else if (request_type == "HTML") {
+  # AWS API Gateway is a bit particular about the response format
+  } else if (attr(result, "from_api_gateway")) {
     list(
       isBase64Encoded = FALSE,
       statusCode = 200L,
@@ -234,6 +247,8 @@ post_result <- function(result, request_id, request_type, serialiser = NULL) {
 #'
 #' @inheritSection extract_context Event context
 #'
+#' @param event the response received from querying the next invocation
+#'   endpoint.
 #' @inheritParams parse_event_content
 #' @inheritParams post_result
 #'
@@ -251,21 +266,25 @@ handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
     Sys.setenv("_X_AMZN_TRACE_ID" = runtime_trace_id)
   }
 
-  event_content <- parse_event_content(event, deserialiser)
-  event_arguments <- event_content$arguments
+  event_content <- httr::content(event, "text", encoding = "UTF-8")
+  parsed_event_content <- parse_event_content(event_content)
 
   # if the handler function accepts either a `context` argument then calculate
   # the event context and append it to the function arguments.
   if (lambda$pass_context_argument) {
     event_arguments <- c(
-      event_arguments,
+      parsed_event_content,
       list(context = extract_context(event_headers))
     )
+  } else {
+    event_arguments <- parsed_event_content
   }
-  request_type <- event_content$request_type
 
-  result <- do.call(lambda$handler, args = event_arguments)
+  result <- structure(
+    do.call(lambda$handler, args = event_arguments),
+    from_api_gateway = attr(parsed_event_content, "from_api_gateway")
+  )
   logger::log_debug("Result:", as.character(result))
 
-  post_result(result, request_id, request_type, serialiser = serialiser)
+  post_result(result, request_id, serialiser = serialiser)
 }

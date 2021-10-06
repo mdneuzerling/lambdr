@@ -6,10 +6,6 @@
 \usage{
 extract_event_headers(event)
 }
-\arguments{
-\item{event}{the response received from querying the next invocation
-endpoint.}
-}
 \description{
 This function is largely equivalent to \code{\link[httr]{headers}}, which it
 wraps. The only difference is that the names of the headers returned are

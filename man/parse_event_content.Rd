@@ -2,13 +2,25 @@
 % Please edit documentation in R/handle-event.R
 \name{parse_event_content}
 \alias{parse_event_content}
+\alias{parse_custom_event_content}
+\alias{parse_scheduled_event_content}
+\alias{parse_api_gateway_event_content}
+\alias{parse_default_event_content}
 \title{Parse the body of the Lambda event}
 \usage{
-parse_event_content(event, deserialiser = NULL)
+parse_event_content(event_content, deserialiser = NULL)
+
+parse_custom_event_content(event_content, deserialiser)
+
+parse_scheduled_event_content(event_content)
+
+parse_api_gateway_event_content(event_content)
+
+parse_default_event_content(event_content)
 }
 \arguments{
-\item{event}{the response received from querying the next invocation
-endpoint.}
+\item{event_content}{the content of the response received from querying the
+text invocation endpoint, as a character}
 
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
