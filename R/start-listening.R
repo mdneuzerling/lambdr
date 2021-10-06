@@ -40,6 +40,8 @@ start_listening <- function(
   serialiser = NULL,
   timeout_seconds = NULL
 ) {
+  assert_lambda_is_setup()
+
   if (!is.null(timeout_seconds)) {
     expire_after <- Sys.time() + timeout_seconds
     while (Sys.time() < expire_after) {

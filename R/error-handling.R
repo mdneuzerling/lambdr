@@ -5,6 +5,7 @@
 #     "stackTrace": [],
 # }
 post_lambda_error <- function(e, endpoint) {
+  logger::log_error(e$message)
   error_list <- list(
     errorMessage = e$message,
     errorType = class(e)[[1]],

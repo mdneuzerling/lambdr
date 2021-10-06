@@ -54,7 +54,14 @@ NULL
 #' @rdname lambda_variables
 #' @keywords internal
 get_lambda_runtime_api <- function() {
-  assert_lambda_is_setup()
+  # It's possible for the runtime API to be used before the runtime is set-up.
+  # This will happen if there's an error during setup. In this case, we need
+  # the runtime API in order to report the initialisation error.
+  if (is.null(lambda$runtime_api) || lambda$runtime_api == "") {
+    stop("The AWS Lambda runtime is not configured. Run `setup_lambda()` once ",
+         "at the beginning of your runtime script.")
+  }
+
   lambda$runtime_api
 }
 
@@ -174,31 +181,42 @@ setup_lambda <- function(
   environ = parent.frame()
   ) {
 
-  handler_character <- get_lambda_environment_variable(
-    "_HANDLER",
-    handler
-  )
-
-  if (!exists(handler_character, envir = environ)) {
-    stop(handler_character, " not found")
-  }
-
-  handler <- get(handler_character, envir = environ)
-  if (!is.function(handler)) {
-    stop(handler_character, " is not a function")
-  }
-  lambda$handler_character <- handler_character
-  lambda$handler <- handler
-  lambda$pass_context_argument <- function_accepts_context(handler)
-
+  # There's no point in wrapping this in a TryCatch. If we don't have the
+  # runtime API, we can't construct the endpoints to which to send errors.
+  # The only option is to stop the R kernel straight away.
   lambda$runtime_api <- get_lambda_environment_variable(
     "AWS_LAMBDA_RUNTIME_API",
     runtime_api
   )
 
-  lambda$task_root <- get_lambda_environment_variable(
-    "LAMBDA_TASK_ROOT",
-    task_root
+  tryCatch({
+    handler_character <- get_lambda_environment_variable(
+      "_HANDLER",
+      handler
+    )
+
+    if (!exists(handler_character, envir = environ)) {
+      stop(handler_character, " not found")
+    }
+
+    handler <- get(handler_character, envir = environ)
+    if (!is.function(handler)) {
+      stop(handler_character, " is not a function")
+    }
+    lambda$handler_character <- handler_character
+    lambda$handler <- handler
+    lambda$pass_context_argument <- function_accepts_context(handler)
+
+    lambda$task_root <- get_lambda_environment_variable(
+      "LAMBDA_TASK_ROOT",
+      task_root
+    )
+    },
+
+    error = function(e) {
+      post_lambda_error(e, get_initialisation_error_endpoint())
+      stop(e)
+    }
   )
 
   lambda$is_setup <- TRUE

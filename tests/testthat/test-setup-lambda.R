@@ -24,7 +24,7 @@ test_that("Lambda task root retrieval fails before setup", {
   expect_setup_failure(get_lambda_task_root)
 })
 
-test_that("Lambda handler fails before setup", {
+test_that("Lambda handler retrieval fails before setup", {
   expect_setup_failure(get_handler)
   expect_setup_failure(get_handler_character)
 })
@@ -57,15 +57,48 @@ test_that("we can retrieve the Lambda handler", {
   )
 })
 
-test_that("bad handlers are caught", {
-  expect_error(
-    use_basic_lambda_setup(handler = "doesntexist"),
-    "doesntexist not found"
+test_that("initialisation error recorded when task_root undefined", {
+  error_received <- trigger_initialisation_error(
+    expected_error = paste(
+      "LAMBDA_TASK_ROOT environment variable is not set. This environment",
+      "variable is set by AWS when Lambda is instantiated. It will not appear",
+      "when running local tests."
+    ),
+    task_root = "",
+    handler = "sqrt"
   )
-  expect_error(
-    use_basic_lambda_setup(handler = "mtcars"),
-    "mtcars is not a function"
+  expect_true(error_received)
+})
+
+test_that("initialisation error recorded when handler undefined", {
+  error_received <- trigger_initialisation_error(
+    expected_error = paste(
+      "_HANDLER environment variable is not set. This environment",
+      "variable is set by AWS when Lambda is instantiated. It will not appear",
+      "when running local tests."
+    ),
+    task_root = "giraffe",
+    handler = ""
   )
+  expect_true(error_received)
+})
+
+test_that("undefined handlers are caught", {
+  error_received <- trigger_initialisation_error(
+    expected_error = "undefined_handler not found",
+    task_root = "giraffe",
+    handler = "undefined_handler"
+  )
+  expect_true(error_received)
+})
+
+test_that("non-function handlers are caught", {
+  error_received <- trigger_initialisation_error(
+    expected_error = "mtcars is not a function",
+    task_root = "giraffe",
+    handler = "mtcars"
+  )
+  expect_true(error_received)
 })
 
 test_that("handler can be a custom function", {
