@@ -1,8 +1,9 @@
 pandoc: '2.5'
 pkgdown: 1.6.1
 pkgdown_sha: ~
-articles: {}
-last_built: 2021-10-06T02:04Z
+articles:
+  lambda-runtime-in-container: lambda-runtime-in-container.html
+last_built: 2021-10-06T03:12Z
 urls:
   reference: https://lambdr.mdneuzerling.com/reference
   article: https://lambdr.mdneuzerling.com/articles
