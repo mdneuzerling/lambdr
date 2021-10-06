@@ -2,7 +2,7 @@
 % Please edit documentation in R/start-lambda.R
 \name{start_lambda}
 \alias{start_lambda}
-\title{Set-up Lambda and start listening for events}
+\title{Set-up logging and a Lambda runtime, and start listening for events}
 \usage{
 start_lambda(
   log_threshold = logger::INFO,

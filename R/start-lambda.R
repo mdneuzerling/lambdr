@@ -1,4 +1,4 @@
-#' Set-up Lambda and start listening for events
+#' Set-up logging and a Lambda runtime, and start listening for events
 #'
 #' @description
 #' Runs the following three functions in order:
