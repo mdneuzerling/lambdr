@@ -119,6 +119,5 @@ parity <- function(number) {
 }
 
 start_lambda()
-
 }
 }

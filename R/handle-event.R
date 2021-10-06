@@ -18,6 +18,23 @@
 # * Cleanup – Release unused resources, send data to other services, or perform
 #   additional tasks before getting the next event.
 
+#' Convert a list to a single character, preserving names
+#'
+#' @param x Named list.
+#'
+#' @return character
+#' @export
+#'
+#' @examples
+#' prettify_list(list("a" = 1, "b" = 2, "c" = 3))
+#' # "a=5, b=5, c=5"
+#' @keywords internal
+prettify_list <- function(x) {
+  paste(
+    paste(names(x), x, sep = "="),
+    collapse = ", "
+  )
+}
 
 #' Extract the headers from a Lambda event
 #'
