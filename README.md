@@ -1,7 +1,13 @@
 # lambdr
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/lambdr)](https://cran.r-project.org/package=lambdr)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/lambdr)](https://cran.r-project.org/package=lambdr)
+[![Last commit](https://img.shields.io/github/last-commit/mdneuzerling/lambdr/main.svg)](https://github.com/mdneuzerling/lambdr/tree/main)
 [![R-CMD-check](https://github.com/mdneuzerling/lambdr/workflows/R-CMD-check/badge.svg)](https://github.com/mdneuzerling/lambdr/actions)
+[![Lint](https://github.com/mdneuzerling/lambdr/workflows/lint/badge.svg)](https://github.com/mdneuzerling/lambdr/actions?query=workflow%3Alint)
+[![Codecov test coverage](https://codecov.io/gh/mdneuzerling/lambdr/branch/main/graph/badge.svg)](https://codecov.io/gh/mdneuzerling/lambdr?branch=main)
+[![license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://choosealicense.com/licenses/mit/)
 <!-- badges: end -->
 
 Running R containers on AWS Lambda.
