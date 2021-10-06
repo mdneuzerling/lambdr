@@ -61,6 +61,10 @@ Runs the following three functions in order:
 \item \code{\link{setup_lambda}}
 \item \code{\link{start_listening}}
 }
+
+See \code{vignette("lambda-runtime-in-container", package = "lambdr")} for an
+example of how to use this function to place an R Lambda Runtime in a
+container.
 }
 \section{AWS Lambda variables}{
 
@@ -103,3 +107,18 @@ as \code{my_func(x, context)} will receive the context argument automatically.
 The \code{context} argument must be named (\code{...} will not work).
 }
 
+\examples{
+\dontrun{
+# A general usage pattern involves sourcing necessary functions and running
+# this `start_lambda` in a `runtime.R` file which is then executed to start
+# the runtime. In the following example, the function handler can be set to
+# "lambda" either as the container `CMD`, or configured through AWS Lambda.
+
+parity <- function(number) {
+  list(parity = if (as.integer(number) \%\% 2 == 0) "even" else "odd")
+}
+
+start_lambda()
+
+}
+}
