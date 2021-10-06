@@ -76,3 +76,23 @@ test_that("handler can be a custom function", {
 
   expect_equal(get_handler()(1), 2)
 })
+
+test_that("can recognise context argument in function formals", {
+  doesnt_accept_context <- function() {}
+  expect_false(function_accepts_context(doesnt_accept_context))
+
+  accepts_context <- function(context) {}
+  expect_true(function_accepts_context(accepts_context))
+})
+
+test_that("context argument recognised in handler formals", {
+  # similar to the test above, but we're checking that the `setup_lambda` uses
+  # the function and stores the correct result
+  doesnt_accept_context <- function() {}
+  use_basic_lambda_setup(handler = "doesnt_accept_context")
+  expect_false(lambda$pass_context_argument)
+
+  accepts_context <- function(context) {}
+  use_basic_lambda_setup(handler = "accepts_context")
+  expect_true(lambda$pass_context_argument)
+})

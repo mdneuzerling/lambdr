@@ -11,6 +11,7 @@
 #' @inheritParams start_listening
 #'
 #' @inheritSection lambda_variables AWS Lambda variables
+#' @inheritSection extract_context Event context
 #'
 #' @export
 start_lambda <- function(

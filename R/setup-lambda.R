@@ -28,14 +28,18 @@ assert_lambda_is_setup <- function() {
 #'
 #' @section AWS Lambda variables:
 #'
-#' The following variables are made available through environment variables
-#' configured by AWS:
+#' The \code{\link{setup_lambda}} function, which is also run as part of
+#' \code{\link{start_lambda}} configures the R session for Lambda based on
+#' environment variables made available by Lambda. The following environment
+#' variables are available:
 #'
 #' * Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
 #'   variable, is the host of the various HTTP endpoints through which the
-#'   runtime interacts with Lambda. See also: \verb{\link{endpoints}}.
+#'   runtime interacts with Lambda.
 #' * Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
-#'   defines the path to the Lambda function code.
+#'   defines the path to the Lambda function code. It isn't used in container
+#'   environments with a custom runtime, as that runtime is responsible for
+#'   finding and sourcing the function code.
 #' * The handler, available as the "_HANDLER" environment variable, is
 #'   interpreted by R as the function that is executed when the Lambda is
 #'   called. This value could be anything, as the interpretation is solely up
@@ -108,11 +112,39 @@ get_lambda_environment_variable <- function(env_var, default = NULL) {
   }
 }
 
-#' Set up endpoints, variables and logging for AWS Lambda
+#' Determine if a function accepts a `context` argument
+#'
+#' @description
+#' The context of a Lambda is the metadata associated with each request, such as
+#' the ARN. In other languages, a function used in a Lambda must accept the
+#' context as an argument. We allow here for functions that disregard it, since
+#' it's not necessary.
+#'
+#' The purpose of `functions_accepts_context` then is to determine if the
+#' arguments of the function defined by the handler includes `context`, in which
+#' case we pass the `context` as an argument whenever the Lambda is invoked. The
+#' `context` argument must be named (`...` won't be recognised). Primitive
+#' functions will always return FALSE.
+#'
+#' @param func Function that may or may not accept a `context` argument
+#'
+#' @return logical
+#'
+#' @keywords internal
+function_accepts_context <- function(func) {
+  if (is.primitive(func)) {
+    return(FALSE)
+  }
+
+  function_formals <- formals(func)
+  "context" %in% names(function_formals)
+}
+
+#' Set up endpoints, variables, and configuration for AWS Lambda
 #' @param handler character. Name of function to use for processing inputs from
 #'   events. This argument is provided for debugging and testing only. The
-#'   "_HANDLER" environment variable, as configured in AWS, as configured by
-#'   AWS, will always override this value if present.
+#'   "_HANDLER" environment variable, as configured in AWS, will always override
+#'   this value if present.
 #' @param runtime_api character. Used as the host in the various endpoints used
 #'   by AWS Lambda. This argument is provided for debugging and testing only.
 #'   The "AWS_LAMBDA_RUNTIME_API" environment variable, as configured by AWS,
@@ -132,6 +164,7 @@ get_lambda_environment_variable <- function(env_var, default = NULL) {
 #' to a package environment.
 #'
 #' @inheritSection lambda_variables AWS Lambda variables
+#' @inheritSection extract_context Event context
 #'
 #' @export
 setup_lambda <- function(
@@ -156,6 +189,7 @@ setup_lambda <- function(
   }
   lambda$handler_character <- handler_character
   lambda$handler <- handler
+  lambda$pass_context_argument <- function_accepts_context(handler)
 
   lambda$runtime_api <- get_lambda_environment_variable(
     "AWS_LAMBDA_RUNTIME_API",

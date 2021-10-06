@@ -23,8 +23,8 @@ processed.}
 
 \item{handler}{character. Name of function to use for processing inputs from
 events. This argument is provided for debugging and testing only. The
-"_HANDLER" environment variable, as configured in AWS, as configured by
-AWS, will always override this value if present.}
+"_HANDLER" environment variable, as configured in AWS, will always override
+this value if present.}
 
 \item{runtime_api}{character. Used as the host in the various endpoints used
 by AWS Lambda. This argument is provided for debugging and testing only.
@@ -65,19 +65,41 @@ Runs the following three functions in order:
 \section{AWS Lambda variables}{
 
 
-The following variables are made available through environment variables
-configured by AWS:
+The \code{\link{setup_lambda}} function, which is also run as part of
+\code{\link{start_lambda}} configures the R session for Lambda based on
+environment variables made available by Lambda. The following environment
+variables are available:
 \itemize{
 \item Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
 variable, is the host of the various HTTP endpoints through which the
-runtime interacts with Lambda. See also: \verb{\link{endpoints}}.
+runtime interacts with Lambda.
 \item Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
-defines the path to the Lambda function code.
+defines the path to the Lambda function code. It isn't used in container
+environments with a custom runtime, as that runtime is responsible for
+finding and sourcing the function code.
 \item The handler, available as the "_HANDLER" environment variable, is
 interpreted by R as the function that is executed when the Lambda is
 called. This value could be anything, as the interpretation is solely up
 to the runtime, so requiring it to be a function is a standard imposed by
 this package.
 }
+}
+
+\section{Event context}{
+
+The \emph{context} of an event is a list of metadata about the invocation. It is
+derived from the headers of a next event invocation response. It consists of:
+\itemize{
+\item \code{aws_request_id} - The identifier of the invocation request
+\item \code{invoked_function_arn} – The Amazon Resource Name (ARN) that's used to
+invoke the function. Indicates if the invoker specified a version number or
+alias.
+}
+
+If the handler function accepts a \code{context} argument then it will
+automatically receive at runtime a named list consisting of these values
+along with the arguments in the body (if any). For example, a function such
+as \code{my_func(x, context)} will receive the context argument automatically.
+The \code{context} argument must be named (\code{...} will not work).
 }
 

@@ -30,14 +30,18 @@ function defined by the handler is returned by \code{get_handler}.
 \section{AWS Lambda variables}{
 
 
-The following variables are made available through environment variables
-configured by AWS:
+The \code{\link{setup_lambda}} function, which is also run as part of
+\code{\link{start_lambda}} configures the R session for Lambda based on
+environment variables made available by Lambda. The following environment
+variables are available:
 \itemize{
 \item Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
 variable, is the host of the various HTTP endpoints through which the
-runtime interacts with Lambda. See also: \verb{\link{endpoints}}.
+runtime interacts with Lambda.
 \item Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
-defines the path to the Lambda function code.
+defines the path to the Lambda function code. It isn't used in container
+environments with a custom runtime, as that runtime is responsible for
+finding and sourcing the function code.
 \item The handler, available as the "_HANDLER" environment variable, is
 interpreted by R as the function that is executed when the Lambda is
 called. This value could be anything, as the interpretation is solely up

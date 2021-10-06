@@ -36,6 +36,34 @@ extract_event_headers <- function(event) {
   event_headers
 }
 
+#' Extract the context of a Lambda invocation from the headers of an event
+#'
+#' @section Event context:
+#' The _context_ of an event is a list of metadata about the invocation. It is
+#' derived from the headers of a next event invocation response. It consists of:
+#'
+#' * `aws_request_id` - The identifier of the invocation request
+#' * `invoked_function_arn` – The Amazon Resource Name (ARN) that's used to
+#'   invoke the function. Indicates if the invoker specified a version number or
+#'   alias.
+#'
+#' If the handler function accepts a `context` argument then it will
+#' automatically receive at runtime a named list consisting of these values
+#' along with the arguments in the body (if any). For example, a function such
+#' as `my_func(x, context)` will receive the context argument automatically.
+#' The `context` argument must be named (`...` will not work).
+#'
+#' @inheritParams parse_event_content
+#'
+#' @return list
+#' @keywords internal
+extract_context <- function(event_headers) {
+  list(
+    aws_request_id = event_headers[["lambda-runtime-aws-request-id"]],
+    invoked_function_arn = event_headers[["lambda-runtime-invoked-function-arn"]]
+  )
+}
+
 #' Extract the request ID from the headers of an event, or error otherwise
 #'
 #' The Request ID is unique for each input of a Lambda. It is carried by the
@@ -181,6 +209,12 @@ post_result <- function(result, request_id, request_type, serialiser = NULL) {
 
 #' Process the input of an event, and submit the result to Lambda
 #'
+#' If the handler function accepts a named `context` argument then the Lambda
+#' invocation context will be included as an argument. See the section below for
+#' more details.
+#'
+#' @inheritSection extract_context Event context
+#'
 #' @inheritParams parse_event_content
 #' @inheritParams post_result
 #'
@@ -192,15 +226,6 @@ handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
   status_code <- httr::status_code(event)
   assert_status_code_is_good(status_code)
 
-  context <- list(
-    event_headers[["content-type"]],
-    event_headers[["lambda-runtime-aws-request-id"]],
-    event_headers[["lambda-runtime-invoked-function-arn"]],
-    event_headers[["lambda-runtime-deadline-ms"]],
-    event_headers[["date"]],
-    event_headers[["content-length"]]
-  )
-
   # According to the AWS guide, we need to set the trace ID as an env var
   # https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html
   runtime_trace_id <- event_headers[["lambda-runtime-trace-id"]]
@@ -210,6 +235,15 @@ handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
 
   event_content <- parse_event_content(event, deserialiser)
   event_arguments <- event_content$arguments
+
+  # if the handler function accepts either a `context` argument then calculate
+  # the event context and append it to the function arguments.
+  if (lambda$pass_context_argument) {
+    event_arguments <- c(
+      event_arguments,
+      list(context = extract_context(event_headers))
+    )
+  }
   request_type <- event_content$request_type
 
   result <- do.call(lambda$handler, args = event_arguments)
