@@ -1,3 +1,23 @@
+test_that("Defaults in setup are considered after environment variables ", {
+  expect_error(
+    get_lambda_environment_variable("doesntexist"),
+    "doesntexist environment variable is not set"
+  )
+
+  expect_equal(
+    get_lambda_environment_variable("doesntexist", default = "red panda"),
+    "red panda"
+  )
+
+  expect_equal(
+    withr::with_envvar(
+      c("doesntexist" = "giraffe"),
+      get_lambda_environment_variable("doesntexist", default = "red panda")
+    ),
+    "giraffe"
+  )
+})
+
 test_that("Lambda can be set up and reset", {
   expect_false(lambda$is_setup)
   expect_error(assert_lambda_is_setup(), "is not configured")
