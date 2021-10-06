@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
     steps:
       - uses: actions/checkout@v2
@@ -26,6 +27,8 @@ jobs:
           extra-packages: |
             rcmdcheck
             pkgdown
+            covr
+            lintr
 
       - uses: r-lib/actions/check-r-package@v1
 
@@ -40,6 +43,19 @@ jobs:
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
+
+      - name: Install package
+        run: R CMD INSTALL .
+
+      - name: Lint
+        run: |
+          lintr::lint_package()
+        shell: Rscript {0}
+
+      - name: Test coverage
+        run: |
+          covr::codecov()
+        shell: Rscript {0}
 
       - name: Deploy pkgdown docs
         run: |
