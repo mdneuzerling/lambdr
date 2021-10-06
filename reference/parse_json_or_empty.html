@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse the body of the Lambda event — parse_event_content • lambdr</title>
+<title>Parse a JSON, but force a NULL or empty string to be interpreted as an empty list — parse_json_or_empty • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,11 @@
 
 
 
-<meta property="og:title" content="Parse the body of the Lambda event — parse_event_content" />
-<meta property="og:description" content="Parse the body of the Lambda event" />
+<meta property="og:title" content="Parse a JSON, but force a NULL or empty string to be interpreted as an empty list — parse_json_or_empty" />
+<meta property="og:description" content="Since jsonlite::fromJSON(NULL) and jsonlite::fromJSON(&quot;&quot;) return errors,
+this function will force a NULL or empty string to be interpreted as
+list(). Otherwise, the output of this function is identical to
+fromJSON." />
 
 
 
@@ -120,47 +123,36 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse the body of the Lambda event</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/handle-event.R'><code>R/handle-event.R</code></a></small>
-    <div class="hidden name"><code>parse_event_content.Rd</code></div>
+    <h1>Parse a JSON, but force a NULL or empty string to be interpreted as an empty list</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/utils.R'><code>R/utils.R</code></a></small>
+    <div class="hidden name"><code>parse_json_or_empty.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse the body of the Lambda event</p>
+    <p>Since <code><a href='https://rdrr.io/pkg/jsonlite/man/fromJSON.html'>jsonlite::fromJSON(NULL)</a></code> and <code><a href='https://rdrr.io/pkg/jsonlite/man/fromJSON.html'>jsonlite::fromJSON("")</a></code> return errors,
+this function will force a NULL or empty string to be interpreted as
+<code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>. Otherwise, the output of this function is identical to
+<code><a href='https://rdrr.io/pkg/jsonlite/man/fromJSON.html'>fromJSON</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>parse_event_content</span><span class='op'>(</span><span class='va'>event_content</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-
-<span class='fu'>parse_custom_event_content</span><span class='op'>(</span><span class='va'>event_content</span>, <span class='va'>deserialiser</span><span class='op'>)</span>
-
-<span class='fu'>parse_scheduled_event_content</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span>
-
-<span class='fu'>parse_api_gateway_event_content</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span>
-
-<span class='fu'>parse_default_event_content</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>parse_json_or_empty</span><span class='op'>(</span><span class='va'>json</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>event_content</th>
-      <td><p>the content of the response received from querying the
-text invocation endpoint, as a character</p></td>
+      <th>json</th>
+      <td><p>character to be interpreted as a JSON</p></td>
     </tr>
     <tr>
-      <th>deserialiser</th>
-      <td><p>function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the <code>identity</code> function.</p></td>
+      <th>...</th>
+      <td><p>additional arguments passed to <code><a href='https://rdrr.io/pkg/jsonlite/man/fromJSON.html'>fromJSON</a></code></p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list containing the "arguments" and "content_type", the latter of
-which is either "HTML", "scheduled", or "direct". The content type may be
-used in serialising the response to be sent back to Lambda.</p>
+    <p>list</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

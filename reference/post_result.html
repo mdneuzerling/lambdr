@@ -129,7 +129,7 @@
     <p>Serialise a result and send it to Lambda</p>
     </div>
 
-    <pre class="usage"><span class='fu'>post_result</span><span class='op'>(</span><span class='va'>result</span>, <span class='va'>request_id</span>, <span class='va'>request_type</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>post_result</span><span class='op'>(</span><span class='va'>result</span>, <span class='va'>request_id</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -144,15 +144,15 @@
 <code><a href='extract_request_id_from_headers.html'>extract_request_id_from_headers</a></code> from the headers of an event.</p></td>
     </tr>
     <tr>
-      <th>request_type</th>
-      <td><p>one of "HTML", "scheduled", or "direct". The content type
-may be used in serialising the response to be sent back to Lambda.</p></td>
-    </tr>
-    <tr>
       <th>serialiser</th>
       <td><p>function for serialising the result before sending.
 By default, will attempt to serialise the body as JSON, based on the
 request type. To send the result as is, pass the <code>identity</code> function.</p></td>
+    </tr>
+    <tr>
+      <th>request_type</th>
+      <td><p>one of "HTML", "scheduled", or "direct". The content type
+may be used in serialising the response to be sent back to Lambda.</p></td>
     </tr>
     </table>
 

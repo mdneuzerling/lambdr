@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse the body of the Lambda event — parse_event_content • lambdr</title>
+<title>Determine if a Lambda event is coming from a scheduled Cloudwatch event — is_scheduled_event_content • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Parse the body of the Lambda event — parse_event_content" />
-<meta property="og:description" content="Parse the body of the Lambda event" />
+<meta property="og:title" content="Determine if a Lambda event is coming from a scheduled Cloudwatch event — is_scheduled_event_content" />
+<meta property="og:description" content="Determine if a Lambda event is coming from a scheduled Cloudwatch event" />
 
 
 
@@ -120,47 +120,29 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse the body of the Lambda event</h1>
+    <h1>Determine if a Lambda event is coming from a scheduled Cloudwatch event</h1>
     <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/handle-event.R'><code>R/handle-event.R</code></a></small>
-    <div class="hidden name"><code>parse_event_content.Rd</code></div>
+    <div class="hidden name"><code>is_scheduled_event_content.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse the body of the Lambda event</p>
+    <p>Determine if a Lambda event is coming from a scheduled Cloudwatch event</p>
     </div>
 
-    <pre class="usage"><span class='fu'>parse_event_content</span><span class='op'>(</span><span class='va'>event_content</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-
-<span class='fu'>parse_custom_event_content</span><span class='op'>(</span><span class='va'>event_content</span>, <span class='va'>deserialiser</span><span class='op'>)</span>
-
-<span class='fu'>parse_scheduled_event_content</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span>
-
-<span class='fu'>parse_api_gateway_event_content</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span>
-
-<span class='fu'>parse_default_event_content</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>is_scheduled_event_content</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>event_content</th>
-      <td><p>the content of the response received from querying the
-text invocation endpoint, as a character</p></td>
-    </tr>
-    <tr>
-      <th>deserialiser</th>
-      <td><p>function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the <code>identity</code> function.</p></td>
+      <td></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list containing the "arguments" and "content_type", the latter of
-which is either "HTML", "scheduled", or "direct". The content type may be
-used in serialising the response to be sent back to Lambda.</p>
+    <p>logical</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -31,10 +31,19 @@
     <loc>https://lambdr.mdneuzerling.com/reference/handle_event.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/is_from_api_gateway.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/is_scheduled_event_content.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/lambda_variables.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/parse_event_content.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/parse_json_or_empty.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/post_result.html</loc>
