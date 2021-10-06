@@ -113,7 +113,7 @@ function defined by the handler is returned by get_handler." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Retrieve AWS Lambda configuration values</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/lambda-setup.R'><code>R/lambda-setup.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/setup-lambda.R'><code>R/setup-lambda.R</code></a></small>
     <div class="hidden name"><code>lambda_variables.Rd</code></div>
     </div>
 
@@ -142,13 +142,17 @@ function defined by the handler is returned by <code>get_handler</code>.</p>
     
 
 
-<p>The following variables are made available through environment variables
-configured by AWS:</p><ul>
+<p>The <code><a href='setup_lambda.html'>setup_lambda</a></code> function, which is also run as part of
+<code><a href='start_lambda.html'>start_lambda</a></code> configures the R session for Lambda based on
+environment variables made available by Lambda. The following environment
+variables are available:</p><ul>
 <li><p>Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
 variable, is the host of the various HTTP endpoints through which the
-runtime interacts with Lambda. See also: <code>\link{endpoints}</code>.</p></li>
+runtime interacts with Lambda.</p></li>
 <li><p>Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
-defines the path to the Lambda function code.</p></li>
+defines the path to the Lambda function code. It isn't used in container
+environments with a custom runtime, as that runtime is responsible for
+finding and sourcing the function code.</p></li>
 <li><p>The handler, available as the "_HANDLER" environment variable, is
 interpreted by R as the function that is executed when the Lambda is
 called. This value could be anything, as the interpretation is solely up

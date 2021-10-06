@@ -40,7 +40,9 @@
 
 
 <meta property="og:title" content="Process the input of an event, and submit the result to Lambda — handle_event" />
-<meta property="og:description" content="Process the input of an event, and submit the result to Lambda" />
+<meta property="og:description" content="If the handler function accepts a named context argument then the Lambda
+invocation context will be included as an argument. See the section below for
+more details." />
 
 
 
@@ -114,7 +116,9 @@
     </div>
 
     <div class="ref-description">
-    <p>Process the input of an event, and submit the result to Lambda</p>
+    <p>If the handler function accepts a named <code>context</code> argument then the Lambda
+invocation context will be included as an argument. See the section below for
+more details.</p>
     </div>
 
     <pre class="usage"><span class='fu'>handle_event</span><span class='op'>(</span><span class='va'>event</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
@@ -142,6 +146,23 @@ request type. To send the result as is, pass the <code>identity</code> function.
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="event-context"><a class="anchor" href="#event-context"></a>Event context</h2>
+
+    
+
+<p>The <em>context</em> of an event is a list of metadata about the invocation. It is
+derived from the headers of a next event invocation response. It consists of:</p><ul>
+<li><p><code>aws_request_id</code> - The identifier of the invocation request</p></li>
+<li><p><code>invoked_function_arn</code> – The Amazon Resource Name (ARN) that's used to
+invoke the function. Indicates if the invoker specified a version number or
+alias.</p></li>
+</ul>
+
+<p>If the handler function accepts a <code>context</code> argument then it will
+automatically receive at runtime a named list consisting of these values
+along with the arguments in the body (if any). For example, a function such
+as <code>my_func(x, context)</code> will receive the context argument automatically.
+The <code>context</code> argument must be named (<code>...</code> will not work).</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

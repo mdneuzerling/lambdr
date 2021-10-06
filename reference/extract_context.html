@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • lambdr</title>
+<title>Extract the context of a Lambda invocation from the headers of an event — extract_context • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,8 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Extract the context of a Lambda invocation from the headers of an event — extract_context" />
+<meta property="og:description" content="Extract the context of a Lambda invocation from the headers of an event" />
 
 
 
@@ -58,7 +59,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -105,60 +106,42 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Extract the context of a Lambda invocation from the headers of an event</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/handle-event.R'><code>R/handle-event.R</code></a></small>
+    <div class="hidden name"><code>extract_context.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Extract the context of a Lambda invocation from the headers of an event</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>extract_context</span><span class='op'>(</span><span class='va'>event_headers</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="setup_lambda.html">setup_lambda()</a></code> </p>
-        </td>
-        <td><p>Set up endpoints, variables, and configuration for AWS Lambda</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="setup_logging.html">setup_logging()</a></code> </p>
-        </td>
-        <td><p>Set up logging with the <code>logger</code> package</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="start_lambda.html">start_lambda()</a></code> </p>
-        </td>
-        <td><p>Set-up Lambda and start listening for events</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="start_listening.html">start_listening()</a></code> </p>
-        </td>
-        <td><p>Start listening for events, and process them as they come</p></td>
-      </tr>
-    </tbody>
-    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>list</p>
+    <h2 class="hasAnchor" id="event-context"><a class="anchor" href="#event-context"></a>Event context</h2>
+
+    
+
+<p>The <em>context</em> of an event is a list of metadata about the invocation. It is
+derived from the headers of a next event invocation response. It consists of:</p><ul>
+<li><p><code>aws_request_id</code> - The identifier of the invocation request</p></li>
+<li><p><code>invoked_function_arn</code> – The Amazon Resource Name (ARN) that's used to
+invoke the function. Indicates if the invoker specified a version number or
+alias.</p></li>
+</ul>
+
+<p>If the handler function accepts a <code>context</code> argument then it will
+automatically receive at runtime a named list consisting of these values
+along with the arguments in the body (if any). For example, a function such
+as <code>my_func(x, context)</code> will receive the context argument automatically.
+The <code>context</code> argument must be named (<code>...</code> will not work).</p>
+
   </div>
-
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

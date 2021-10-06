@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Set up endpoints, variables and logging for AWS Lambda — setup_lambda • lambdr</title>
+<title>Set up endpoints, variables, and configuration for AWS Lambda — setup_lambda • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Set up endpoints, variables and logging for AWS Lambda — setup_lambda" />
-<meta property="og:description" content="Set up endpoints, variables and logging for AWS Lambda" />
+<meta property="og:title" content="Set up endpoints, variables, and configuration for AWS Lambda — setup_lambda" />
+<meta property="og:description" content="Set up endpoints, variables, and configuration for AWS Lambda" />
 
 
 
@@ -108,17 +108,16 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Set up endpoints, variables and logging for AWS Lambda</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/lambda-setup.R'><code>R/lambda-setup.R</code></a></small>
+    <h1>Set up endpoints, variables, and configuration for AWS Lambda</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/setup-lambda.R'><code>R/setup-lambda.R</code></a></small>
     <div class="hidden name"><code>setup_lambda.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Set up endpoints, variables and logging for AWS Lambda</p>
+    <p>Set up endpoints, variables, and configuration for AWS Lambda</p>
     </div>
 
     <pre class="usage"><span class='fu'>setup_lambda</span><span class='op'>(</span>
-  log_threshold <span class='op'>=</span> <span class='fu'>logger</span><span class='fu'>::</span><span class='va'><a href='https://daroczig.github.io/logger/reference/log_levels.html'>INFO</a></span>,
   handler <span class='op'>=</span> <span class='cn'>NULL</span>,
   runtime_api <span class='op'>=</span> <span class='cn'>NULL</span>,
   task_root <span class='op'>=</span> <span class='cn'>NULL</span>,
@@ -129,18 +128,11 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>log_threshold</th>
-      <td><p>Threshold for recording and displaying log entries.
-Defaults to <code><a href='https://daroczig.github.io/logger/reference/log_levels.html'>logger::INFO</a></code>. To debug a failing Lambda container, set this
-to <code><a href='https://daroczig.github.io/logger/reference/log_levels.html'>logger::DEBUG</a></code> to log verbose information about how each request is
-processed.</p></td>
-    </tr>
-    <tr>
       <th>handler</th>
       <td><p>character. Name of function to use for processing inputs from
 events. This argument is provided for debugging and testing only. The
-"_HANDLER" environment variable, as configured in AWS, as configured by
-AWS, will always override this value if present.</p></td>
+"_HANDLER" environment variable, as configured in AWS, will always override
+this value if present.</p></td>
     </tr>
     <tr>
       <th>runtime_api</th>
@@ -175,13 +167,17 @@ to a package environment.</p>
     
 
 
-<p>The following variables are made available through environment variables
-configured by AWS:</p><ul>
+<p>The <code>setup_lambda</code> function, which is also run as part of
+<code><a href='start_lambda.html'>start_lambda</a></code> configures the R session for Lambda based on
+environment variables made available by Lambda. The following environment
+variables are available:</p><ul>
 <li><p>Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
 variable, is the host of the various HTTP endpoints through which the
-runtime interacts with Lambda. See also: <code>\link{endpoints}</code>.</p></li>
+runtime interacts with Lambda.</p></li>
 <li><p>Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
-defines the path to the Lambda function code.</p></li>
+defines the path to the Lambda function code. It isn't used in container
+environments with a custom runtime, as that runtime is responsible for
+finding and sourcing the function code.</p></li>
 <li><p>The handler, available as the "_HANDLER" environment variable, is
 interpreted by R as the function that is executed when the Lambda is
 called. This value could be anything, as the interpretation is solely up
@@ -189,6 +185,23 @@ to the runtime, so requiring it to be a function is a standard imposed by
 this package.</p></li>
 </ul>
 
+    <h2 class="hasAnchor" id="event-context"><a class="anchor" href="#event-context"></a>Event context</h2>
+
+    
+
+<p>The <em>context</em> of an event is a list of metadata about the invocation. It is
+derived from the headers of a next event invocation response. It consists of:</p><ul>
+<li><p><code>aws_request_id</code> - The identifier of the invocation request</p></li>
+<li><p><code>invoked_function_arn</code> – The Amazon Resource Name (ARN) that's used to
+invoke the function. Indicates if the invoker specified a version number or
+alias.</p></li>
+</ul>
+
+<p>If the handler function accepts a <code>context</code> argument then it will
+automatically receive at runtime a named list consisting of these values
+along with the arguments in the body (if any). For example, a function such
+as <code>my_func(x, context)</code> will receive the context argument automatically.
+The <code>context</code> argument must be named (<code>...</code> will not work).</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

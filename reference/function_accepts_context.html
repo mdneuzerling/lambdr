@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • lambdr</title>
+<title>Determine if a function accepts a context argument — function_accepts_context • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,16 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Determine if a function accepts a context argument — function_accepts_context" />
+<meta property="og:description" content="The context of a Lambda is the metadata associated with each request, such as
+the ARN. In other languages, a function used in a Lambda must accept the
+context as an argument. We allow here for functions that disregard it, since
+it's not necessary.
+The purpose of functions_accepts_context then is to determine if the
+arguments of the function defined by the handler includes context, in which
+case we pass the context as an argument whenever the Lambda is invoked. The
+context argument must be named (... won't be recognised). Primitive
+functions will always return FALSE." />
 
 
 
@@ -58,7 +67,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -105,60 +114,41 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Determine if a function accepts a <code>context</code> argument</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/setup-lambda.R'><code>R/setup-lambda.R</code></a></small>
+    <div class="hidden name"><code>function_accepts_context.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>The context of a Lambda is the metadata associated with each request, such as
+the ARN. In other languages, a function used in a Lambda must accept the
+context as an argument. We allow here for functions that disregard it, since
+it's not necessary.</p>
+<p>The purpose of <code>functions_accepts_context</code> then is to determine if the
+arguments of the function defined by the handler includes <code>context</code>, in which
+case we pass the <code>context</code> as an argument whenever the Lambda is invoked. The
+<code>context</code> argument must be named (<code>...</code> won't be recognised). Primitive
+functions will always return FALSE.</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>function_accepts_context</span><span class='op'>(</span><span class='va'>func</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="setup_lambda.html">setup_lambda()</a></code> </p>
-        </td>
-        <td><p>Set up endpoints, variables, and configuration for AWS Lambda</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="setup_logging.html">setup_logging()</a></code> </p>
-        </td>
-        <td><p>Set up logging with the <code>logger</code> package</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="start_lambda.html">start_lambda()</a></code> </p>
-        </td>
-        <td><p>Set-up Lambda and start listening for events</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="start_listening.html">start_listening()</a></code> </p>
-        </td>
-        <td><p>Start listening for events, and process them as they come</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>func</th>
+      <td><p>Function that may or may not accept a <code>context</code> argument</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>logical</p>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

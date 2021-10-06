@@ -13,10 +13,16 @@
     <loc>https://lambdr.mdneuzerling.com/reference/endpoints.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/extract_context.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/extract_event_headers.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/extract_request_id_from_headers.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/function_accepts_context.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/get_lambda_environment_variable.html</loc>
