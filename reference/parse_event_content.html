@@ -161,6 +161,93 @@ direct. To use the body as is, pass the <code>identity</code> function.</p></td>
     <p>A list containing the "arguments" and "content_type", the latter of
 which is either "HTML", "scheduled", or "direct". The content type may be
 used in serialising the response to be sent back to Lambda.</p>
+    <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
+
+    
+
+
+<p>Here is an example event content from an invocation that is coming via an
+API Gateway. The invocation is a call to a <code>parity</code> function with an argument
+<code>number = 7</code>. Some information has been censored.<div class="json"></p><pre>{
+"resource": "/parity",
+"path": "/parity",
+"httpMethod": "POST",
+"headers": {
+  "accept": "*/*",
+  "Host": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
+  "User-Agent": "curl/7.64.1",
+  "X-Amzn-Trace-Id": "Root=1-615e4711-5f239aad2b046b5609e43b1c",
+  "X-Forwarded-For": "192.168.1.1",
+  "X-Forwarded-Port": "443",
+  "X-Forwarded-Proto": "https"
+},
+"multiValueHeaders": {
+  "accept": [
+    "*/*"
+  ],
+  "Host": [
+    "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"
+  ],
+  "User-Agent": [
+    "curl/7.64.1"
+  ],
+  "X-Amzn-Trace-Id": [
+    "Root=1-615e4711-5f239aad2b046b5609e43b1c"
+  ],
+  "X-Forwarded-For": [
+    "192.168.1.1"
+  ],
+  "X-Forwarded-Port": [
+    "443"
+  ],
+  "X-Forwarded-Proto": [
+    "https"
+  ]
+},
+"queryStringParameters": {
+  "number": "9"
+},
+"multiValueQueryStringParameters": {
+  "number": [
+    "9"
+  ]
+},
+"pathParameters": null,
+"stageVariables": null,
+"requestContext": {
+  "resourceId": "abcdef",
+  "resourcePath": "/parity",
+  "httpMethod": "POST",
+  "extendedRequestId": "G0AKsFXISwMFsGA=",
+  "requestTime": "07/Oct/2021:01:02:09 +0000",
+  "path": "/test/parity",
+  "accountId": "1234567890",
+  "protocol": "HTTP/1.1",
+  "stage": "test",
+  "domainPrefix": "abcdefghijk",
+  "requestTimeEpoch": 1633568529038,
+  "requestId": "59bbb4c9-9d24-4cbb-941b-60dd4969e9c5",
+  "identity": {
+    "cognitoIdentityPoolId": null,
+    "accountId": null,
+    "cognitoIdentityId": null,
+    "caller": null,
+    "sourceIp": "192.168.1.1",
+    "principalOrgId": null,
+    "accessKey": null,
+    "cognitoAuthenticationType": null,
+    "cognitoAuthenticationProvider": null,
+    "userArn": null,
+    "userAgent": "curl/7.64.1",
+    "user": null
+  },
+  "domainName": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
+  "apiId": "abcdefghijk"
+},
+"body": null,
+"isBase64Encoded": false
+}
+</pre><p></div></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
