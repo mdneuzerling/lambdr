@@ -225,8 +225,8 @@ trigger_initialisation_error <- function(expected_error,
 
 
 mock_api_gateway_event <- function(
-  query_parameter_input = "null",
-  body_input = "null",
+  query_parameters = NULL,
+  body_parameters = NULL,
   result,
   expected_response_headers = list(
     "Accept" = "application/json, text/xml, application/xml, */*",
@@ -235,89 +235,9 @@ mock_api_gateway_event <- function(
   request_id = "abc123",
   timeout_seconds = 0.5
 ) {
-  as_json_parameter <- function(x, force_character = FALSE) {
-    x
-  }
-
-  api_gateway_event_body <- paste0('
-    {
-    "resource": "/parity",
-    "path": "/parity",
-    "httpMethod": "POST",
-    "headers": {
-      "accept": "*/*",
-      "Host": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
-      "User-Agent": "curl/7.64.1",
-      "X-Amzn-Trace-Id": "Root=1-615e4711-5f239aad2b046b5609e43b1c",
-      "X-Forwarded-For": "192.168.1.1",
-      "X-Forwarded-Port": "443",
-      "X-Forwarded-Proto": "https"
-    },
-    "multiValueHeaders": {
-      "accept": [
-        "*/*"
-      ],
-      "Host": [
-        "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"
-      ],
-      "User-Agent": [
-        "curl/7.64.1"
-      ],
-      "X-Amzn-Trace-Id": [
-        "Root=1-615e4711-5f239aad2b046b5609e43b1c"
-      ],
-      "X-Forwarded-For": [
-        "192.168.1.1"
-      ],
-      "X-Forwarded-Port": [
-        "443"
-      ],
-      "X-Forwarded-Proto": [
-        "https"
-      ]
-    },
-    "queryStringParameters": ', query_parameter_input, ',
-    "multiValueQueryStringParameters": {
-      "number": [
-        "9"
-      ]
-    },
-    "pathParameters": null,
-    "stageVariables": null,
-    "requestContext": {
-      "resourceId": "abcdef",
-      "resourcePath": "/parity",
-      "httpMethod": "POST",
-      "extendedRequestId": "G0AKsFXISwMFsGA=",
-      "requestTime": "07/Oct/2021:01:02:09 +0000",
-      "path": "/test/parity",
-      "accountId": "1234567890",
-      "protocol": "HTTP/1.1",
-      "stage": "test",
-      "domainPrefix": "abcdefghijk",
-      "requestTimeEpoch": 1633568529038,
-      "requestId": "59bbb4c9-9d24-4cbb-941b-60dd4969e9c5",
-      "identity": {
-        "cognitoIdentityPoolId": null,
-        "accountId": null,
-        "cognitoIdentityId": null,
-        "caller": null,
-        "sourceIp": "192.168.1.1",
-        "principalOrgId": null,
-        "accessKey": null,
-        "cognitoAuthenticationType": null,
-        "cognitoAuthenticationProvider": null,
-        "userArn": null,
-        "userAgent": "curl/7.64.1",
-        "user": null
-      },
-      "domainName": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
-      "apiId": "abcdefghijk"
-    },
-    "body": ', body_input, ',
-    "isBase64Encoded": false
-    }
-  '
+  api_gateway_event_body <- mock_api_gateway_event_body(
+    query_parameters,
+    body_parameters
   )
 
   # Make webmockr intercept HTTP requests
@@ -343,7 +263,7 @@ mock_api_gateway_event <- function(
         list(
           isBase64Encoded = FALSE,
           statusCode = 200L,
-          body = result
+          body = as_json_string(result)
         ),
         auto_unbox = TRUE
       )
@@ -359,4 +279,76 @@ mock_api_gateway_event <- function(
   )
 
   n_responses >= 1
+}
+
+mock_api_gateway_event_body <- function(
+  query_parameters = NULL,
+  body_parameters = NULL
+) {
+  # Bizarrely, the body needs to be a stringified JSON but the query parameters
+  # need to be just a normal JSON
+  jsonlite::toJSON(
+    list(
+      resource = "/parity",
+      path = "/parity",
+      httpMethod = "POST",
+      headers = list(
+        accept = "*/*",
+        Host = "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
+        "User-Agent" = "curl/7.64.1",
+        "X-Amzn-Trace-Id" = "Root=1-615e4711-5f239aad2b046b5609e43b1c",
+        "X-Forwarded-For" = "192.168.1.1",
+        "X-Forwarded-Port" = "443",
+        "X-Forwarded-Proto" = "https"
+      ),
+      multiValueHeaders = list(
+        accept = list("*/*"),
+        Host = list("abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"),
+        "User-Agent" = list("curl/7.64.1"),
+        "X-Amzn-Trace-Id" = list("Root=1-615e4711-5f239aad2b046b5609e43b1c"),
+        "X-Forwarded-For" = list("192.168.1.1"),
+        "X-Forwarded-Port" = list("443"),
+        "X-Forwarded-Proto" = list("https")
+      ),
+      "queryStringParameters" = query_parameters,
+      "multiValueQueryStringParameters" = query_parameters, # should be boxed
+      pathParameters = NULL,
+      stageVariables = NULL,
+      requestContext = list(
+        resourceId = "abcdef",
+        resourcePath = "/parity",
+        httpMethod = "POST",
+        extendedRequestId = "G0AKsFXISwMFsGA=",
+        requestTime = "07/Oct/2021:01:02:09 +0000",
+        path = "/test/parity",
+        accountId = "1234567890",
+        protocol = "HTTP/1.1",
+        stage = "test",
+        domainPrefix = "abcdefghijk",
+        requestTimeEpoch = 1.633569e+12,
+        requestId = "59bbb4c9-9d24-4cbb-941b-60dd4969e9c5",
+        identity = list(
+          cognitoIdentityPoolId = NULL,
+          accountId = NULL,
+          cognitoIdentityId = NULL,
+          caller = NULL,
+          sourceIp = "192.168.1.1",
+          principalOrgId = NULL,
+          accessKey = NULL,
+          cognitoAuthenticationType = NULL,
+          cognitoAuthenticationProvider = NULL,
+          userArn = NULL,
+          userAgent = "curl/7.64.1",
+          user = NULL
+        ),
+        domainName = "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
+        apiId = "abcdefghijk"
+      ),
+      body = as_json_string(body_parameters),
+      isBase64Encoded = FALSE
+    ),
+    auto_unbox = TRUE,
+    pretty = TRUE,
+    null = "null"
+  )
 }

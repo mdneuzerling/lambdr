@@ -35,3 +35,11 @@ parse_json_or_empty <- function(json, ...) {
     jsonlite::fromJSON(json, ...)
   }
 }
+
+# list(number = 9) becomes '"{\\"number\\": 9}"'
+as_json_string <- function(x) {
+  if (is.null(x)) {
+    return(NULL)
+  }
+  as.character(jsonlite::toJSON(x, auto_unbox = TRUE))
+}

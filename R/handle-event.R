@@ -323,7 +323,7 @@ post_result <- function(result, request_id, serialiser = NULL) {
         list(
           isBase64Encoded = FALSE,
           statusCode = 200L,
-          body = result
+          body = as_json_string(result)
         ),
         auto_unbox = TRUE
       )
