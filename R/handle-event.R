@@ -111,15 +111,14 @@ assert_status_code_is_good <- function(status_code) {
 #' Determine if a Lambda event is coming via an API Gateway
 #'
 #' Events coming from an API Gateway need to be treated a little differently,
-#' both in parsing the event content and in posting the results. An event
-#' coming from an API Gateway will contain the `http_request_element`.
+#' both in parsing the event content and in posting the results.
 #'
 #' @param event_content
 #'
 #' @return logical
 #' @keywords internal
 is_from_api_gateway <- function(event_content) {
-  http_request_element %in% names(event_content)
+  grepl("httpMethod", event_content)
 }
 
 #' @rdname is_from_api_gateway
@@ -246,7 +245,7 @@ parse_event_content <- function(event_content, deserialiser = NULL) {
   } else if (is_scheduled_event_content(event_content)) {
     parse_scheduled_event_content(event_content)
   } else if (is_from_api_gateway(event_content)) {
-    parse_api_gateway_event_content(event_content[[http_request_element]])
+    parse_api_gateway_event_content(event_content)
   } else {
     parse_default_event_content(event_content)
   }
@@ -277,8 +276,11 @@ parse_scheduled_event_content <- function(event_content) {
 #' @keywords internal
 #' @rdname parse_event_content
 parse_api_gateway_event_content <- function(event_content) {
+  logger::log_debug("Input coming via API Gateway")
+  html_arguments <- parse_json_or_empty(event_content)[[http_request_element]]
+  if (is.null(html_arguments)) html_arguments <- list()
   structure(
-    parse_json_or_empty(event_content),
+    html_arguments,
     from_api_gateway = TRUE
   )
 }

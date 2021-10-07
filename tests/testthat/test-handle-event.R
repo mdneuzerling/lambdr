@@ -204,3 +204,19 @@ test_that("errors are sent to invocation error endpoint", {
 
   expect_true(mock_invocation_error_success)
 })
+
+test_that("we can parse input with arguments from an API Gateway", {
+  use_basic_lambda_setup(handler = "parity")
+  mock_response_success <- mock_api_gateway_event(
+    input = list(number = 9),
+    result = list(parity = "odd"),
+    expected_response_headers = list(
+      "Accept" = "application/json, text/xml, application/xml, */*",
+      "Content-Type" = ""
+    ),
+    request_id = "abc123",
+    timeout_seconds = 0.5
+  )
+
+  expect_true(mock_response_success)
+})
