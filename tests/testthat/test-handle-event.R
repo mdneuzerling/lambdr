@@ -208,7 +208,7 @@ test_that("errors are sent to invocation error endpoint", {
 test_that("we can parse input with parameter arguments from an API Gateway", {
   use_basic_lambda_setup(handler = "parity")
   mock_response_success <- mock_api_gateway_event(
-    query_parameter_input = list(number = 9),
+    query_parameter_input = jsonlite::toJSON(list(number = 9), auto_unbox = TRUE),
     result = list(parity = "odd"),
     expected_response_headers = list(
       "Accept" = "application/json, text/xml, application/xml, */*",
@@ -224,7 +224,7 @@ test_that("we can parse input with parameter arguments from an API Gateway", {
 test_that("we can parse input with body arguments from an API Gateway", {
   use_basic_lambda_setup(handler = "parity")
   mock_response_success <- mock_api_gateway_event(
-    body_input = list(number = 9),
+    body_input = '"{\\"number\\": 9}"',
     result = list(parity = "odd"),
     expected_response_headers = list(
       "Accept" = "application/json, text/xml, application/xml, */*",
@@ -241,8 +241,8 @@ test_that("we can parse input with body and parameter arguments from an API Gate
   named_sum <- function(x, y) list(sum = x + y)
   use_basic_lambda_setup(handler = "named_sum")
   mock_response_success <- mock_api_gateway_event(
-    query_parameter_input = list(x = 5),
-    body_input = list(y  = 4),
+    query_parameter_input = jsonlite::toJSON(list(x = 5), auto_unbox = TRUE),
+    body_input = '"{\\"y\\": 4}"',
     result = list(sum = 9),
     expected_response_headers = list(
       "Accept" = "application/json, text/xml, application/xml, */*",

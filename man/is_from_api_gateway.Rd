@@ -21,7 +21,6 @@ logical
 }
 \description{
 Events coming from an API Gateway need to be treated a little differently,
-both in parsing the event content and in posting the results. An event
-coming from an API Gateway will contain the \code{http_request_element}.
+both in parsing the event content and in posting the results.
 }
 \keyword{internal}

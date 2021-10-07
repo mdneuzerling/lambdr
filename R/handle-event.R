@@ -282,8 +282,8 @@ parse_api_gateway_event_content <- function(event_content) {
   query_parameters <- parsed_json[[http_request_element]]
   if (is.null(query_parameters)) query_parameters <- list()
 
-  body_parameters <- parsed_json[["body"]]
-  if (is.null(body_parameters)) body_parameters <- list()
+  # Parse the JSON within the JSON
+  body_parameters <- parse_json_or_empty(parsed_json[["body"]])
 
   structure(
     c(query_parameters, body_parameters),
