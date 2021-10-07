@@ -225,7 +225,8 @@ trigger_initialisation_error <- function(expected_error,
 
 
 mock_api_gateway_event <- function(
-  input,
+  query_parameter_input = NULL,
+  body_input = NULL,
   result,
   expected_response_headers = list(
     "Accept" = "application/json, text/xml, application/xml, */*",
@@ -234,6 +235,14 @@ mock_api_gateway_event <- function(
   request_id = "abc123",
   timeout_seconds = 0.5
 ) {
+  as_json_parameter <- function(x) {
+    if (is.null(x)) {
+      "null"
+    } else {
+      jsonlite::toJSON(x, auto_unbox = TRUE)
+    }
+  }
+
   api_gateway_event_body <- paste0('
     {
     "resource": "/parity",
@@ -271,7 +280,7 @@ mock_api_gateway_event <- function(
         "https"
       ]
     },
-    "queryStringParameters": ', jsonlite::toJSON(input), ',
+    "queryStringParameters": ', as_json_parameter(query_parameter_input), ',
     "multiValueQueryStringParameters": {
       "number": [
         "9"
@@ -309,7 +318,7 @@ mock_api_gateway_event <- function(
       "domainName": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
       "apiId": "abcdefghijk"
     },
-    "body": null,
+    "body": ', as_json_parameter(body_input), ',
     "isBase64Encoded": false
     }
   '

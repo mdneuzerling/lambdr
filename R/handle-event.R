@@ -250,7 +250,7 @@ parse_event_content <- function(event_content, deserialiser = NULL) {
     parse_default_event_content(event_content)
   }
 
-  logger::log_debug("Parsed event body:", parsed_event_content)
+  logger::log_debug("Parsed event body:", prettify_list(parsed_event_content))
 
   parsed_event_content
 }
@@ -277,10 +277,16 @@ parse_scheduled_event_content <- function(event_content) {
 #' @rdname parse_event_content
 parse_api_gateway_event_content <- function(event_content) {
   logger::log_debug("Input coming via API Gateway")
-  html_arguments <- parse_json_or_empty(event_content)[[http_request_element]]
-  if (is.null(html_arguments)) html_arguments <- list()
+  parsed_json <- parse_json_or_empty(event_content)
+
+  query_parameters <- parsed_json[[http_request_element]]
+  if (is.null(query_parameters)) query_parameters <- list()
+
+  body_parameters <- parsed_json[["body"]]
+  if (is.null(body_parameters)) body_parameters <- list()
+
   structure(
-    html_arguments,
+    c(query_parameters, body_parameters),
     from_api_gateway = TRUE
   )
 }
