@@ -7,13 +7,22 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-With direct invocation the content of the event (the response from the next
-invocation endpoint) contains a string which --- when interpreted as JSON ---
-gives the arguments for the handler function. When a Lambda is invoked via an
-API Gateway then the content of the event contains significantly more detail
-and requires careful parsing. An example is given at the bottom of this
-section but the two most important sections are `body` and
-`queryStringParameters`
+Invocations via an API Gateway require extra care when parsing the input event,
+and when formatting results. For the most part, `lambdr` will handle this 
+automatically. But for highly custom serialisation/deserialisation or edge cases
+it may be helpful to understand how content via API Gateways is structured and
+responded to.
+
+When a Lambda runtime, like that implemented by `lambdr`, starts listening for
+inputs it queries the "next invocation" HTTP endpoint. The response to this
+is what's called here an _event_. The content of this event contains the
+arguments (if any) to the function. After the result has been calculate, the
+runtime must format the result and submit it to the "result" HTTP endpoint.
+
+With direct invocation the content of the event contains a string which --- when interpreted as JSON --- gives the arguments for the handler function. When a
+Lambda is invoked via an API Gateway then the content of the event contains significantly more detail and requires careful parsing. An example is given at 
+the bottom of this section but the two most important sections are `body` and
+`queryStringParameters`.
 
 The `queryStringParameters` contain standard JSON. So if the request contains
 a parameter `?number=9` in the query then the event will contain
