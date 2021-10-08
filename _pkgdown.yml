@@ -20,4 +20,4 @@ reference:
     - start_listening
 - title: "Helper functions"
   contents:
-    - as_stringified_lambda
+    - as_stringified_json
