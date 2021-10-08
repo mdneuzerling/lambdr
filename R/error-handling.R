@@ -9,9 +9,9 @@ post_lambda_error <- function(e, endpoint) {
   error_list <- list(
     errorMessage = e$message,
     errorType = class(e)[[1]],
-    stackTrace = c()
+    stackTrace = list()
   )
-  error_json <- jsonlite::toJSON(error_list, auto_unbox = TRUE)
+  error_json <- as_json(error_list)
   httr::POST(
     url = endpoint,
     body = error_json,

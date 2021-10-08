@@ -22,4 +22,11 @@ may be used in serialising the response to be sent back to Lambda.}
 \description{
 Serialise a result and send it to Lambda
 }
+\section{Invocations via an API Gateway}{
+
+Events coming from an API Gateway need to be treated a little differently,
+both in parsing the event content and in posting the results. Refer to
+\code{vignette("api-gateway-invocations", package = "lambdr")} for details.
+}
+
 \keyword{internal}

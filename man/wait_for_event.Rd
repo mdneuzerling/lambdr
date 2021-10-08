@@ -10,7 +10,9 @@ wait_for_event(deserialiser = NULL, serialiser = NULL)
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
 the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the \code{identity} function.}
+direct. To use the body as is, pass the \code{identity} function. If input is
+coming via an API Gateway this will require some complicated parsing (see
+below).}
 
 \item{serialiser}{function for serialising the result before sending.
 By default, will attempt to serialise the body as JSON, based on the

@@ -25,7 +25,9 @@ text invocation endpoint, as a character}
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
 the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the \code{identity} function.}
+direct. To use the body as is, pass the \code{identity} function. If input is
+coming via an API Gateway this will require some complicated parsing (see
+below).}
 }
 \value{
 A list containing the "arguments" and "content_type", the latter of
@@ -37,89 +39,9 @@ Parse the body of the Lambda event
 }
 \section{Invocations via an API Gateway}{
 
-
-Here is an example event content from an invocation that is coming via an
-API Gateway. The invocation is a call to a \code{parity} function with an argument
-\code{number = 7}. Some information has been censored.\if{html}{\out{<div class="json">}}\preformatted{\{
-"resource": "/parity",
-"path": "/parity",
-"httpMethod": "POST",
-"headers": \{
-  "accept": "*/*",
-  "Host": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
-  "User-Agent": "curl/7.64.1",
-  "X-Amzn-Trace-Id": "Root=1-615e4711-5f239aad2b046b5609e43b1c",
-  "X-Forwarded-For": "192.168.1.1",
-  "X-Forwarded-Port": "443",
-  "X-Forwarded-Proto": "https"
-\},
-"multiValueHeaders": \{
-  "accept": [
-    "*/*"
-  ],
-  "Host": [
-    "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"
-  ],
-  "User-Agent": [
-    "curl/7.64.1"
-  ],
-  "X-Amzn-Trace-Id": [
-    "Root=1-615e4711-5f239aad2b046b5609e43b1c"
-  ],
-  "X-Forwarded-For": [
-    "192.168.1.1"
-  ],
-  "X-Forwarded-Port": [
-    "443"
-  ],
-  "X-Forwarded-Proto": [
-    "https"
-  ]
-\},
-"queryStringParameters": \{
-  "number": "9"
-\},
-"multiValueQueryStringParameters": \{
-  "number": [
-    "9"
-  ]
-\},
-"pathParameters": null,
-"stageVariables": null,
-"requestContext": \{
-  "resourceId": "abcdef",
-  "resourcePath": "/parity",
-  "httpMethod": "POST",
-  "extendedRequestId": "G0AKsFXISwMFsGA=",
-  "requestTime": "07/Oct/2021:01:02:09 +0000",
-  "path": "/test/parity",
-  "accountId": "1234567890",
-  "protocol": "HTTP/1.1",
-  "stage": "test",
-  "domainPrefix": "abcdefghijk",
-  "requestTimeEpoch": 1633568529038,
-  "requestId": "59bbb4c9-9d24-4cbb-941b-60dd4969e9c5",
-  "identity": \{
-    "cognitoIdentityPoolId": null,
-    "accountId": null,
-    "cognitoIdentityId": null,
-    "caller": null,
-    "sourceIp": "192.168.1.1",
-    "principalOrgId": null,
-    "accessKey": null,
-    "cognitoAuthenticationType": null,
-    "cognitoAuthenticationProvider": null,
-    "userArn": null,
-    "userAgent": "curl/7.64.1",
-    "user": null
-  \},
-  "domainName": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
-  "apiId": "abcdefghijk"
-\},
-"body": null,
-"isBase64Encoded": false
-\}
-}\if{html}{\out{</div>}}
+Events coming from an API Gateway need to be treated a little differently,
+both in parsing the event content and in posting the results. Refer to
+\code{vignette("api-gateway-invocations", package = "lambdr")} for details.
 }
 
 \keyword{internal}

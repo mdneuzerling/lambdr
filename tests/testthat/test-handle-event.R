@@ -136,7 +136,7 @@ test_that("status code check works", {
 test_that("Mock square root function", {
   use_basic_lambda_setup(handler = "sqrt")
   mock_response_success <- mock_response(
-    input = jsonlite::toJSON(list(x = 4)),
+    input = as_json(list(x = 4)),
     expected_response_body = 2
   )
   expect_true(mock_response_success)
@@ -146,8 +146,8 @@ test_that("Mock custom function", {
   use_basic_lambda_setup(handler = "parity")
 
   mock_response_success <- mock_response(
-    input = jsonlite::toJSON(list(number = 5)),
-    expected_response_body = jsonlite::toJSON(list(parity = "odd"), auto_unbox = TRUE)
+    input = as_json(list(number = 5)),
+    expected_response_body = as_json(list(parity = "odd"))
   )
   expect_true(mock_response_success)
 })
@@ -156,10 +156,9 @@ test_that("Mock function with no inputs", {
   use_basic_lambda_setup(handler = "no_arguments")
 
   mock_response_success <- mock_response(
-    input = jsonlite::toJSON(list()),
-    expected_response_body = jsonlite::toJSON(
-      list(animal = "dog", breed = "corgi"),
-      auto_unbox = TRUE
+    input = as_json(list()),
+    expected_response_body = as_json(
+      list(animal = "dog", breed = "corgi")
     )
   )
 
@@ -177,10 +176,9 @@ test_that("handlers that accept a context argument receive it", {
   use_basic_lambda_setup(handler = "assert_context_exists")
 
   mock_response_success <- mock_response(
-    input = jsonlite::toJSON(list()),
-    expected_response_body = jsonlite::toJSON(
-      list(animal = "dog", breed = "corgi"),
-      auto_unbox = TRUE
+    input = as_json(list()),
+    expected_response_body = as_json(
+      list(animal = "dog", breed = "corgi")
     )
   )
 
@@ -191,14 +189,13 @@ test_that("errors are sent to invocation error endpoint", {
   use_basic_lambda_setup(handler = "no_arguments")
 
   mock_invocation_error_success <- mock_invocation_error(
-    input = jsonlite::toJSON(list(x = 3)),
-    expected_error_body = jsonlite::toJSON(
+    input = as_json(list(x = 3)),
+    expected_error_body = as_json(
       list(
         errorMessage = "unused argument (x = 3)",
         errorType = "simpleError",
-        stackTrace = c()
-      ),
-      auto_unbox = TRUE
+        stackTrace = list()
+      )
     )
   )
 
@@ -224,7 +221,7 @@ test_that("we can parse input with parameter arguments from an API Gateway", {
 test_that("we can parse input with body arguments from an API Gateway", {
   use_basic_lambda_setup(handler = "parity")
   mock_response_success <- mock_api_gateway_event(
-    body_parameters = list(number = 9), #'"{\\"number\\": 9}"',
+    body_parameters = list(number = 9), #' "{\\"number\\": 9}"',
     result = list(parity = "odd"),
     expected_response_headers = list(
       "Accept" = "application/json, text/xml, application/xml, */*",

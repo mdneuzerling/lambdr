@@ -13,7 +13,9 @@ endpoint.}
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
 the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the \code{identity} function.}
+direct. To use the body as is, pass the \code{identity} function. If input is
+coming via an API Gateway this will require some complicated parsing (see
+below).}
 
 \item{serialiser}{function for serialising the result before sending.
 By default, will attempt to serialise the body as JSON, based on the
@@ -24,6 +26,13 @@ If the handler function accepts a named \code{context} argument then the Lambda
 invocation context will be included as an argument. See the section below for
 more details.
 }
+\section{Invocations via an API Gateway}{
+
+Events coming from an API Gateway need to be treated a little differently,
+both in parsing the event content and in posting the results. Refer to
+\code{vignette("api-gateway-invocations", package = "lambdr")} for details.
+}
+
 \section{Event context}{
 
 The \emph{context} of an event is a list of metadata about the invocation. It is

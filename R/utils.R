@@ -5,9 +5,10 @@
 #' @return character
 #' @export
 #'
-#' @examples
-#' prettify_list(list("a" = 1, "b" = 2, "c" = 3))
-#' # "a=5, b=5, c=5"
+#' @examples \dontrun{
+#' prettify_list(list(a = 1, b = 2, c = 3))
+#' # "a=1, b=2, c=3"
+#' }
 #' @keywords internal
 prettify_list <- function(x) {
   paste(
@@ -36,10 +37,47 @@ parse_json_or_empty <- function(json, ...) {
   }
 }
 
-# list(number = 9) becomes '"{\\"number\\": 9}"'
-as_json_string <- function(x) {
+#' Convert an object to JSON
+#'
+#' This function effectively wraps \code{\link[jsonlite]{toJSON}} with two
+#' hardcoded arguments:
+#'
+#' * `auto_unbox` is set to `TRUE`, such that singleton values are not
+#'   represented as lists.
+#' * `NULL` values are represented as JSON `null`s.
+#'
+#' @param x R object to be converted to JSON.
+#' @param ... additional arguments (except `auto_unbox` and `null`) passed to
+#'   \code{\link[toJSON]{toJSON}}
+#'
+#' @return character of class "json"
+#' @keywords internal
+as_json <- function(x, ...) {
+  jsonlite::toJSON(x, auto_unbox = TRUE, null = "null", ...)
+}
+
+#' Convert an R object to stringified JSON matching AWS Lambda conventions
+#'
+#' @description
+#' Stringified JSON is a string which can be parsed as a JSON. While a standard
+#' JSON interpretation of `list(number = 9)` would be `{"number":9}`,
+#' a stringified JSON representation would be `"{\"number\":9}"`.
+#'
+#' This function will convert `NULL` values to JSON "nulls", to match the
+#' convention used by Lambda event inputs, and values are automatically
+#' unboxed.
+#'
+#' @param x R object to be converted to stringified JSON.
+#'
+#' @return character
+#' @export
+#'
+#' @examples
+#' as_stringified_json(list(number = 9))
+#' "{\"number\":9}"
+as_stringified_json <- function(x) {
   if (is.null(x)) {
     return(NULL)
   }
-  as.character(jsonlite::toJSON(x, auto_unbox = TRUE))
+  as.character(as_json(x))
 }

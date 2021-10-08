@@ -18,3 +18,6 @@ reference:
     - setup_logging
     - setup_lambda
     - start_listening
+- title: "Helper functions"
+  contents:
+    - as_stringified_lambda

@@ -190,13 +190,12 @@ trigger_initialisation_error <- function(expected_error,
         "Accept" = "application/json, text/xml, application/xml, */*",
         "Content-Type" = "application/vnd.aws.lambda.error+json"
       ),
-      body = jsonlite::toJSON(
+      body = as_json(
         list(
           errorMessage = expected_error,
           errorType = "simpleError",
-          stackTrace = c()
-        ),
-        auto_unbox = TRUE
+          stackTrace = list()
+        )
       )
     ) %>%
     webmockr::to_return(status = 202) # accepted
@@ -224,17 +223,15 @@ trigger_initialisation_error <- function(expected_error,
 }
 
 
-mock_api_gateway_event <- function(
-  query_parameters = NULL,
-  body_parameters = NULL,
-  result,
-  expected_response_headers = list(
-    "Accept" = "application/json, text/xml, application/xml, */*",
-    "Content-Type" = ""
-  ),
-  request_id = "abc123",
-  timeout_seconds = 0.5
-) {
+mock_api_gateway_event <- function(query_parameters = NULL,
+                                   body_parameters = NULL,
+                                   result,
+                                   expected_response_headers = list(
+                                     "Accept" = "application/json, text/xml, application/xml, */*",
+                                     "Content-Type" = ""
+                                   ),
+                                   request_id = "abc123",
+                                   timeout_seconds = 0.5) {
   api_gateway_event_body <- mock_api_gateway_event_body(
     query_parameters,
     body_parameters
@@ -259,13 +256,12 @@ mock_api_gateway_event <- function(
   webmockr::stub_request("post", response_endpoint) %>%
     webmockr::wi_th(
       headers = expected_response_headers,
-      body = jsonlite::toJSON(
+      body = as_json(
         list(
           isBase64Encoded = FALSE,
           statusCode = 200L,
-          body = as_json_string(result)
-        ),
-        auto_unbox = TRUE
+          body = as_stringified_json(result)
+        )
       )
     ) %>%
     webmockr::to_return(status = 200)
@@ -281,13 +277,11 @@ mock_api_gateway_event <- function(
   n_responses >= 1
 }
 
-mock_api_gateway_event_body <- function(
-  query_parameters = NULL,
-  body_parameters = NULL
-) {
+mock_api_gateway_event_body <- function(query_parameters = NULL,
+                                        body_parameters = NULL) {
   # Bizarrely, the body needs to be a stringified JSON but the query parameters
   # need to be just a normal JSON
-  jsonlite::toJSON(
+  as_json(
     list(
       resource = "/parity",
       path = "/parity",
@@ -344,11 +338,9 @@ mock_api_gateway_event_body <- function(
         domainName = "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
         apiId = "abcdefghijk"
       ),
-      body = as_json_string(body_parameters),
+      body = as_stringified_json(body_parameters),
       isBase64Encoded = FALSE
     ),
-    auto_unbox = TRUE,
-    pretty = TRUE,
-    null = "null"
+    pretty = TRUE
   )
 }

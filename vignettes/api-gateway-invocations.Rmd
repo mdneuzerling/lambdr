@@ -1,0 +1,132 @@
+---
+title: "API Gateway Invocations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{api-gateway-invocations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+With direct invocation the content of the event (the response from the next
+invocation endpoint) contains a string which --- when interpreted as JSON ---
+gives the arguments for the handler function. When a Lambda is invoked via an
+API Gateway then the content of the event contains significantly more detail
+and requires careful parsing. An example is given at the bottom of this
+section but the two most important sections are `body` and
+`queryStringParameters`
+
+The `queryStringParameters` contain standard JSON. So if the request contains
+a parameter `?number=9` in the query then the event will contain
+`"queryStringParameters": {"number": "9"}` (note the string).
+
+The `body` of the event contains the data passed during a `POST` operation.
+It contains _stringified_ JSON. That is, instead of `"body": {"number": 9}`
+we would see `"body": "{\"number\":9}"`.
+
+Stringified JSON can be produced with the `as_stringified_json` helper
+function which wraps `jsonlite`'s \code{\link[jsonlite]{toJSON}} function.
+There is a slight difference in behaviour, as this function also
+automatically unboxes singleton values and also represents `NULL`s as JSON
+`nulls` --- a convention that is used by the event body provided by AWS
+Lambda.
+
+When the result is calculated and ready to be sent back to the AWS Lambda
+response endpoint it must be formatted in a very specific way in order to be
+compatible with the API Gateway. The correct format is as below, with the
+`body` containing the _stringified_ JSON representation of the result. This
+is given as an R list which is then converted to stringified JSON. Compare
+this to the representation of the result for a direct invocation:
+
+```r
+## Formatting a result for a direct invocation
+as_stringified_json(result)
+
+## Formatting a result for an invocation via an API Gateway
+as_stringified_json(
+  list(
+    isBase64Encoded = FALSE,
+    statusCode = 200L,
+    body = as_stringified_json(result)
+  )
+)
+```
+
+Here is an example event content from an invocation that is coming via an
+API Gateway. The invocation is a call to a `parity` function with an argument
+`number = 9`. Some information has been censored.
+
+```json
+{
+"resource": "/parity",
+"path": "/parity",
+"httpMethod": "POST",
+"headers": {
+  "accept": "*/*",
+  "Host": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
+  "User-Agent": "curl/7.64.1",
+  "X-Amzn-Trace-Id": "Root=1-615e4711-5f239aad2b046b5609e43b1c",
+  "X-Forwarded-For": "192.168.1.1",
+  "X-Forwarded-Port": "443",
+  "X-Forwarded-Proto": "https"
+},
+"multiValueHeaders": {
+  "accept": [
+    "*/*"
+  ],
+  "Host": [
+    "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"
+  ],
+  "User-Agent": [
+    "curl/7.64.1"
+  ],
+  "X-Amzn-Trace-Id": [
+    "Root=1-615e4711-5f239aad2b046b5609e43b1c"
+  ],
+  "X-Forwarded-For": [
+    "192.168.1.1"
+  ],
+  "X-Forwarded-Port": [
+    "443"
+  ],
+  "X-Forwarded-Proto": [
+    "https"
+  ]
+},
+"queryStringParameters": null,
+"multiValueQueryStringParameters": null,
+"pathParameters": null,
+"stageVariables": null,
+"requestContext": {
+  "resourceId": "abcdef",
+  "resourcePath": "/parity",
+  "httpMethod": "POST",
+  "extendedRequestId": "G0AKsFXISwMFsGA=",
+  "requestTime": "07/Oct/2021:01:02:09 +0000",
+  "path": "/test/parity",
+  "accountId": "1234567890",
+  "protocol": "HTTP/1.1",
+  "stage": "test",
+  "domainPrefix": "abcdefghijk",
+  "requestTimeEpoch": 1633568529038,
+  "requestId": "59bbb4c9-9d24-4cbb-941b-60dd4969e9c5",
+  "identity": {
+    "cognitoIdentityPoolId": null,
+    "accountId": null,
+    "cognitoIdentityId": null,
+    "caller": null,
+    "sourceIp": "192.168.1.1",
+    "principalOrgId": null,
+    "accessKey": null,
+    "cognitoAuthenticationType": null,
+    "cognitoAuthenticationProvider": null,
+    "userArn": null,
+    "userAgent": "curl/7.64.1",
+    "user": null
+  },
+  "domainName": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
+  "apiId": "abcdefghijk"
+},
+"body": "{\"number\":9}",
+"isBase64Encoded": false
+}
+```

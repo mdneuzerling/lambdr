@@ -105,13 +105,12 @@ assert_status_code_is_good <- function(status_code) {
   TRUE
 }
 
-
-
-
 #' Determine if a Lambda event is coming via an API Gateway
 #'
+#' @section Invocations via an API Gateway:
 #' Events coming from an API Gateway need to be treated a little differently,
-#' both in parsing the event content and in posting the results.
+#' both in parsing the event content and in posting the results. Refer to
+#' \code{vignette("api-gateway-invocations", package = "lambdr")} for details.
 #'
 #' @param event_content
 #'
@@ -120,10 +119,6 @@ assert_status_code_is_good <- function(status_code) {
 is_from_api_gateway <- function(event_content) {
   grepl("httpMethod", event_content)
 }
-
-#' @rdname is_from_api_gateway
-#' @keywords internal
-http_request_element <- "queryStringParameters"
 
 #' Determine if a Lambda event is coming from a scheduled Cloudwatch event
 #'
@@ -137,104 +132,20 @@ is_scheduled_event_content <- function(event_content) {
 
 #' Parse the body of the Lambda event
 #'
+#' @inheritSection is_from_api_gateway Invocations via an API Gateway
+#'
 #' @param event_content the content of the response received from querying the
-#' text invocation endpoint, as a character
+#'   text invocation endpoint, as a character
 #' @param deserialiser function for deserialising the body of the event.
 #'   By default, will attempt to deserialise the body as JSON, based on whether
 #'   the input is coming from an API Gateway, scheduled Cloudwatch event, or
-#'   direct. To use the body as is, pass the `identity` function.
+#'   direct. To use the body as is, pass the `identity` function. If input is
+#'   coming via an API Gateway this will require some complicated parsing (see
+#'   below).
 #'
 #' @return A list containing the "arguments" and "content_type", the latter of
 #'   which is either "HTML", "scheduled", or "direct". The content type may be
 #'   used in serialising the response to be sent back to Lambda.
-#'
-#' @section Invocations via an API Gateway:
-#'
-#' Here is an example event content from an invocation that is coming via an
-#' API Gateway. The invocation is a call to a `parity` function with an argument
-#' `number = 7`. Some information has been censored.
-#'
-#' ```json
-#' {
-#' "resource": "/parity",
-#' "path": "/parity",
-#' "httpMethod": "POST",
-#' "headers": {
-#'   "accept": "*/*",
-#'   "Host": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
-#'   "User-Agent": "curl/7.64.1",
-#'   "X-Amzn-Trace-Id": "Root=1-615e4711-5f239aad2b046b5609e43b1c",
-#'   "X-Forwarded-For": "192.168.1.1",
-#'   "X-Forwarded-Port": "443",
-#'   "X-Forwarded-Proto": "https"
-#' },
-#' "multiValueHeaders": {
-#'   "accept": [
-#'     "*/*"
-#'   ],
-#'   "Host": [
-#'     "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"
-#'   ],
-#'   "User-Agent": [
-#'     "curl/7.64.1"
-#'   ],
-#'   "X-Amzn-Trace-Id": [
-#'     "Root=1-615e4711-5f239aad2b046b5609e43b1c"
-#'   ],
-#'   "X-Forwarded-For": [
-#'     "192.168.1.1"
-#'   ],
-#'   "X-Forwarded-Port": [
-#'     "443"
-#'   ],
-#'   "X-Forwarded-Proto": [
-#'     "https"
-#'   ]
-#' },
-#' "queryStringParameters": {
-#'   "number": "9"
-#' },
-#' "multiValueQueryStringParameters": {
-#'   "number": [
-#'     "9"
-#'   ]
-#' },
-#' "pathParameters": null,
-#' "stageVariables": null,
-#' "requestContext": {
-#'   "resourceId": "abcdef",
-#'   "resourcePath": "/parity",
-#'   "httpMethod": "POST",
-#'   "extendedRequestId": "G0AKsFXISwMFsGA=",
-#'   "requestTime": "07/Oct/2021:01:02:09 +0000",
-#'   "path": "/test/parity",
-#'   "accountId": "1234567890",
-#'   "protocol": "HTTP/1.1",
-#'   "stage": "test",
-#'   "domainPrefix": "abcdefghijk",
-#'   "requestTimeEpoch": 1633568529038,
-#'   "requestId": "59bbb4c9-9d24-4cbb-941b-60dd4969e9c5",
-#'   "identity": {
-#'     "cognitoIdentityPoolId": null,
-#'     "accountId": null,
-#'     "cognitoIdentityId": null,
-#'     "caller": null,
-#'     "sourceIp": "192.168.1.1",
-#'     "principalOrgId": null,
-#'     "accessKey": null,
-#'     "cognitoAuthenticationType": null,
-#'     "cognitoAuthenticationProvider": null,
-#'     "userArn": null,
-#'     "userAgent": "curl/7.64.1",
-#'     "user": null
-#'   },
-#'   "domainName": "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
-#'   "apiId": "abcdefghijk"
-#' },
-#' "body": null,
-#' "isBase64Encoded": false
-#' }
-#' ```
 #'
 #' @keywords internal
 parse_event_content <- function(event_content, deserialiser = NULL) {
@@ -279,7 +190,7 @@ parse_api_gateway_event_content <- function(event_content) {
   logger::log_debug("Input coming via API Gateway")
   parsed_json <- parse_json_or_empty(event_content)
 
-  query_parameters <- parsed_json[[http_request_element]]
+  query_parameters <- parsed_json[["queryStringParameters"]]
   if (is.null(query_parameters)) query_parameters <- list()
 
   # Parse the JSON within the JSON
@@ -302,6 +213,8 @@ parse_default_event_content <- function(event_content) {
 
 #' Serialise a result and send it to Lambda
 #'
+#' @inheritSection is_from_api_gateway Invocations via an API Gateway
+#'
 #' @param result result to be sent back to Lambda
 #' @param request_id character request ID, as extracted by
 #'   \code{\link{extract_request_id_from_headers}} from the headers of an event.
@@ -316,20 +229,17 @@ post_result <- function(result, request_id, serialiser = NULL) {
   logger::log_debug("Raw result:", result)
   body <- if (!is.null(serialiser)) {
     serialiser(result)
-  # AWS API Gateway is a bit particular about the response format
+    # AWS API Gateway is a bit particular about the response format
   } else if (attr(result, "from_api_gateway")) {
-    as.character(
-      jsonlite::toJSON(
-        list(
-          isBase64Encoded = FALSE,
-          statusCode = 200L,
-          body = as_json_string(result)
-        ),
-        auto_unbox = TRUE
+    as_stringified_json(
+      list(
+        isBase64Encoded = FALSE,
+        statusCode = 200L,
+        body = as_stringified_json(result)
       )
     )
   } else {
-    as.character(jsonlite::toJSON(result, auto_unbox = TRUE))
+    as_json(result)
   }
 
   logger::log_debug("Result to be posted:", body)
@@ -342,16 +252,19 @@ post_result <- function(result, request_id, serialiser = NULL) {
 
 #' Process the input of an event, and submit the result to Lambda
 #'
+#' @description
 #' If the handler function accepts a named `context` argument then the Lambda
 #' invocation context will be included as an argument. See the section below for
 #' more details.
 #'
-#' @inheritSection extract_context Event context
+#' @inheritSection is_from_api_gateway Invocations via an API Gateway
 #'
 #' @param event the response received from querying the next invocation
 #'   endpoint.
 #' @inheritParams parse_event_content
 #' @inheritParams post_result
+#'
+#' @inheritSection extract_context Event context
 #'
 #' @keywords internal
 handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {

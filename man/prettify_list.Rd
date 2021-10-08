@@ -16,7 +16,9 @@ character
 Convert a list to a single character, preserving names
 }
 \examples{
-prettify_list(list("a" = 1, "b" = 2, "c" = 3))
-# "a=5, b=5, c=5"
+\dontrun{
+prettify_list(list(a = 1, b = 2, c = 3))
+# "a=1, b=2, c=3"
+}
 }
 \keyword{internal}
