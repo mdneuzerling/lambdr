@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Undo the Lambda runtime setup — reset_lambda • lambdr</title>
+<title>Convert an object to JSON — as_json • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,10 +39,9 @@
 
 
 
-<meta property="og:title" content="Undo the Lambda runtime setup — reset_lambda" />
-<meta property="og:description" content="This function removes all detected variables and setup initiated by either
-\link{setup_lambda} or \link{start_lambda}. It does not affect
-the logging handlers setup by these functions." />
+<meta property="og:title" content="Convert an object to JSON — as_json" />
+<meta property="og:description" content="This function effectively wraps toJSON with two
+hardcoded arguments:" />
 
 
 
@@ -125,19 +124,43 @@ the logging handlers setup by these functions." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Undo the Lambda runtime setup</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/setup-lambda.R'><code>R/setup-lambda.R</code></a></small>
-    <div class="hidden name"><code>reset_lambda.Rd</code></div>
+    <h1>Convert an object to JSON</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/utils.R'><code>R/utils.R</code></a></small>
+    <div class="hidden name"><code>as_json.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This function removes all detected variables and setup initiated by either
-<code>\link{setup_lambda}</code> or <code>\link{start_lambda}</code>. It does not affect
-the logging handlers setup by these functions.</p>
+    <p>This function effectively wraps <code><a href='https://rdrr.io/pkg/jsonlite/man/fromJSON.html'>toJSON</a></code> with two
+hardcoded arguments:</p>
     </div>
 
-    <pre class="usage"><span class='fu'>reset_lambda</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>as_json</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p>R object to be converted to JSON.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>additional arguments (except <code>auto_unbox</code> and <code>null</code>) passed to
+<code>toJSON</code></p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>character of class "json"</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    
+<ul>
+<li><p><code>auto_unbox</code> is set to <code>TRUE</code>, such that singleton values are not
+represented as lists.</p></li>
+<li><p><code>NULL</code> values are represented as JSON <code>null</code>s.</p></li>
+</ul>
 
 
   </div>

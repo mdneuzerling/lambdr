@@ -103,6 +103,9 @@ container." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/api-gateway-invocations.html">API Gateway Invocations</a>
+    </li>
+    <li>
       <a href="../articles/lambda-runtime-in-container.html">Placing an R Lambda Runtime in a Container</a>
     </li>
   </ul>
@@ -197,7 +200,9 @@ handler.</p></td>
       <td><p>function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
 the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the <code>identity</code> function.</p></td>
+direct. To use the body as is, pass the <code>identity</code> function. If input is
+coming via an API Gateway this will require some complicated parsing (see
+below).</p></td>
     </tr>
     <tr>
       <th>serialiser</th>

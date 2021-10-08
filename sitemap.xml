@@ -4,6 +4,12 @@
     <loc>https://lambdr.mdneuzerling.com/index.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/as_json.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/as_stringified_json.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/assert_lambda_is_setup.html</loc>
   </url>
   <url>
@@ -68,6 +74,9 @@
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/wait_for_event.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/articles/api-gateway-invocations.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/articles/lambda-runtime-in-container.html</loc>

@@ -40,8 +40,7 @@
 
 
 <meta property="og:title" content="Determine if a Lambda event is coming via an API Gateway — is_from_api_gateway" />
-<meta property="og:description" content="Events coming from an API Gateway need to be treated a little differently,
-both in parsing the event content and in posting the results." />
+<meta property="og:description" content="Determine if a Lambda event is coming via an API Gateway" />
 
 
 
@@ -96,6 +95,9 @@ both in parsing the event content and in posting the results." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/api-gateway-invocations.html">API Gateway Invocations</a>
+    </li>
+    <li>
       <a href="../articles/lambda-runtime-in-container.html">Placing an R Lambda Runtime in a Container</a>
     </li>
   </ul>
@@ -127,13 +129,10 @@ both in parsing the event content and in posting the results." />
     </div>
 
     <div class="ref-description">
-    <p>Events coming from an API Gateway need to be treated a little differently,
-both in parsing the event content and in posting the results.</p>
+    <p>Determine if a Lambda event is coming via an API Gateway</p>
     </div>
 
-    <pre class="usage"><span class='fu'>is_from_api_gateway</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span>
-
-<span class='va'>http_request_element</span></pre>
+    <pre class="usage"><span class='fu'>is_from_api_gateway</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -144,12 +143,16 @@ both in parsing the event content and in posting the results.</p>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
-
-    <p>An object of class <code>character</code> of length 1.</p>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>logical</p>
+    <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
+
+    
+
+<p>Events coming from an API Gateway need to be treated a little differently,
+both in parsing the event content and in posting the results. Refer to
+<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code> for details.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

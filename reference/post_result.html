@@ -95,6 +95,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/api-gateway-invocations.html">API Gateway Invocations</a>
+    </li>
+    <li>
       <a href="../articles/lambda-runtime-in-container.html">Placing an R Lambda Runtime in a Container</a>
     </li>
   </ul>
@@ -156,6 +159,13 @@ may be used in serialising the response to be sent back to Lambda.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
+
+    
+
+<p>Events coming from an API Gateway need to be treated a little differently,
+both in parsing the event content and in posting the results. Refer to
+<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code> for details.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
