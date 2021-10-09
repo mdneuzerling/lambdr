@@ -5,7 +5,7 @@
 #' both in parsing the event content and in posting the results. Refer to
 #' \code{vignette("api-gateway-invocations", package = "lambdr")} for details.
 #'
-#' @param event_content
+#' @inheritParams classify_event
 #'
 #' @return logical
 #' @keywords internal

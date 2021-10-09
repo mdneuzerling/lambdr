@@ -7,7 +7,8 @@
 is_from_api_gateway(event_content)
 }
 \arguments{
-\item{event_content}{}
+\item{event_content}{the content of the response received from querying the
+text invocation endpoint, as a character}
 }
 \value{
 logical
