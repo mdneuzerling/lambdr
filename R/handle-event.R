@@ -235,7 +235,7 @@ post_result <- function(result, request_id, serialiser = NULL) {
       )
     )
   } else {
-    as_json(result)
+    as_stringified_json(result)
   }
 
   logger::log_debug("Result to be posted:", body)
