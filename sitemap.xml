@@ -16,6 +16,9 @@
     <loc>https://lambdr.mdneuzerling.com/reference/assert_status_code_is_good.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/condition.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/endpoints.html</loc>
   </url>
   <url>
@@ -37,6 +40,9 @@
     <loc>https://lambdr.mdneuzerling.com/reference/handle_event.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/handle_invocation_error.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/is_from_api_gateway.html</loc>
   </url>
   <url>
@@ -50,6 +56,9 @@
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/parse_json_or_empty.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/post_lambda_error.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/post_result.html</loc>
@@ -71,6 +80,9 @@
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/start_listening.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/stop_missing_request_id.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/wait_for_event.html</loc>
