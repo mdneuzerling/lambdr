@@ -4,7 +4,11 @@
 \alias{extract_context}
 \title{Extract the context of a Lambda invocation from the headers of an event}
 \usage{
-extract_context(event_headers)
+extract_context(event)
+}
+\arguments{
+\item{event}{the response received from querying the next invocation
+endpoint.}
 }
 \value{
 list

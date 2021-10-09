@@ -14,7 +14,8 @@ condition(subclass, message, code = 500L, call = sys.call(-1), ...)
 with the condition.}
 
 \item{code}{HTTP status code to return (if applicable). Defaults to \code{500},
-which is a generic "Internal Server Error". Not currently used anywhere.}
+which is a generic "Internal Server Error". This is used when errors are to
+be returned to an API Gateway.}
 
 \item{call}{call expression}
 
