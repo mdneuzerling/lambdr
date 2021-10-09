@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Serialise a result and send it to Lambda — post_result • lambdr</title>
+<title>Post an event with a result to the response endpoint — post_result • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,11 @@
 
 
 
-<meta property="og:title" content="Serialise a result and send it to Lambda — post_result" />
-<meta property="og:description" content="Serialise a result and send it to Lambda" />
+<meta property="og:title" content="Post an event with a result to the response endpoint — post_result" />
+<meta property="og:description" content="This function will first serialise the event result according to its class
+by dispatching through serialise_result.The result of that
+serialisation is posted as is to the response endpoint; this function
+will not perform any JSON serialisation, for example." />
 
 
 
@@ -123,39 +126,33 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Serialise a result and send it to Lambda</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/handle-event.R'><code>R/handle-event.R</code></a></small>
+    <h1>Post an event with a result to the response endpoint</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/post-result.R'><code>R/post-result.R</code></a></small>
     <div class="hidden name"><code>post_result.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Serialise a result and send it to Lambda</p>
+    <p>This function will first serialise the event result according to its class
+by dispatching through <code><a href='serialise_result.html'>serialise_result</a></code>.The result of that
+serialisation is posted <strong>as is</strong> to the response endpoint; this function
+will not perform any JSON serialisation, for example.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>post_result</span><span class='op'>(</span><span class='va'>result</span>, <span class='va'>request_id</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>post_result</span><span class='op'>(</span><span class='va'>event</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>result</th>
-      <td><p>result to be sent back to Lambda</p></td>
-    </tr>
-    <tr>
-      <th>request_id</th>
-      <td><p>character request ID, as extracted by
-<code><a href='extract_request_id_from_headers.html'>extract_request_id_from_headers</a></code> from the headers of an event.</p></td>
+      <th>event</th>
+      <td><p>the response received from querying the next invocation
+endpoint.</p></td>
     </tr>
     <tr>
       <th>serialiser</th>
       <td><p>function for serialising the result before sending.
 By default, will attempt to serialise the body as JSON, based on the
 request type. To send the result as is, pass the <code>identity</code> function.</p></td>
-    </tr>
-    <tr>
-      <th>request_type</th>
-      <td><p>one of "HTML", "scheduled", or "direct". The content type
-may be used in serialising the response to be sent back to Lambda.</p></td>
     </tr>
     </table>
 

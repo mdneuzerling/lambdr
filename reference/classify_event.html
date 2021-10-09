@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse the body of the Lambda event — parse_event_content • lambdr</title>
+<title>Classify an event based on how it is invoked — classify_event • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,13 @@
 
 
 
-<meta property="og:title" content="Parse the body of the Lambda event — parse_event_content" />
-<meta property="og:description" content="Parse the body of the Lambda event" />
+<meta property="og:title" content="Classify an event based on how it is invoked — classify_event" />
+<meta property="og:description" content="Events need to be handled differently depending on how the Lambda is invoked.
+For example, an event via an API Gateway needs to be parsed and handled
+differently to that of an event received via direct invocation. This function
+attempts to detect the method of invocation and returns a character vector
+which can be used to assign an S3 class to the event. The last element of
+the vector is always &quot;event&quot;." />
 
 
 
@@ -123,29 +128,25 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse the body of the Lambda event</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/parse-event-content.R'><code>R/parse-event-content.R</code></a></small>
-    <div class="hidden name"><code>parse_event_content.Rd</code></div>
+    <h1>Classify an event based on how it is invoked</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/start-listening.R'><code>R/start-listening.R</code></a></small>
+    <div class="hidden name"><code>classify_event.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse the body of the Lambda event</p>
+    <p>Events need to be handled differently depending on how the Lambda is invoked.
+For example, an event via an API Gateway needs to be parsed and handled
+differently to that of an event received via direct invocation. This function
+attempts to detect the method of invocation and returns a character vector
+which can be used to assign an S3 class to the event. The last element of
+the vector is always "event".</p>
     </div>
 
-    <pre class="usage"><span class='fu'>parse_event_content</span><span class='op'>(</span><span class='va'>event</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>classify_event</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>deserialiser</th>
-      <td><p>function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the <code>identity</code> function. If input is
-coming via an API Gateway this will require some complicated parsing (see
-below).</p></td>
-    </tr>
     <tr>
       <th>event_content</th>
       <td><p>the content of the response received from querying the
@@ -155,14 +156,7 @@ text invocation endpoint, as a character</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list containing the arguments to be passed to the handler function</p>
-    <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
-
-    
-
-<p>Events coming from an API Gateway need to be treated a little differently,
-both in parsing the event content and in posting the results. Refer to
-<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code> for details.</p>
+    <p>character vector, the last element of which is always "event"</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse the body of the Lambda event — parse_event_content • lambdr</title>
+<title>Serialise a result — serialise_result • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Parse the body of the Lambda event — parse_event_content" />
-<meta property="og:description" content="Parse the body of the Lambda event" />
+<meta property="og:title" content="Serialise a result — serialise_result" />
+<meta property="og:description" content="This result is posted as is, and so all JSON serialisation, etc. must be
+performed here." />
 
 
 
@@ -123,39 +124,37 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse the body of the Lambda event</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/parse-event-content.R'><code>R/parse-event-content.R</code></a></small>
-    <div class="hidden name"><code>parse_event_content.Rd</code></div>
+    <h1>Serialise a result</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/post-result.R'><code>R/post-result.R</code></a></small>
+    <div class="hidden name"><code>serialise_result.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse the body of the Lambda event</p>
+    <p>This result is posted <strong>as is</strong>, and so all JSON serialisation, etc. must be
+performed here.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>parse_event_content</span><span class='op'>(</span><span class='va'>event</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>serialise_result</span><span class='op'>(</span><span class='va'>event</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>deserialiser</th>
-      <td><p>function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the <code>identity</code> function. If input is
-coming via an API Gateway this will require some complicated parsing (see
-below).</p></td>
+      <th>event</th>
+      <td><p>the response received from querying the next invocation
+endpoint.</p></td>
     </tr>
     <tr>
-      <th>event_content</th>
-      <td><p>the content of the response received from querying the
-text invocation endpoint, as a character</p></td>
+      <th>serialiser</th>
+      <td><p>function for serialising the result before sending.
+By default, will attempt to serialise the body as JSON, based on the
+request type. To send the result as is, pass the <code>identity</code> function.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list containing the arguments to be passed to the handler function</p>
+    <p>character.</p>
     <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
 
     

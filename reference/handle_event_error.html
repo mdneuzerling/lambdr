@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse the body of the Lambda event — parse_event_content • lambdr</title>
+<title>Generate a handling function for an invocation error — handle_event_error • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,23 @@
 
 
 
-<meta property="og:title" content="Parse the body of the Lambda event — parse_event_content" />
-<meta property="og:description" content="Parse the body of the Lambda event" />
+<meta property="og:title" content="Generate a handling function for an invocation error — handle_event_error" />
+<meta property="og:description" content="An error caught during event handling must be handled in a special way. An
+error message must be logged and posted to the invocation error endpoint,
+and the the runtime must continue --- an invocation error is a problem for
+the invocation, not the runtime.
+The handle_event_error function accepts an event and generates a
+function. The generated function accepts error caught by
+tryCatch, logs it, and then submits it to the invocation
+error endpoint. Importantly it does not stop the kernel --- the intention is
+that the runtime moves onto the next event.
+This function may need to be implemented differently depending on the source
+of an event. As such, handle_event_error is an S3 generic that can dispatch
+on the event class as returned by classify_event.tryCatch(
+    handle_event(...),
+    error = handle_invocation_error(event) # returns a function(e)
+ )
+" />
 
 
 
@@ -123,46 +138,37 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse the body of the Lambda event</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/parse-event-content.R'><code>R/parse-event-content.R</code></a></small>
-    <div class="hidden name"><code>parse_event_content.Rd</code></div>
+    <h1>Generate a handling function for an invocation error</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/error-handling.R'><code>R/error-handling.R</code></a></small>
+    <div class="hidden name"><code>handle_event_error.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse the body of the Lambda event</p>
+    <p>An error caught during event handling must be handled in a special way. An
+error message must be logged and posted to the invocation error endpoint,
+and the the runtime must continue --- an invocation error is a problem for
+the invocation, not the runtime.</p>
+<p>The <code>handle_event_error</code> function accepts an event and generates a
+function. The generated function accepts error caught by
+<code><a href='https://rdrr.io/r/base/conditions.html'>tryCatch</a></code>, logs it, and then submits it to the invocation
+error endpoint. Importantly it does not stop the kernel --- the intention is
+that the runtime moves onto the next event.</p>
+<p>This function may need to be implemented differently depending on the source
+of an event. As such, <code>handle_event_error</code> is an S3 generic that can dispatch
+on the event class as returned by <code><a href='classify_event.html'>classify_event</a></code>.<div class="r"></p><pre><span class='kw'><a href='https://rdrr.io/r/base/conditions.html'>tryCatch</a></span><span class='op'>(</span>
+    <span class='fu'><a href='handle_event.html'>handle_event</a></span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>,
+    error <span class='op'>=</span> <span class='fu'>handle_invocation_error</span><span class='op'>(</span><span class='va'>event</span><span class='op'>)</span> <span class='co'># returns a function(e)</span>
+ <span class='op'>)</span>
+</pre><p></div></p>
     </div>
 
-    <pre class="usage"><span class='fu'>parse_event_content</span><span class='op'>(</span><span class='va'>event</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>handle_event_error</span><span class='op'>(</span><span class='va'>event</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>deserialiser</th>
-      <td><p>function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the <code>identity</code> function. If input is
-coming via an API Gateway this will require some complicated parsing (see
-below).</p></td>
-    </tr>
-    <tr>
-      <th>event_content</th>
-      <td><p>the content of the response received from querying the
-text invocation endpoint, as a character</p></td>
-    </tr>
-    </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list containing the arguments to be passed to the handler function</p>
-    <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
-
-    
-
-<p>Events coming from an API Gateway need to be treated a little differently,
-both in parsing the event content and in posting the results. Refer to
-<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code> for details.</p>
+    <p>A function that accepts an error <code>e</code> as caught by
+<code><a href='https://rdrr.io/r/base/conditions.html'>tryCatch</a></code></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

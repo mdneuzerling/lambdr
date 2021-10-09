@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse the body of the Lambda event — parse_event_content • lambdr</title>
+<title>Query the next invocation endpoint to get the next input — wait_for_and_handle_event • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,10 @@
 
 
 
-<meta property="og:title" content="Parse the body of the Lambda event — parse_event_content" />
-<meta property="og:description" content="Parse the body of the Lambda event" />
+<meta property="og:title" content="Query the next invocation endpoint to get the next input — wait_for_and_handle_event" />
+<meta property="og:description" content="The query will receive a response when an input is queued up. If there is no
+input waiting, the Lambda instance will be shut down after a period of
+inactivity." />
 
 
 
@@ -123,16 +125,18 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse the body of the Lambda event</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/parse-event-content.R'><code>R/parse-event-content.R</code></a></small>
-    <div class="hidden name"><code>parse_event_content.Rd</code></div>
+    <h1>Query the next invocation endpoint to get the next input</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/start-listening.R'><code>R/start-listening.R</code></a></small>
+    <div class="hidden name"><code>wait_for_and_handle_event.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse the body of the Lambda event</p>
+    <p>The query will receive a response when an input is queued up. If there is no
+input waiting, the Lambda instance will be shut down after a period of
+inactivity.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>parse_event_content</span><span class='op'>(</span><span class='va'>event</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>wait_for_and_handle_event</span><span class='op'>(</span>deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -147,22 +151,13 @@ coming via an API Gateway this will require some complicated parsing (see
 below).</p></td>
     </tr>
     <tr>
-      <th>event_content</th>
-      <td><p>the content of the response received from querying the
-text invocation endpoint, as a character</p></td>
+      <th>serialiser</th>
+      <td><p>function for serialising the result before sending.
+By default, will attempt to serialise the body as JSON, based on the
+request type. To send the result as is, pass the <code>identity</code> function.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>A list containing the arguments to be passed to the handler function</p>
-    <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
-
-    
-
-<p>Events coming from an API Gateway need to be treated a little differently,
-both in parsing the event content and in posting the results. Refer to
-<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code> for details.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
