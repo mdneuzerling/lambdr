@@ -96,11 +96,7 @@ extract_request_id_from_headers <- function(headers) {
 assert_status_code_is_good <- function(status_code) {
   logger::log_debug("Status code:", status_code)
   if (status_code != 200) {
-    error_message <- paste(
-      "Didn't get status code 200. Status code:",
-      status_code
-    )
-    stop_lambda(error_message, code = status_code)
+    stop("Didn't get status code 200. Status code: ",status_code)
   }
   TRUE
 }

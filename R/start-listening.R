@@ -17,7 +17,6 @@ wait_for_event <- function(deserialiser = NULL,
   tryCatch(
     handle_event(event, deserialiser = deserialiser, serialiser = serialiser),
     missing_request_id = handle_missing_request_id,
-    api_error = handle_api_error(event),
     error = handle_invocation_error(event)
   )
 }

@@ -48,7 +48,7 @@ parse_json_or_empty <- function(json, ...) {
 #'
 #' @param x R object to be converted to JSON.
 #' @param ... additional arguments (except `auto_unbox` and `null`) passed to
-#'   \code{\link[toJSON]{toJSON}}
+#'   \code{\link[jsonlite]{toJSON}}
 #'
 #' @return character of class "json"
 #' @keywords internal

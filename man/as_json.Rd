@@ -10,7 +10,7 @@ as_json(x, ...)
 \item{x}{R object to be converted to JSON.}
 
 \item{...}{additional arguments (except \code{auto_unbox} and \code{null}) passed to
-\code{\link[toJSON]{toJSON}}}
+\code{\link[jsonlite]{toJSON}}}
 }
 \value{
 character of class "json"
