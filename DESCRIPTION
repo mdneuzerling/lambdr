@@ -17,6 +17,7 @@ RoxygenNote: 7.1.1
 Imports: 
     httr,
     jsonlite,
+    lifecycle,
     logger
 Suggests: 
     withr,

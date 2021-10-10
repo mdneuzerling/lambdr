@@ -174,6 +174,23 @@ handle_missing_request_id <- function(e) {
 ############################## API Gateway errors ##############################
 ################################################################################
 
+#' Raise an error with an optional HTML status code for API Gateways
+#'
+#' @description
+#' This variation of `stop` can be used to raise an error with a specific error
+#' code. This is provided to the API Gateway to return an appropriate response.
+#' It had no use outside of invocations via an API Gateway.
+#'
+#' If a status code is not provided, a generic "500" internal server error will
+#' be used.
+#'
+#' @inheritParams condition
+#'
+#' @export
+#'
+#' @examples \dontrun{
+#' stop_html("Resource doesn't exist", code = 404L)
+#' }
 stop_html <- function(message, code = 500L) {
   stop(
     condition(

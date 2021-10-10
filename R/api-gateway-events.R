@@ -41,9 +41,10 @@ serialise_result.api_gateway_event <- function(event, ...) {
 #' @export
 handle_event_error.api_gateway_event <- function(event, ...) {
   error_handling_function <- function(e) {
+    html_code <- if (is.null(e$code)) 500L else e$code # internal server error
     logger::log_error(e$message)
     error_response <- list(
-      statusCode = e$code,
+      statusCode = html_code,
       headers = list(
         "Content-Type" = "text/plain",
         "x-amzn-ErrorType" = class(e)[1]

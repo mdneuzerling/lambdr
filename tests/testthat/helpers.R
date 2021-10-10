@@ -230,6 +230,7 @@ mock_api_gateway_event <- function(query_parameters = NULL,
                                      "Accept" = "application/json, text/xml, application/xml, */*",
                                      "Content-Type" = ""
                                    ),
+                                   expect_result_as_is = FALSE,
                                    request_id = "abc123",
                                    timeout_seconds = 0.5) {
   api_gateway_event_body <- mock_api_gateway_event_body(
@@ -252,17 +253,23 @@ mock_api_gateway_event <- function(query_parameters = NULL,
       status = 200
     )
 
+  expected_body <- if (expect_result_as_is) {
+    result
+  } else {
+    as_json(
+      list(
+        isBase64Encoded = FALSE,
+        statusCode = 200L,
+        body = as_stringified_json(result)
+      )
+    )
+  }
+
   # Mock the response endpoint. We expect a response of `2`.
   webmockr::stub_request("post", response_endpoint) %>%
     webmockr::wi_th(
       headers = expected_response_headers,
-      body = as_json(
-        list(
-          isBase64Encoded = FALSE,
-          statusCode = 200L,
-          body = as_stringified_json(result)
-        )
-      )
+      body = expected_body
     ) %>%
     webmockr::to_return(status = 200)
 

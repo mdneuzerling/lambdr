@@ -21,3 +21,5 @@ reference:
 - title: "Helper functions"
   contents:
     - as_stringified_json
+    - stop_html
+    - prettify_list
