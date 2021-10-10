@@ -48,7 +48,7 @@ extract_request_id_from_headers <- function(headers) {
       "Event doesn't contain request ID",
       "Can't clear this request from the queue."
     )
-    stop_missing_request_id(error_message)
+    stop(error_message)
   }
   headers[["lambda-runtime-aws-request-id"]]
 }
@@ -93,7 +93,9 @@ classify_event <- function(event_content) {
 wait_for_and_handle_event <- function(deserialiser = NULL, serialiser = NULL) {
   logger::log_debug("Waiting for event")
 
-  # will raise a missing_request_id error if not found
+  # If an error occurs during the following tryCatch block it is impossible to
+  # post it to the invocation error endpoint as that requires a Request ID.
+  # We log the error and move on.
   tryCatch(
     {
       invocation <- httr::GET(url = get_next_invocation_endpoint())
@@ -103,7 +105,7 @@ wait_for_and_handle_event <- function(deserialiser = NULL, serialiser = NULL) {
       logger::log_debug("Request ID: ", request_id)
     },
     error = function(e) {
-      handle_missing_request_id(e)
+      logger::log_error(e$message)
       return(NULL)
     }
   )

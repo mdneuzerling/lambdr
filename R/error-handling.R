@@ -138,38 +138,6 @@ condition <- function(subclass, message, code = 500L, call = sys.call(-1), ...) 
   )
 }
 
-#' Raise an error when there's a missing request ID
-#'
-#' @description
-#' A missing Request ID is an unusual error. It occurs after the runtime has
-#' been initialised, and is _technically_ an invocation error. However it's
-#' impossible to post the error to the invocation error endpoint as that
-#' requires a Request ID.
-#'
-#' We define a separate condition for it here, such that instead of `stop` we
-#' can use `stop_missing_request_id`. This allows us to catch and treat the
-#' error in a unique way. The `handle_missing_request_id` function accepts an
-#' error caught by \code{\link[base]{tryCatch}}, logs it, and then returns
-#' a standard error with a sensible message.
-#'
-#' @inheritParams condition
-#'
-#' @keywords internal
-stop_missing_request_id <- function(message) {
-  stop(condition("missing_request_id", message))
-}
-
-#' @param e error caught by \code{\link[base]{tryCatch}}
-#' @keywords internal
-#' @rdname stop_missing_request_id
-handle_missing_request_id <- function(e) {
-  error_message <- paste(
-    "lambda-runtime-aws-request-id header not found.",
-    "Can't process this request."
-  )
-  logger::log_error(error_message)
-}
-
 ################################################################################
 ############################## API Gateway errors ##############################
 ################################################################################
