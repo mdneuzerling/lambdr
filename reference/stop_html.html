@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • lambdr</title>
+<title>Raise an error with an optional HTML status code for API Gateways — stop_html • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,12 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Raise an error with an optional HTML status code for API Gateways — stop_html" />
+<meta property="og:description" content="This variation of stop can be used to raise an error with a specific error
+code. This is provided to the API Gateway to return an appropriate response.
+It had no use outside of invocations via an API Gateway.
+If a status code is not provided, a generic &quot;500&quot; internal server error will
+be used." />
 
 
 
@@ -58,7 +63,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -120,104 +125,46 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Raise an error with an optional HTML status code for API Gateways</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/error-handling.R'><code>R/error-handling.R</code></a></small>
+    <div class="hidden name"><code>stop_html.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>This variation of <code>stop</code> can be used to raise an error with a specific error
+code. This is provided to the API Gateway to return an appropriate response.
+It had no use outside of invocations via an API Gateway.</p>
+<p>If a status code is not provided, a generic "500" internal server error will
+be used.</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>stop_html</span><span class='op'>(</span><span class='va'>message</span>, code <span class='op'>=</span> <span class='fl'>500L</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-set-up-a-lambda-runtime-and-start-listening-for-events" class="hasAnchor"><a href="#section-set-up-a-lambda-runtime-and-start-listening-for-events" class="anchor"></a>Set-up a Lambda runtime and start listening for events</h2>
-          <p class="section-desc"><p>This combines the three individual setup steps: <code>setup_logging</code>, <code>setup_lambda</code>, and <code>start_listening</code>. For most applications this is the only necessary function.</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="start_lambda.html">start_lambda()</a></code> </p>
-        </td>
-        <td><p>Set-up logging and a Lambda runtime, and start listening for events</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-individual-set-up-steps" class="hasAnchor"><a href="#section-individual-set-up-steps" class="anchor"></a>Individual set-up steps</h2>
-          <p class="section-desc"><p>Specific scenarios may require breaking the runtime setup into individual steps. For example, perhaps certain checks need to be run during initialisation. These functions — in the order of <code>setup_logging</code>, <code>setup_lambda</code>, and <code>start_listening</code> — have the same outcome as <code>start_lambda</code>.</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="setup_logging.html">setup_logging()</a></code> </p>
-        </td>
-        <td><p>Set up logging with the <code>logger</code> package</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="setup_lambda.html">setup_lambda()</a></code> </p>
-        </td>
-        <td><p>Set up endpoints, variables, and configuration for AWS Lambda</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="start_listening.html">start_listening()</a></code> </p>
-        </td>
-        <td><p>Start listening for events, and process them as they come</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-helper-functions" class="hasAnchor"><a href="#section-helper-functions" class="anchor"></a>Helper functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="as_stringified_json.html">as_stringified_json()</a></code> </p>
-        </td>
-        <td><p>Convert an R object to stringified JSON matching AWS Lambda conventions</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="stop_html.html">stop_html()</a></code> </p>
-        </td>
-        <td><p>Raise an error with an optional HTML status code for API Gateways</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="prettify_list.html">prettify_list()</a></code> </p>
-        </td>
-        <td><p>Convert a list to a single character, preserving names</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>message</th>
+      <td><p>character message, such as an error description, to include
+with the condition.</p></td>
+    </tr>
+    <tr>
+      <th>code</th>
+      <td><p>HTTP status code to return (if applicable). Defaults to <code>500</code>,
+which is a generic "Internal Server Error". This is used when errors are to
+be returned to an API Gateway.</p></td>
+    </tr>
     </table>
-  </div>
 
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='fu'>stop_html</span><span class='op'>(</span><span class='st'>"Resource doesn't exist"</span>, code <span class='op'>=</span> <span class='fl'>404L</span><span class='op'>)</span>
+<span class='op'>}</span>
+</div></pre>
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

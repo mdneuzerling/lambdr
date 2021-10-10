@@ -61,6 +61,9 @@
     <loc>https://lambdr.mdneuzerling.com/reference/lambda_variables.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/lambdr.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/parse_event_content.html</loc>
   </url>
   <url>
@@ -92,6 +95,9 @@
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/start_listening.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/stop_html.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/stop_missing_request_id.html</loc>
