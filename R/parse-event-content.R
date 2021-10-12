@@ -23,11 +23,6 @@ parse_event_content <- function(event, deserialiser = NULL) {
 }
 
 #' @export
-parse_event_content.scheduled_event <- function(event, ...) {
-  list()
-}
-
-#' @export
 parse_event_content.default <- function(event, ...) {
   parse_json_or_empty(event$event_content)
 }

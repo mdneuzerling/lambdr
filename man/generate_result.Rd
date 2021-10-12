@@ -4,11 +4,18 @@
 \alias{generate_result}
 \title{Parse the content of an event and pass it through the handler function}
 \usage{
-generate_result(event)
+generate_result(event, deserialiser)
 }
 \arguments{
 \item{event}{the response received from querying the next invocation
 endpoint.}
+
+\item{deserialiser}{function for deserialising the body of the event.
+By default, will attempt to deserialise the body as JSON, based on whether
+the input is coming from an API Gateway, scheduled Cloudwatch event, or
+direct. To use the body as is, pass the \code{identity} function. If input is
+coming via an API Gateway this will require some complicated parsing (see
+below).}
 }
 \value{
 An object of class the same as \code{event}. The object contains a

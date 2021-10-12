@@ -17,6 +17,34 @@ test_that("Mock custom function", {
   expect_true(mock_response_success)
 })
 
+test_that("Custom deserialisers are used in event handling", {
+  use_basic_lambda_setup(handler = "parity")
+  custom_deserialiser <- function(event_content) {
+    list(number = 0)
+  }
+
+  mock_response_success <- mock_response(
+    input = as_json(list(number = 5)),
+    expected_response_body = as_json(list(parity = "even")),
+    deserialiser = custom_deserialiser
+  )
+  expect_true(mock_response_success)
+})
+
+test_that("Custom serialisers are used in event handling", {
+  use_basic_lambda_setup(handler = "parity")
+  custom_serialiser <- function(result) {
+    "my heart is a fish"
+  }
+
+  mock_response_success <- mock_response(
+    input = as_json(list(number = 5)),
+    expected_response_body = "my heart is a fish",
+    serialiser = custom_serialiser
+  )
+  expect_true(mock_response_success)
+})
+
 test_that("Mock function with no inputs", {
   use_basic_lambda_setup(handler = "no_arguments")
 

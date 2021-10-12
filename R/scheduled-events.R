@@ -7,3 +7,8 @@
 is_scheduled_event_content <- function(event_content) {
   grepl("Scheduled Event", event_content)
 }
+
+#' @export
+parse_event_content.scheduled_event <- function(event, ...) {
+  list()
+}

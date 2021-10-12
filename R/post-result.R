@@ -16,7 +16,7 @@
 #' @export
 serialise_result <- function(event, serialiser = NULL) {
   if (!attr(event, "result_calculated")) {
-    stop("The result for this event has not been calculated")
+    stop("The result for event ", event$request_id, " has not been calculated")
   }
   if (!is.null(serialiser)) {
     return(serialiser(event$result))
@@ -44,7 +44,7 @@ serialise_result.default <- function(event, ...) {
 #' @keywords internal
 post_result <- function(event, serialiser = NULL) {
   logger::log_debug("Raw result:", event$result)
-  serialised_result <- serialise_result(event)
+  serialised_result <- serialise_result(event, serialiser = serialiser)
   logger::log_debug("Result to be posted:", serialised_result)
 
   httr::POST(

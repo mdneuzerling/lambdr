@@ -49,13 +49,14 @@ extract_context <- function(event) {
 #' Parse the content of an event and pass it through the handler function
 #'
 #' @inheritParams handle_event
+#' @inheritParams parse_event_content
 #'
 #' @return An object of class the same as `event`. The object contains a
 #'   `result` value, and the `result_calculated` attribute is set to `TRUE`.
 #'
 #' @keywords internal
-generate_result <- function(event) {
-  parsed_event_content <- parse_event_content(event)
+generate_result <- function(event, deserialiser) {
+  parsed_event_content <- parse_event_content(event, deserialiser = deserialiser)
   logger::log_debug("Parsed event body:", prettify_list(parsed_event_content))
 
   # if the handler function accepts either a `context` argument then calculate
@@ -108,7 +109,7 @@ handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
     Sys.setenv("_X_AMZN_TRACE_ID" = runtime_trace_id)
   }
 
-  event_with_result <- generate_result(event)
+  event_with_result <- generate_result(event, deserialiser = deserialiser)
 
   post_result(event_with_result, serialiser = serialiser)
 }
