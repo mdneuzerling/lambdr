@@ -36,10 +36,7 @@ use_basic_lambda_setup <- function(handler = "sqrt",
 
 mock_response <- function(input,
                           expected_response_body,
-                          expected_response_headers = list(
-                            "Accept" = "application/json, text/xml, application/xml, */*",
-                            "Content-Type" = ""
-                          ),
+                          expected_response_headers = default_response_headers,
                           request_id = "abc123",
                           timeout_seconds = 0.5) {
 
@@ -226,10 +223,7 @@ trigger_initialisation_error <- function(expected_error,
 mock_api_gateway_event <- function(query_parameters = NULL,
                                    body_parameters = NULL,
                                    result,
-                                   expected_response_headers = list(
-                                     "Accept" = "application/json, text/xml, application/xml, */*",
-                                     "Content-Type" = ""
-                                   ),
+                                   expected_response_headers = default_response_headers,
                                    expect_result_as_is = FALSE,
                                    request_id = "abc123",
                                    timeout_seconds = 0.5) {

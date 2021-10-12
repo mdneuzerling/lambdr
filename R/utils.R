@@ -81,3 +81,8 @@ as_stringified_json <- function(x) {
   }
   as.character(as_json(x))
 }
+
+default_response_headers <- list(
+  "Accept" = "application/json, text/xml, application/xml, */*",
+  "Content-Type" = ""
+)
