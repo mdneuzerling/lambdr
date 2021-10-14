@@ -23,8 +23,12 @@ parse_event_content.rest_api_gateway_event <- function(event, ...) {
 
   # Parse the JSON within the JSON
   body_parameters <- parse_json_or_empty(parsed_json[["body"]])
+  if (parsed_json[["isBase64Encoded"]] && lambda$decode_base64) {
+    body_parameters <- from_base64(body_parameters)
+  }
 
-  c(query_parameters, body_parameters)
+  # query parameters always named, should go last
+  c(body_parameters, query_parameters)
 }
 
 #' @export

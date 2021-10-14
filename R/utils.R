@@ -86,3 +86,21 @@ default_response_headers <- list(
   "Accept" = "application/json, text/xml, application/xml, */*",
   "Content-Type" = ""
 )
+
+#' Decode a Base64 encoded value to a string
+#'
+#' Events coming via an API Gateway can have content with bodies encoded as
+#' Base64. This is especially true for HTML API Gateways (as opposed to REST
+#' API Gateways).
+#'
+#' @param x a Base64 string
+#'
+#' @return character
+#' @export
+#'
+#' @examples
+#' from_base64("eyJudW1iZXIiOjd9")
+#' # "{\"number\":7}"
+from_base64 <- function(x) {
+  rawToChar(jsonlite::base64_dec(x))
+}

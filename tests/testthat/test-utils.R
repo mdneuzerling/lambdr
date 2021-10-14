@@ -42,3 +42,10 @@ test_that("JSON converted with proper NULLs and singleton values", {
     json_string('{"x":1,"y":[1,2]}')
   )
 })
+
+test_that("we can decode Base64 strings", {
+  expect_equal(
+    from_base64("eyJudW1iZXIiOjd9"),
+    "{\"number\":7}"
+  )
+})

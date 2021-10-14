@@ -154,6 +154,7 @@ function_accepts_context <- function(func) {
 }
 
 #' Set up endpoints, variables, and configuration for AWS Lambda
+#'
 #' @param handler character. Name of function to use for processing inputs from
 #'   events. This argument is provided for debugging and testing only. The
 #'   "_HANDLER" environment variable, as configured in AWS, will always override
@@ -167,7 +168,11 @@ function_accepts_context <- function(func) {
 #'   "LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
 #'   override this value if present.
 #' @param environ environment in which to search for the function given by the
-#'   handler.
+#'   handler. Defaults to the parent frame.
+#' @param decode_base64 logical. Should Base64 input be automatically decoded?
+#'   This is only used for events coming via an API Gateway. Complicated input
+#'   (such as images) may be better left as is, so that the handler function can
+#'   deal with it appropriately. Defaults to `TRUE`.
 #'
 #' @details
 #' As a rule of thumb, it takes longer to retrieve a value from an environment
@@ -183,6 +188,7 @@ function_accepts_context <- function(func) {
 setup_lambda <- function(handler = NULL,
                          runtime_api = NULL,
                          task_root = NULL,
+                         decode_base64 = TRUE,
                          environ = parent.frame()) {
 
   # There's no point in wrapping this in a TryCatch. If we don't have the
@@ -223,6 +229,7 @@ setup_lambda <- function(handler = NULL,
     }
   )
 
+  lambda$decode_base64 <- as.logical(decode_base64)
   lambda$is_setup <- TRUE
 }
 

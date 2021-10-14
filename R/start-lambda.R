@@ -35,16 +35,18 @@ start_lambda <- function(log_threshold = logger::INFO,
                          handler = NULL,
                          runtime_api = NULL,
                          task_root = NULL,
-                         environ = parent.frame(),
                          deserialiser = NULL,
                          serialiser = NULL,
-                         timeout_seconds = NULL) {
+                         decode_base64 = TRUE,
+                         timeout_seconds = NULL,
+                         environ = parent.frame()) {
   setup_logging(log_threshold = log_threshold)
 
   setup_lambda(
     handler = handler,
     runtime_api = runtime_api,
     task_root = task_root,
+    decode_base64 = decode_base64,
     environ = environ
   )
 

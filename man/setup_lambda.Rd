@@ -8,6 +8,7 @@ setup_lambda(
   handler = NULL,
   runtime_api = NULL,
   task_root = NULL,
+  decode_base64 = TRUE,
   environ = parent.frame()
 )
 }
@@ -27,8 +28,13 @@ This argument is provided for debugging and testing only. The
 "LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
 override this value if present.}
 
+\item{decode_base64}{logical. Should Base64 input be automatically decoded?
+This is only used for events coming via an API Gateway. Complicated input
+(such as images) may be better left as is, so that the handler function can
+deal with it appropriately. Defaults to \code{TRUE}.}
+
 \item{environ}{environment in which to search for the function given by the
-handler.}
+handler. Defaults to the parent frame.}
 }
 \description{
 Set up endpoints, variables, and configuration for AWS Lambda

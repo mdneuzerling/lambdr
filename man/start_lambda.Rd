@@ -9,10 +9,11 @@ start_lambda(
   handler = NULL,
   runtime_api = NULL,
   task_root = NULL,
-  environ = parent.frame(),
   deserialiser = NULL,
   serialiser = NULL,
-  timeout_seconds = NULL
+  decode_base64 = TRUE,
+  timeout_seconds = NULL,
+  environ = parent.frame()
 )
 }
 \arguments{
@@ -36,9 +37,6 @@ This argument is provided for debugging and testing only. The
 "LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
 override this value if present.}
 
-\item{environ}{environment in which to search for the function given by the
-handler.}
-
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
 the input is coming from an API Gateway, scheduled Cloudwatch event, or
@@ -50,11 +48,19 @@ below).}
 By default, will attempt to serialise the body as JSON, based on the
 request type. To send the result as is, pass the \code{identity} function.}
 
+\item{decode_base64}{logical. Should Base64 input be automatically decoded?
+This is only used for events coming via an API Gateway. Complicated input
+(such as images) may be better left as is, so that the handler function can
+deal with it appropriately. Defaults to \code{TRUE}.}
+
 \item{timeout_seconds}{If set, the function will stop listening for events
 after this timeout. The timeout is checked between events, so this won't
 interrupt the function while it is waiting for a new event. This argument
 is provided for testing purposes, and shouldn't otherwise need to be set:
 AWS should handle the shutdown of idle Lambda instances.}
+
+\item{environ}{environment in which to search for the function given by the
+handler. Defaults to the parent frame.}
 }
 \description{
 Runs the following three functions in order:
