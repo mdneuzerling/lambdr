@@ -153,10 +153,11 @@ container.</p>
   handler <span class='op'>=</span> <span class='cn'>NULL</span>,
   runtime_api <span class='op'>=</span> <span class='cn'>NULL</span>,
   task_root <span class='op'>=</span> <span class='cn'>NULL</span>,
-  environ <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span>,
   deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
   serialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
-  timeout_seconds <span class='op'>=</span> <span class='cn'>NULL</span>
+  decode_base64 <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  timeout_seconds <span class='op'>=</span> <span class='cn'>NULL</span>,
+  environ <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -191,11 +192,6 @@ This argument is provided for debugging and testing only. The
 override this value if present.</p></td>
     </tr>
     <tr>
-      <th>environ</th>
-      <td><p>environment in which to search for the function given by the
-handler.</p></td>
-    </tr>
-    <tr>
       <th>deserialiser</th>
       <td><p>function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
@@ -211,12 +207,24 @@ By default, will attempt to serialise the body as JSON, based on the
 request type. To send the result as is, pass the <code>identity</code> function.</p></td>
     </tr>
     <tr>
+      <th>decode_base64</th>
+      <td><p>logical. Should Base64 input be automatically decoded?
+This is only used for events coming via an API Gateway. Complicated input
+(such as images) may be better left as is, so that the handler function can
+deal with it appropriately. Defaults to <code>TRUE</code>.</p></td>
+    </tr>
+    <tr>
       <th>timeout_seconds</th>
       <td><p>If set, the function will stop listening for events
 after this timeout. The timeout is checked between events, so this won't
 interrupt the function while it is waiting for a new event. This argument
 is provided for testing purposes, and shouldn't otherwise need to be set:
 AWS should handle the shutdown of idle Lambda instances.</p></td>
+    </tr>
+    <tr>
+      <th>environ</th>
+      <td><p>environment in which to search for the function given by the
+handler. Defaults to the parent frame.</p></td>
     </tr>
     </table>
 
