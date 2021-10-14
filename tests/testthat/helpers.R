@@ -66,9 +66,11 @@ mock_response <- function(input,
     webmockr::to_return(status = 200)
 
   # 1 second should be plenty of time to calculate some square roots.
-  start_listening(timeout_seconds = timeout_seconds,
-                  deserialiser = deserialiser,
-                  serialiser = serialiser)
+  start_listening(
+    timeout_seconds = timeout_seconds,
+    deserialiser = deserialiser,
+    serialiser = serialiser
+  )
 
   requests <- webmockr::request_registry()
   n_responses <- requests$times_executed(
@@ -224,15 +226,13 @@ trigger_initialisation_error <- function(expected_error,
 }
 
 
-mock_rest_api_gateway_event <- function(
-  query_parameters = NULL,
-  body_parameters = NULL,
-  result,
-  expected_response_headers = default_response_headers,
-  expect_result_as_is = FALSE,
-  request_id = "abc123",
-  timeout_seconds = 0.5
-) {
+mock_rest_api_gateway_event <- function(query_parameters = NULL,
+                                        body_parameters = NULL,
+                                        result,
+                                        expected_response_headers = default_response_headers,
+                                        expect_result_as_is = FALSE,
+                                        request_id = "abc123",
+                                        timeout_seconds = 0.5) {
   api_gateway_event_body <- mock_rest_api_gateway_event_body(
     query_parameters,
     body_parameters

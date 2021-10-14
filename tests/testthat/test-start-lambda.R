@@ -1,11 +1,10 @@
 test_that("start_lambda starts lambda runtime", {
-
   expect_false(lambda$is_setup)
 
   lambda_runtime_api <- "red_panda"
   request_id <- "abc123"
 
-    # Make webmockr intercept HTTP requests
+  # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
   withr::defer(webmockr::disable(quiet = TRUE))
 
@@ -40,7 +39,7 @@ test_that("start_lambda starts lambda runtime", {
       "_HANDLER" = "parity"
     ),
     start_lambda(timeout_seconds = 0.5)
-    )
+  )
   withr::defer(reset_lambda())
 
   expect_true(lambda$is_setup)
