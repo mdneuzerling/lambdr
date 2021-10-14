@@ -3,7 +3,7 @@
 #' This result is posted **as is**, and so all JSON serialisation, etc. must be
 #' performed here.
 #'
-#' @inheritSection is_from_api_gateway Invocations via an API Gateway
+#' @inheritSection is_from_rest_api_gateway Invocations via an API Gateway
 #'
 #' @inheritParams handle_event
 #' @param serialiser function for serialising the result before sending.
@@ -36,7 +36,7 @@ serialise_result.default <- function(event, ...) {
 #' serialisation is posted **as is** to the response endpoint; this function
 #' will not perform any JSON serialisation, for example.
 #'
-#' @inheritSection is_from_api_gateway Invocations via an API Gateway
+#' @inheritSection is_from_rest_api_gateway Invocations via an API Gateway
 #'
 #' @inheritParams handle_event
 #' @inheritParams serialise_result

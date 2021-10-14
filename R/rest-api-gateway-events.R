@@ -9,13 +9,13 @@
 #'
 #' @return logical
 #' @keywords internal
-is_from_api_gateway <- function(event_content) {
+is_from_rest_api_gateway <- function(event_content) {
   grepl("httpMethod", event_content)
 }
 
 #' @export
-parse_event_content.api_gateway_event <- function(event, ...) {
-  logger::log_debug("Input coming via API Gateway")
+parse_event_content.rest_api_gateway_event <- function(event, ...) {
+  logger::log_debug("Input coming via REST API Gateway")
   parsed_json <- parse_json_or_empty(event$event_content)
 
   query_parameters <- parsed_json[["queryStringParameters"]]
@@ -28,7 +28,7 @@ parse_event_content.api_gateway_event <- function(event, ...) {
 }
 
 #' @export
-serialise_result.api_gateway_event <- function(event, ...) {
+serialise_result.rest_api_gateway_event <- function(event, ...) {
   as_stringified_json(
     list(
       isBase64Encoded = FALSE,
@@ -39,7 +39,7 @@ serialise_result.api_gateway_event <- function(event, ...) {
 }
 
 #' @export
-handle_event_error.api_gateway_event <- function(event, ...) {
+handle_event_error.rest_api_gateway_event <- function(event, ...) {
   error_handling_function <- function(e) {
     html_code <- if (is.null(e$code)) 500L else e$code # internal server error
     logger::log_error(e$message)

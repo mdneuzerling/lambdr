@@ -89,7 +89,7 @@ generate_result <- function(event, deserialiser) {
 #' invocation context will be included as an argument. See the section below for
 #' more details.
 #'
-#' @inheritSection is_from_api_gateway Invocations via an API Gateway
+#' @inheritSection is_from_rest_api_gateway Invocations via an API Gateway
 #'
 #' @param event the response received from querying the next invocation
 #'   endpoint.

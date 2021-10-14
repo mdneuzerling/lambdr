@@ -1,6 +1,6 @@
 #' Parse the body of the Lambda event
 #'
-#' @inheritSection is_from_api_gateway Invocations via an API Gateway
+#' @inheritSection is_from_rest_api_gateway Invocations via an API Gateway
 #'
 #' @param event_content the content of the response received from querying the
 #'   text invocation endpoint, as a character

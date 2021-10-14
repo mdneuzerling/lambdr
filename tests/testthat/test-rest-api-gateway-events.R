@@ -1,6 +1,6 @@
-test_that("we can parse input with parameter arguments from an API Gateway", {
+test_that("we can parse input with parameter arguments from a REST API Gateway", {
   use_basic_lambda_setup(handler = "parity")
-  mock_response_success <- mock_api_gateway_event(
+  mock_response_success <- mock_rest_api_gateway_event(
     query_parameters = list(number = 9),
     result = list(parity = "odd"),
     expected_response_headers = list(
@@ -14,9 +14,9 @@ test_that("we can parse input with parameter arguments from an API Gateway", {
   expect_true(mock_response_success)
 })
 
-test_that("we can parse input with body arguments from an API Gateway", {
+test_that("we can parse input with body arguments from a REST API Gateway", {
   use_basic_lambda_setup(handler = "parity")
-  mock_response_success <- mock_api_gateway_event(
+  mock_response_success <- mock_rest_api_gateway_event(
     body_parameters = list(number = 9), #' "{\\"number\\": 9}"',
     result = list(parity = "odd"),
     expected_response_headers = list(
@@ -30,10 +30,11 @@ test_that("we can parse input with body arguments from an API Gateway", {
   expect_true(mock_response_success)
 })
 
-test_that("we can parse input with body and parameter arguments from an API Gateway", {
+test_that("we can parse input with body and parameter arguments from a REST
+          API Gateway", {
   named_sum <- function(x, y) list(sum = x + y)
   use_basic_lambda_setup(handler = "named_sum")
-  mock_response_success <- mock_api_gateway_event(
+  mock_response_success <- mock_rest_api_gateway_event(
     query_parameters = list(x = 5),
     body_parameters = list(y = 4),
     result = list(sum = 9),
@@ -48,9 +49,9 @@ test_that("we can parse input with body and parameter arguments from an API Gate
   expect_true(mock_response_success)
 })
 
-test_that("we can parse input with no arguments from an API Gateway", {
+test_that("we can parse input with no arguments from a REST API Gateway", {
   use_basic_lambda_setup(handler = "no_arguments")
-  mock_response_success <- mock_api_gateway_event(
+  mock_response_success <- mock_rest_api_gateway_event(
     query_parameters = NULL,
     body_parameters = NULL,
     result = list(animal = "dog", breed = "corgi"),
@@ -65,11 +66,11 @@ test_that("we can parse input with no arguments from an API Gateway", {
   expect_true(mock_response_success)
 })
 
-test_that("API Gateway event errors are handled as responses", {
+test_that("REST API Gateway event errors are handled as responses", {
   give_error <- function() stop("my heart is a fish")
   use_basic_lambda_setup(handler = "give_error")
 
-  mock_response_success <- mock_api_gateway_event(
+  mock_response_success <- mock_rest_api_gateway_event(
     query_parameters = NULL,
     body_parameters = NULL,
     result = as_json(
@@ -93,11 +94,11 @@ test_that("API Gateway event errors are handled as responses", {
   expect_true(mock_response_success)
 })
 
-test_that("API Gateway event errors can include status codes", {
+test_that("REST API Gateway event errors can include status codes", {
   give_error <- function() stop_html("my heart is a fish", code = 404L)
   use_basic_lambda_setup(handler = "give_error")
 
-  mock_response_success <- mock_api_gateway_event(
+  mock_response_success <- mock_rest_api_gateway_event(
     query_parameters = NULL,
     body_parameters = NULL,
     result = as_json(

@@ -224,14 +224,16 @@ trigger_initialisation_error <- function(expected_error,
 }
 
 
-mock_api_gateway_event <- function(query_parameters = NULL,
-                                   body_parameters = NULL,
-                                   result,
-                                   expected_response_headers = default_response_headers,
-                                   expect_result_as_is = FALSE,
-                                   request_id = "abc123",
-                                   timeout_seconds = 0.5) {
-  api_gateway_event_body <- mock_api_gateway_event_body(
+mock_rest_api_gateway_event <- function(
+  query_parameters = NULL,
+  body_parameters = NULL,
+  result,
+  expected_response_headers = default_response_headers,
+  expect_result_as_is = FALSE,
+  request_id = "abc123",
+  timeout_seconds = 0.5
+) {
+  api_gateway_event_body <- mock_rest_api_gateway_event_body(
     query_parameters,
     body_parameters
   )
@@ -282,8 +284,8 @@ mock_api_gateway_event <- function(query_parameters = NULL,
   n_responses >= 1
 }
 
-mock_api_gateway_event_body <- function(query_parameters = NULL,
-                                        body_parameters = NULL) {
+mock_rest_api_gateway_event_body <- function(query_parameters = NULL,
+                                             body_parameters = NULL) {
   # Bizarrely, the body needs to be a stringified JSON but the query parameters
   # need to be just a normal JSON
   as_json(

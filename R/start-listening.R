@@ -70,8 +70,8 @@ extract_request_id_from_headers <- function(headers) {
 #'
 #' @keywords internal
 classify_event <- function(event_content) {
-  invocation_type <- if (is_from_api_gateway(event_content)) {
-    "api_gateway_event"
+  invocation_type <- if (is_from_rest_api_gateway(event_content)) {
+    "rest_api_gateway_event"
   } else if (is_scheduled_event_content(event_content)) {
     "scheduled_event"
   } else {
