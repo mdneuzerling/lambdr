@@ -136,7 +136,7 @@ conditions." />
 <code><a href='https://rdrr.io/r/base/conditions.html'>conditions</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>condition</span><span class='op'>(</span><span class='va'>subclass</span>, <span class='va'>message</span>, code <span class='op'>=</span> <span class='fl'>500L</span>, call <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>sys.call</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>condition</span><span class='op'>(</span><span class='va'>subclass</span>, <span class='va'>...</span>, code <span class='op'>=</span> <span class='fl'>500L</span>, request_id <span class='op'>=</span> <span class='cn'>NULL</span>, call <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>sys.call</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -147,9 +147,9 @@ conditions." />
 <code><a href='https://rdrr.io/r/base/c.html'>c(subclass, "simpleError", "error", "condition")</a></code>.</p></td>
     </tr>
     <tr>
-      <th>message</th>
-      <td><p>character message, such as an error description, to include
-with the condition.</p></td>
+      <th>...</th>
+      <td><p>zero or more objects which can be coerced to character (and which
+are pasted together with no separator). This forms the error message.</p></td>
     </tr>
     <tr>
       <th>code</th>
@@ -158,13 +158,14 @@ which is a generic "Internal Server Error". This is used when errors are to
 be returned to an API Gateway.</p></td>
     </tr>
     <tr>
-      <th>call</th>
-      <td><p>call expression</p></td>
+      <th>request_id</th>
+      <td><p>character. Used in error handling during event
+decomposition, when it's possible that a request ID might be known but the
+event hasn't been fully examined yet.</p></td>
     </tr>
     <tr>
-      <th>...attributes, </th>
-      <td><p>specified in <code>tag = value</code> form, which will be attached
-to the condition</p></td>
+      <th>call</th>
+      <td><p>call expression</p></td>
     </tr>
     </table>
 

@@ -31,9 +31,6 @@
     <loc>https://lambdr.mdneuzerling.com/reference/extract_event_headers.html</loc>
   </url>
   <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/extract_request_id_from_headers.html</loc>
-  </url>
-  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/from_base64.html</loc>
   </url>
   <url>
@@ -46,13 +43,13 @@
     <loc>https://lambdr.mdneuzerling.com/reference/get_lambda_environment_variable.html</loc>
   </url>
   <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/handle_decomposition_error.html</loc>
-  </url>
-  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/handle_event.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/handle_event_error.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/is_from_html_api_gateway.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/is_from_rest_api_gateway.html</loc>
@@ -100,10 +97,16 @@
     <loc>https://lambdr.mdneuzerling.com/reference/start_listening.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/stop_decomposition.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/stop_html.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/wait_for_and_handle_event.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/wait_for_event.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/articles/api-gateway-invocations.html</loc>

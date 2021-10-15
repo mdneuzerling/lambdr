@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Query the next invocation endpoint to get the next input — wait_for_event • lambdr</title>
+<title>Determine if a Lambda event is coming via an API Gateway — is_from_html_api_gateway • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,10 +39,8 @@
 
 
 
-<meta property="og:title" content="Query the next invocation endpoint to get the next input — wait_for_event" />
-<meta property="og:description" content="The query will receive a response when an input is queued up. If there is no
-input waiting, the Lambda instance will be shut down after a period of
-inactivity." />
+<meta property="og:title" content="Determine if a Lambda event is coming via an API Gateway — is_from_html_api_gateway" />
+<meta property="og:description" content="Determine if a Lambda event is coming via an API Gateway" />
 
 
 
@@ -125,28 +123,37 @@ inactivity." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Query the next invocation endpoint to get the next input</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/start-listening.R'><code>R/start-listening.R</code></a></small>
-    <div class="hidden name"><code>wait_for_event.Rd</code></div>
+    <h1>Determine if a Lambda event is coming via an API Gateway</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/html-api-gateway-events.R'><code>R/html-api-gateway-events.R</code></a></small>
+    <div class="hidden name"><code>is_from_html_api_gateway.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The query will receive a response when an input is queued up. If there is no
-input waiting, the Lambda instance will be shut down after a period of
-inactivity.</p>
+    <p>Determine if a Lambda event is coming via an API Gateway</p>
     </div>
 
-    <pre class="usage"><span class='fu'>wait_for_event</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>is_from_html_api_gateway</span><span class='op'>(</span><span class='va'>event_content</span><span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>event_content</th>
+      <td><p>the content of the response received from querying the
+text invocation endpoint, as a character</p></td>
+    </tr>
+    </table>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The Request ID is unique for each input of a Lambda. It is carried by the
-"lambda-runtime-aws-request-id" header of the response from the next
-invocation endpoint (see <code><a href='endpoints.html'>endpoints</a></code>).</p>
-<p>If an error occurs when extracting the Request ID it is impossible to post it
-to the invocation error endpoint as that is determined by the Request ID. We
-log the error and move on.</p>
+    <p>logical</p>
+    <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
+
+    
+
+<p>Events coming from an API Gateway need to be treated a little differently,
+both in parsing the event content and in posting the results. Refer to
+<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code> for details.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

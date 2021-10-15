@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Query the next invocation endpoint to get the next input — wait_for_and_handle_event • lambdr</title>
+<title>Wait for and handle event — wait_for_and_handle_event • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,10 +39,9 @@
 
 
 
-<meta property="og:title" content="Query the next invocation endpoint to get the next input — wait_for_and_handle_event" />
-<meta property="og:description" content="The query will receive a response when an input is queued up. If there is no
-input waiting, the Lambda instance will be shut down after a period of
-inactivity." />
+<meta property="og:title" content="Wait for and handle event — wait_for_and_handle_event" />
+<meta property="og:description" content="Combines wait_for_event and handle_event along
+with" />
 
 
 
@@ -125,18 +124,17 @@ inactivity." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Query the next invocation endpoint to get the next input</h1>
+    <h1>Wait for and handle event</h1>
     <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/start-listening.R'><code>R/start-listening.R</code></a></small>
     <div class="hidden name"><code>wait_for_and_handle_event.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The query will receive a response when an input is queued up. If there is no
-input waiting, the Lambda instance will be shut down after a period of
-inactivity.</p>
+    <p>Combines <code><a href='wait_for_event.html'>wait_for_event</a></code> and <code><a href='handle_event.html'>handle_event</a></code> along
+with</p>
     </div>
 
-    <pre class="usage"><span class='fu'>wait_for_and_handle_event</span><span class='op'>(</span>deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>wait_for_and_handle_event</span><span class='op'>(</span>deserialiser <span class='op'>=</span> <span class='va'>deserialiser</span>, serialiser <span class='op'>=</span> <span class='va'>serialiser</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -158,6 +156,9 @@ request type. To send the result as is, pass the <code>identity</code> function.
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p><code>NULL</code></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
