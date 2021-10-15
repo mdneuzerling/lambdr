@@ -195,6 +195,9 @@ following functions dispatch on this class:
   passed to the handler function
 * `seralise_result` converts the result into the form that will be sent back to
   Lambda
+* `extract_context` extracts metadata about the event as a list. If the handler
+  function accepts a named `context` argument then it will receive the context
+  as a value to that argument.
 * `handle_event_error` deals with errors that occur during event handling. Some 
   invocation types require errors to be formatted or handled in a very specific
   way.

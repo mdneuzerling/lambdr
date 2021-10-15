@@ -4,7 +4,7 @@
 \alias{extract_context}
 \title{Extract the context of a Lambda invocation from the headers of an event}
 \usage{
-extract_context(event)
+extract_context(event, ...)
 }
 \arguments{
 \item{event}{the response received from querying the next invocation
@@ -19,13 +19,19 @@ Extract the context of a Lambda invocation from the headers of an event
 \section{Event context}{
 
 The \emph{context} of an event is a list of metadata about the invocation. It is
-derived from the headers of a next event invocation response. It consists of:
+derived from the headers of a next event invocation response. By default it
+consists of:
 \itemize{
 \item \code{aws_request_id} - The identifier of the invocation request
 \item \code{invoked_function_arn} – The Amazon Resource Name (ARN) that's used to
 invoke the function. Indicates if the invoker specified a version number or
 alias.
 }
+
+Alternatively, a particular event \emph{class} (determined by invocation method)
+can implement an \code{extract_context} method. This is useful for, say,
+invocations coming via API Gateway, in which the context includes details
+about the HTTP request. In all cases the context should be a list.
 
 If the handler function accepts a \code{context} argument then it will
 automatically receive at runtime a named list consisting of these values

@@ -22,12 +22,18 @@
 #'
 #' @section Event context:
 #' The _context_ of an event is a list of metadata about the invocation. It is
-#' derived from the headers of a next event invocation response. It consists of:
+#' derived from the headers of a next event invocation response. By default it
+#' consists of:
 #'
 #' * `aws_request_id` - The identifier of the invocation request
 #' * `invoked_function_arn` – The Amazon Resource Name (ARN) that's used to
 #'   invoke the function. Indicates if the invoker specified a version number or
 #'   alias.
+#'
+#' Alternatively, a particular event _class_ (determined by invocation method)
+#' can implement an `extract_context` method. This is useful for, say,
+#' invocations coming via API Gateway, in which the context includes details
+#' about the HTTP request. In all cases the context should be a list.
 #'
 #' If the handler function accepts a `context` argument then it will
 #' automatically receive at runtime a named list consisting of these values
@@ -39,7 +45,12 @@
 #'
 #' @return list
 #' @keywords internal
-extract_context <- function(event) {
+#' @export
+extract_context <- function(event, ...) {
+  UseMethod("extract_context")
+}
+
+extract_context.default <- function(event, ...) {
   list(
     aws_request_id = event$event_headers[["lambda-runtime-aws-request-id"]],
     invoked_function_arn = event$event_headers[["lambda-runtime-invoked-function-arn"]]
