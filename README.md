@@ -13,6 +13,16 @@ Running R containers on AWS Lambda.
 
 This package is in active development, and is not yet ready for use.
 
+Not all invocation types have been implemented or tested.
+
+
+ invocation type | implementation stage
+|:---------------|:---------------------|
+ direct | <img src="man/figures/lifecycle-maturing.svg" align="center"/>
+ API Gateway (REST) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
+ API Gateway (HTML) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
+ Scheduled (Cloudwatch) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
+
 ## Installation
 
 ``` r
@@ -136,29 +146,29 @@ cat /tmp/response.json
 ### Runtime endpoints
 
 The runtime works by querying HTTP endpoints configured by AWS Lambda.
-These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API"
-environment variable set by AWS Lambda during initialisation. They generally
-won't be available locally.
+These endpoints are determined by on the "AWS_LAMBDA_RUNTIME_API" environment
+variable set by AWS Lambda during initialisation. They generally won't be
+available locally.
 
 * The **next invocation endpoint** is the endpoint which R must query for
-the next input. R must send a `GET` request to this endpoint and will wait
-until either a response is received or the Lambda instance is shut down for
-inactivity. When Lambda receives an input from, say, an API Gateway, it will
-respond to the pending request with details of the input. We call the response
-to this request an _invocation_ in this document, and invocations are 
-interpreted as _events_.
-* The **initialisation error endpoint** is where an error should be sent if the
-error occurs when setting up the runtime. This is distinct from errors that
-occur during handling of an event.
+  the next input. R must send a `GET` request to this endpoint and will wait
+  until either a response is received or the Lambda instance is shut down for
+  inactivity. When AWS Lambda receives an input from, say, an API Gateway, it
+  will respond to R's request with details of the input. We call the response to
+  this request an _invocation_ in this document, and invocations are interpreted
+  as _events_.
+* The **initialisation error endpoint** is where an error should be sent if
+  the error occurs when setting up the runtime. This is distinct from errors 
+  that occur during handling of an event.
 * The **response endpoint** is where an event response should be sent. It is
-unique for each event.
+  unique for each event.
 * The **invocation error endpoint** is where errors that occur during event
-handling should be reported. It is unique for each event.
+  handling should be reported. It is unique for each event.
 
 The next invocation and initialisation error endpoints are unique in each Lambda 
 instance. The response and invocation error endpoints are determined by the
 `request_id` associated with each invocation. The request ID is given in the
-"lambda-runtime-aws-request-id" header in the response to the query of the
+"lambda-runtime-aws-request-id" header in the response to the query to the
 next invocation endpoint.
 
 ### Handler functions
@@ -170,19 +180,11 @@ can be configured in one of two ways:
 * as the `CMD` to the Dockerfile which contains the runtime, or
 * as configured through the Lambda console (this takes precedence)
 
-The `setup_lambda` function (run as part of `start_lambda`) picks up on this environment variable and identifies the function to which it refers. This handler function is used to process all invocations.
+The `setup_lambda` function (run as part of `start_lambda`) picks up on this
+environment variable and identifies the R function to which it refers. This
+handler function is used to process all invocations.
 
-## Event listening lifecycle
-
-The main function, `start_lambda`, runs three functions in sequence:
-
-* `setup_logging`
-* `setup_lambda`
-* `start_listening`
-
-The `start_listening` function sets up an infinite loop that listens for
-_invocations_, interprets them as _events_, and processes them with the handler 
-function. 
+### Event classification according to invocation
 
 Events need to be handled differently depending upon whether they are invoked
 directly, by an API Gateway, etc. Events are classified according to their
@@ -197,13 +199,27 @@ following functions dispatch on this class:
   invocation types require errors to be formatted or handled in a very specific
   way.
 
+### Event listening lifecycle
+
+The main function --- `start_lambda` --- runs three functions in sequence:
+
+* `setup_logging`
+* `setup_lambda`
+* `start_listening`
+
+The `start_listening` function sets up an infinite loop that listens for
+_invocations_, interprets them as _events_, and processes them with the handler 
+function. 
+
 `start_listening` triggers the listening loop, which consists of
 `wait_for_event` and `handle_event` (combined into `wait_for_and_handle_event`).
 Once a response (called an _invocation_) is sent to the request made in 
-`wait_for_event`, it is _decomposed_ into and classified into an _event_. If an
-error occurs during this stage it is handled by `handle_decomposition_error`. If 
-possible the error will be posted to the error invocation endpoint so that
-Lambda can process it, but otherwise it will simply be logged and then the 
+`wait_for_event`, it is _decomposed_ into an _event_, and classified according
+to its (detected) invocation type.
+
+If an error occurs during this stage it is handled by
+`handle_decomposition_error`. Ifpossible the error will be posted to the error invocation endpoint so that Lambda can process it, but otherwise it will simply
+be logged and then the runtime will move onto the next invocation.
 
 The event is passed to `handle_event` which consists of the following steps:
 
