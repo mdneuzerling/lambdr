@@ -234,4 +234,4 @@ All of these functions are diagrammed below, with boxes representing functions
 which are grouped together according to the primary function that calls each
 of them in sequence. Errors are shown in red.
 
-<img src="start-listening.drawio.svg" align="center" height="800" />
+<img src="man/figures/start-listening.drawio.svg" align="center" height="800" />
