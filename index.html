@@ -234,7 +234,7 @@
 <p>Afterwards, the runtime will return to the <code>wait_for_event</code> function and process the next invocation that arrives. AWS Lambda may shut down the instance if it times out before another event invocation arrives.</p>
 <p>Alternatively, if an error occurs during <code>wait_for_event</code> it will be handled by <code>handle_decomposition_error</code>, or if it occurs during <code>handle_event</code> it will be dispatched to the appropriate <code>handle_event_error</code> method according to the S3 class of the event. In either case this will not stop the R session — an error when processing a single event is a problem for that event alone. The runtime will return to the <code>wait_for_event</code> step.</p>
 <p>All of these functions are diagrammed below, with boxes representing functions which are grouped together according to the primary function that calls each of them in sequence. Errors are shown in red.</p>
-<p><img src="reference/figures/start-listening.drawio.svg" align="center" height="800"></p>
+<p><img src="reference/figures/start-listening.drawio.svg" align="center"></p>
 </div>
 </div>
   </div>
