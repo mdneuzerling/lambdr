@@ -1,4 +1,4 @@
-#' Determine if a Lambda event is coming via an API Gateway
+#' Determine if a Lambda event is coming via a REST API Gateway
 #'
 #' @section Invocations via an API Gateway:
 #' Events coming from an API Gateway need to be treated a little differently,

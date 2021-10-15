@@ -4,11 +4,11 @@
 \alias{stop_html}
 \title{Raise an error with an optional HTML status code for API Gateways}
 \usage{
-stop_html(message, code = 500L)
+stop_html(..., code = 500L)
 }
 \arguments{
-\item{message}{character message, such as an error description, to include
-with the condition.}
+\item{...}{zero or more objects which can be coerced to character (and which
+are pasted together with no separator). This forms the error message.}
 
 \item{code}{HTTP status code to return (if applicable). Defaults to \code{500},
 which is a generic "Internal Server Error". This is used when errors are to

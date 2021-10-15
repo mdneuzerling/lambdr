@@ -92,26 +92,6 @@ handle_event_error.default <- function(event, ...) {
   error_handling_function
 }
 
-
-#' Handle an error that occurs when decomposing an invocation into an event
-#'
-#' This function is largely similar to \code{\link{handle_event_error}}. Its
-#' purpose is to catch errors that occur between identifying the request ID
-#' of an invocation and handling the event it defines. As such, it takes a
-#' `request_id` argument rather than an `event argument`.
-#'
-#' @inheritParams endpoints
-#'
-#' @inherit handle_event_error return
-#'
-#' @keywords internal
-handle_decomposition_error <- function(request_id) {
-  error_handling_function <- function(e) {
-    post_lambda_error(e, endpoint = get_invocation_error_endpoint(request_id))
-  }
-  error_handling_function
-}
-
 #' Define a condition (like an error) with support for HTTP status codes
 #'
 #' For more information on conditions and errors see
@@ -120,22 +100,70 @@ handle_decomposition_error <- function(request_id) {
 #'
 #' @param subclass conditions returned by this function will be of the class
 #' `c(subclass, "simpleError", "error", "condition")`.
-#' @param message character message, such as an error description, to include
-#'   with the condition.
+#' @param ... zero or more objects which can be coerced to character (and which
+#'   are pasted together with no separator). This forms the error message.
 #' @param code HTTP status code to return (if applicable). Defaults to `500`,
 #'   which is a generic "Internal Server Error". This is used when errors are to
 #'   be returned to an API Gateway.
+#' @param request_id character. Used in error handling during event
+#'   decomposition, when it's possible that a request ID might be known but the
+#'   event hasn't been fully examined yet.
 #' @param call call expression
-#' @param ...attributes, specified in `tag = value` form, which will be attached
-#'   to the condition
 #'
 #' @keywords internal
-condition <- function(subclass, message, code = 500L, call = sys.call(-1), ...) {
+condition <- function(subclass,
+                      ...,
+                      code = 500L,
+                      request_id = NULL,
+                      call = sys.call(-1)) {
+  message <- .makeMessage(..., domain = NULL)
   structure(
     class = c(subclass, "error", "condition"),
-    list(message = message, code = code, call = call),
-    ...
+    list(message = message, code = code, request_id = request_id, call = call)
   )
+}
+
+################################################################################
+############################# Decomposition errors #############################
+################################################################################
+
+#' Raise an error with a request ID if known
+#'
+#' @description
+#' During decomposition from an invocation into an event, it is possible for an
+#' error to occur when a request ID is known but the event hasn't been fully
+#' realised yet. In order to handle these, an error must be posted to the
+#' invocation error endpoint.
+#'
+#' `stop_decomposition` raises an error with an optional `request_id`. The error
+#' can then be processed by `handle_decomposition_error`. If a `request_id` is
+#' present then the error can be posted to the invocation error endpoint.
+#' Otherwise, the error is simply logged. In either case the error does not
+#' stop the kernel, and the runtime can move onto the next event.
+#'
+#' @inheritParams condition
+#'
+#' @keywords internal
+stop_decomposition <- function(..., request_id = NULL) {
+  stop(
+    condition(
+      c("decomposition_error", "error"),
+      ...,
+      request_id = request_id
+    )
+  )
+}
+
+#' @inheritParams post_lambda_error
+#' @rdname stop_decomposition
+handle_decomposition_error <- function(e) {
+  logger::log_error(e$message)
+
+  if (is.null(e$request_id)) {
+    return(NULL)
+  }
+
+  post_lambda_error(e, endpoint = get_invocation_error_endpoint(e$request_id))
 }
 
 ################################################################################
@@ -159,11 +187,11 @@ condition <- function(subclass, message, code = 500L, call = sys.call(-1), ...) 
 #' @examples \dontrun{
 #' stop_html("Resource doesn't exist", code = 404L)
 #' }
-stop_html <- function(message, code = 500L) {
+stop_html <- function(..., code = 500L) {
   stop(
     condition(
       c("html_error", "error"),
-      message,
+      ...,
       code = code
     )
   )

@@ -4,23 +4,24 @@
 \alias{condition}
 \title{Define a condition (like an error) with support for HTTP status codes}
 \usage{
-condition(subclass, message, code = 500L, call = sys.call(-1), ...)
+condition(subclass, ..., code = 500L, request_id = NULL, call = sys.call(-1))
 }
 \arguments{
 \item{subclass}{conditions returned by this function will be of the class
 \code{c(subclass, "simpleError", "error", "condition")}.}
 
-\item{message}{character message, such as an error description, to include
-with the condition.}
+\item{...}{zero or more objects which can be coerced to character (and which
+are pasted together with no separator). This forms the error message.}
 
 \item{code}{HTTP status code to return (if applicable). Defaults to \code{500},
 which is a generic "Internal Server Error". This is used when errors are to
 be returned to an API Gateway.}
 
-\item{call}{call expression}
+\item{request_id}{character. Used in error handling during event
+decomposition, when it's possible that a request ID might be known but the
+event hasn't been fully examined yet.}
 
-\item{...attributes, }{specified in \code{tag = value} form, which will be attached
-to the condition}
+\item{call}{call expression}
 }
 \description{
 For more information on conditions and errors see

@@ -95,7 +95,7 @@ test_that("event headers extracted, prettified and distilled", {
   )
 
   expect_equal(
-    extract_request_id_from_headers(headers),
+    headers[["lambda-runtime-aws-request-id"]],
     request_id
   )
 })
@@ -124,11 +124,22 @@ test_that("error occurs when request ID not in headers", {
       status = 200
     )
 
-  event <- httr::GET(invocation_endpoint)
-  headers <- extract_event_headers(event)
+  use_basic_lambda_setup(handler = "sqrt")
 
+  # Errors are simply logged and shouldn't stop the runtime.
+  # They aren't reported to any endpoints (there's no request_id so there's no
+  # endpoint) so we expect no errors from webmockr here either.
   expect_error(
-    extract_request_id_from_headers(headers),
-    "Event doesn't contain request ID"
+    start_listening(timeout_seconds = 0.5),
+    NA
   )
+
+  requests <- webmockr::request_registry()
+  n_responses <- requests$times_executed(
+    webmockr::RequestPattern$new("get", invocation_endpoint)
+  )
+
+  # Should be more than 1 invocation, to prove the runtime didn't hang on one
+  # failed invocation without a request_id
+  n_responses > 1
 })

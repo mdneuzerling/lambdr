@@ -17,3 +17,6 @@ Events coming via an API Gateway can have content with bodies encoded as
 Base64. This is especially true for HTML API Gateways (as opposed to REST
 API Gateways).
 }
+\examples{
+from_base64("eyJudW1iZXIiOjd9")
+}

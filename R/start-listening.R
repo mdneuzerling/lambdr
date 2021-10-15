@@ -31,28 +31,6 @@ extract_event_headers <- function(event) {
   event_headers
 }
 
-#' Extract the request ID from the headers of an event, or error otherwise
-#'
-#' The Request ID is unique for each input of a Lambda. It is carried by the
-#' "lambda-runtime-aws-request-id" header of the response from the next
-#' invocation endpoint (see \code{\link{endpoints}}).
-#'
-#' @param headers headers of a HTML response, as extracted by
-#'   \code{\link[httr]{headers}} or \code{\link{extract_event_headers}}
-#'
-#' @return character
-#' @keywords internal
-extract_request_id_from_headers <- function(headers) {
-  if (!("lambda-runtime-aws-request-id" %in% names(headers))) {
-    error_message <- paste(
-      "Event doesn't contain request ID",
-      "Can't clear this request from the queue."
-    )
-    stop(error_message)
-  }
-  headers[["lambda-runtime-aws-request-id"]]
-}
-
 #' Classify an event based on how it is invoked
 #'
 #' @description
@@ -72,6 +50,8 @@ extract_request_id_from_headers <- function(headers) {
 classify_event <- function(event_content) {
   invocation_type <- if (is_from_rest_api_gateway(event_content)) {
     "rest_api_gateway_event"
+  } else if (is_from_html_api_gateway(event_content)) {
+    "html_api_gateway_event"
   } else if (is_scheduled_event_content(event_content)) {
     "scheduled_event"
   } else {
@@ -86,29 +66,30 @@ classify_event <- function(event_content) {
 #' input waiting, the Lambda instance will be shut down after a period of
 #' inactivity.
 #'
-#' @inheritParams parse_event_content
-#' @inheritParams post_result
+#' @details
+#' The Request ID is unique for each input of a Lambda. It is carried by the
+#' "lambda-runtime-aws-request-id" header of the response from the next
+#' invocation endpoint (see \code{\link{endpoints}}).
+#'
+#' If an error occurs when extracting the Request ID it is impossible to post it
+#' to the invocation error endpoint as that is determined by the Request ID. We
+#' log the error and move on.
 #'
 #' @keywords internal
-wait_for_and_handle_event <- function(deserialiser = NULL, serialiser = NULL) {
-  logger::log_debug("Waiting for event")
+wait_for_event <- function() {
 
-  # If an error occurs during the following tryCatch block it is impossible to
-  # post it to the invocation error endpoint as that requires a Request ID.
-  # We log the error and move on.
-  tryCatch(
-    {
-      invocation <- httr::GET(url = get_next_invocation_endpoint())
-      logger::log_debug("Event received")
-      event_headers <- extract_event_headers(invocation)
-      request_id <- extract_request_id_from_headers(event_headers)
-      logger::log_debug("Request ID: ", request_id)
-    },
-    error = function(e) {
-      logger::log_error(e$message)
-      return(NULL)
-    }
-  )
+  logger::log_debug("Waiting for event")
+  invocation <- httr::GET(url = get_next_invocation_endpoint())
+  logger::log_debug("Event received")
+
+  event_headers <- extract_event_headers(invocation)
+  if (!("lambda-runtime-aws-request-id" %in% names(event_headers))) {
+    stop_decomposition("Event doesn't contain request ID ",
+                       "Can't clear this request from the queue.",
+                       request_id = NULL)
+  }
+  request_id <- event_headers[["lambda-runtime-aws-request-id"]]
+  logger::log_debug("Request ID: ", request_id)
 
   tryCatch(
     {
@@ -121,13 +102,10 @@ wait_for_and_handle_event <- function(deserialiser = NULL, serialiser = NULL) {
       event_classification <- classify_event(event_content)
       logger::log_debug("Event class:", event_classification[1])
     },
-    error = function(e) {
-      handle_decomposition_error(request_id)(e)
-      return(NULL)
-    }
+    error = function(e) stop_decomposition(e$message, request_id = request_id)
   )
 
-  event <- structure(
+  structure(
     list(
       request_id = request_id,
       status_code = status_code,
@@ -139,6 +117,33 @@ wait_for_and_handle_event <- function(deserialiser = NULL, serialiser = NULL) {
     # calculated with the `result_calculated` flag
     result_calculated = FALSE
   )
+}
+
+
+#' Wait for and handle event
+#'
+#' Combines \code{\link{wait_for_event}} and \code{\link{handle_event}} along
+#' with
+#'
+#' @inheritParams parse_event_content
+#' @inheritParams post_result
+#'
+#' @return `NULL`
+#'
+#' @keywords internal
+wait_for_and_handle_event <- function(deserialiser = deserialiser,
+                                      serialiser = serialiser) {
+
+  event <- NULL
+
+  tryCatch(
+    event <- wait_for_event(),
+    error = function(e) handle_decomposition_error(e)
+  )
+
+  if (is.null(event)) {
+    return(NULL)
+  }
 
   tryCatch(
     handle_event(event, deserialiser = deserialiser, serialiser = serialiser),

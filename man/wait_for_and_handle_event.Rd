@@ -2,9 +2,9 @@
 % Please edit documentation in R/start-listening.R
 \name{wait_for_and_handle_event}
 \alias{wait_for_and_handle_event}
-\title{Query the next invocation endpoint to get the next input}
+\title{Wait for and handle event}
 \usage{
-wait_for_and_handle_event(deserialiser = NULL, serialiser = NULL)
+wait_for_and_handle_event(deserialiser = deserialiser, serialiser = serialiser)
 }
 \arguments{
 \item{deserialiser}{function for deserialising the body of the event.
@@ -18,9 +18,11 @@ below).}
 By default, will attempt to serialise the body as JSON, based on the
 request type. To send the result as is, pass the \code{identity} function.}
 }
+\value{
+\code{NULL}
+}
 \description{
-The query will receive a response when an input is queued up. If there is no
-input waiting, the Lambda instance will be shut down after a period of
-inactivity.
+Combines \code{\link{wait_for_event}} and \code{\link{handle_event}} along
+with
 }
 \keyword{internal}

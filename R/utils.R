@@ -100,7 +100,6 @@ default_response_headers <- list(
 #'
 #' @examples
 #' from_base64("eyJudW1iZXIiOjd9")
-#' # "{\"number\":7}"
 from_base64 <- function(x) {
   rawToChar(jsonlite::base64_dec(x))
 }

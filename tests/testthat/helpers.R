@@ -1,3 +1,5 @@
+test_debug_level <- logger::FATAL
+
 parity <- function(number) {
   list(parity = if (as.integer(number) %% 2 == 0) "even" else "odd")
 }
@@ -18,7 +20,7 @@ expect_setup_failure <- function(endpoint_function, ...) {
 use_basic_lambda_setup <- function(handler = "sqrt",
                                    runtime_api = "red_panda",
                                    task_root = "giraffe",
-                                   log_threshold = logger::FATAL) {
+                                   log_threshold = test_debug_level) {
   setup_logging(log_threshold = log_threshold)
   withr::with_envvar(
     c(
@@ -273,7 +275,6 @@ mock_rest_api_gateway_event <- function(query_parameters = NULL,
     ) %>%
     webmockr::to_return(status = 200)
 
-  # 1 second should be plenty of time to calculate some square roots.
   start_listening(timeout_seconds = timeout_seconds)
 
   requests <- webmockr::request_registry()
