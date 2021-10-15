@@ -91,6 +91,31 @@
 
 <p>Running R containers on AWS Lambda.</p>
 <p>This package is in active development, and is not yet ready for use.</p>
+<p>Not all invocation types have been implemented or tested.</p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">invocation type</th>
+<th align="left">implementation stage</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">direct</td>
+<td align="left"><img src="reference/figures/lifecycle-maturing.svg" align="center"></td>
+</tr>
+<tr class="even">
+<td align="left">API Gateway (REST)</td>
+<td align="left"><img src="reference/figures/lifecycle-experimental.svg" align="center"></td>
+</tr>
+<tr class="odd">
+<td align="left">API Gateway (HTML)</td>
+<td align="left"><img src="reference/figures/lifecycle-experimental.svg" align="center"></td>
+</tr>
+<tr class="even">
+<td align="left">Scheduled (Cloudwatch)</td>
+<td align="left"><img src="reference/figures/lifecycle-experimental.svg" align="center"></td>
+</tr>
+</tbody>
+</table>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
@@ -180,14 +205,14 @@
 <div id="runtime-endpoints" class="section level3">
 <h3 class="hasAnchor">
 <a href="#runtime-endpoints" class="anchor"></a>Runtime endpoints</h3>
-<p>The runtime works by querying HTTP endpoints configured by AWS Lambda. These endpoints are configured based on the “AWS_LAMBDA_RUNTIME_API” environment variable set by AWS Lambda during initialisation. They generally won’t be available locally.</p>
+<p>The runtime works by querying HTTP endpoints configured by AWS Lambda. These endpoints are determined by on the “AWS_LAMBDA_RUNTIME_API” environment variable set by AWS Lambda during initialisation. They generally won’t be available locally.</p>
 <ul>
-<li>The <strong>next invocation endpoint</strong> is the endpoint which R must query for the next input. R must send a <code>GET</code> request to this endpoint and will wait until either a response is received or the Lambda instance is shut down for inactivity. When Lambda receives an input from, say, an API Gateway, it will respond to the pending request with details of the input. We call the response to this request an <em>invocation</em> in this document, and invocations are interpreted as <em>events</em>.</li>
+<li>The <strong>next invocation endpoint</strong> is the endpoint which R must query for the next input. R must send a <code>GET</code> request to this endpoint and will wait until either a response is received or the Lambda instance is shut down for inactivity. When AWS Lambda receives an input from, say, an API Gateway, it will respond to R’s request with details of the input. We call the response to this request an <em>invocation</em> in this document, and invocations are interpreted as <em>events</em>.</li>
 <li>The <strong>initialisation error endpoint</strong> is where an error should be sent if the error occurs when setting up the runtime. This is distinct from errors that occur during handling of an event.</li>
 <li>The <strong>response endpoint</strong> is where an event response should be sent. It is unique for each event.</li>
 <li>The <strong>invocation error endpoint</strong> is where errors that occur during event handling should be reported. It is unique for each event.</li>
 </ul>
-<p>The next invocation and initialisation error endpoints are unique in each Lambda instance. The response and invocation error endpoints are determined by the <code>request_id</code> associated with each invocation. The request ID is given in the “lambda-runtime-aws-request-id” header in the response to the query of the next invocation endpoint.</p>
+<p>The next invocation and initialisation error endpoints are unique in each Lambda instance. The response and invocation error endpoints are determined by the <code>request_id</code> associated with each invocation. The request ID is given in the “lambda-runtime-aws-request-id” header in the response to the query to the next invocation endpoint.</p>
 </div>
 <div id="handler-functions" class="section level3">
 <h3 class="hasAnchor">
@@ -197,19 +222,11 @@
 <li>as the <code>CMD</code> to the Dockerfile which contains the runtime, or</li>
 <li>as configured through the Lambda console (this takes precedence)</li>
 </ul>
-<p>The <code>setup_lambda</code> function (run as part of <code>start_lambda</code>) picks up on this environment variable and identifies the function to which it refers. This handler function is used to process all invocations.</p>
+<p>The <code>setup_lambda</code> function (run as part of <code>start_lambda</code>) picks up on this environment variable and identifies the R function to which it refers. This handler function is used to process all invocations.</p>
 </div>
-</div>
-<div id="event-listening-lifecycle" class="section level2">
-<h2 class="hasAnchor">
-<a href="#event-listening-lifecycle" class="anchor"></a>Event listening lifecycle</h2>
-<p>The main function, <code>start_lambda</code>, runs three functions in sequence:</p>
-<ul>
-<li><code>setup_logging</code></li>
-<li><code>setup_lambda</code></li>
-<li><code>start_listening</code></li>
-</ul>
-<p>The <code>start_listening</code> function sets up an infinite loop that listens for <em>invocations</em>, interprets them as <em>events</em>, and processes them with the handler function.</p>
+<div id="event-classification-according-to-invocation" class="section level3">
+<h3 class="hasAnchor">
+<a href="#event-classification-according-to-invocation" class="anchor"></a>Event classification according to invocation</h3>
 <p>Events need to be handled differently depending upon whether they are invoked directly, by an API Gateway, etc. Events are classified according to their detected invocation method, with their invocation stored as an S3 class. The following functions dispatch on this class:</p>
 <ul>
 <li>
@@ -219,7 +236,19 @@
 <li>
 <code>handle_event_error</code> deals with errors that occur during event handling. Some invocation types require errors to be formatted or handled in a very specific way.</li>
 </ul>
-<p><code>start_listening</code> triggers the listening loop, which consists of <code>wait_for_event</code> and <code>handle_event</code> (combined into <code>wait_for_and_handle_event</code>). Once a response (called an <em>invocation</em>) is sent to the request made in <code>wait_for_event</code>, it is <em>decomposed</em> into and classified into an <em>event</em>. If an error occurs during this stage it is handled by <code>handle_decomposition_error</code>. If possible the error will be posted to the error invocation endpoint so that Lambda can process it, but otherwise it will simply be logged and then the</p>
+</div>
+<div id="event-listening-lifecycle" class="section level3">
+<h3 class="hasAnchor">
+<a href="#event-listening-lifecycle" class="anchor"></a>Event listening lifecycle</h3>
+<p>The main function — <code>start_lambda</code> — runs three functions in sequence:</p>
+<ul>
+<li><code>setup_logging</code></li>
+<li><code>setup_lambda</code></li>
+<li><code>start_listening</code></li>
+</ul>
+<p>The <code>start_listening</code> function sets up an infinite loop that listens for <em>invocations</em>, interprets them as <em>events</em>, and processes them with the handler function.</p>
+<p><code>start_listening</code> triggers the listening loop, which consists of <code>wait_for_event</code> and <code>handle_event</code> (combined into <code>wait_for_and_handle_event</code>). Once a response (called an <em>invocation</em>) is sent to the request made in <code>wait_for_event</code>, it is <em>decomposed</em> into an <em>event</em>, and classified according to its (detected) invocation type.</p>
+<p>If an error occurs during this stage it is handled by <code>handle_decomposition_error</code>. Ifpossible the error will be posted to the error invocation endpoint so that Lambda can process it, but otherwise it will simply be logged and then the runtime will move onto the next invocation.</p>
 <p>The event is passed to <code>handle_event</code> which consists of the following steps:</p>
 <ul>
 <li>
@@ -235,6 +264,7 @@
 <p>Alternatively, if an error occurs during <code>wait_for_event</code> it will be handled by <code>handle_decomposition_error</code>, or if it occurs during <code>handle_event</code> it will be dispatched to the appropriate <code>handle_event_error</code> method according to the S3 class of the event. In either case this will not stop the R session — an error when processing a single event is a problem for that event alone. The runtime will return to the <code>wait_for_event</code> step.</p>
 <p>All of these functions are diagrammed below, with boxes representing functions which are grouped together according to the primary function that calls each of them in sequence. Errors are shown in red.</p>
 <p><img src="reference/figures/start-listening.drawio.svg" align="center"></p>
+</div>
 </div>
 </div>
   </div>
