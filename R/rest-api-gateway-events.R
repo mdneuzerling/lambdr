@@ -22,9 +22,14 @@ parse_event_content.rest_api_gateway_event <- function(event, ...) {
   if (is.null(query_parameters)) query_parameters <- list()
 
   # Parse the JSON within the JSON
-  body_parameters <- parse_json_or_empty(parsed_json[["body"]])
-  if (parsed_json[["isBase64Encoded"]] && lambda$decode_base64) {
-    body_parameters <- from_base64(body_parameters)
+  body <- parsed_json[["body"]]
+  base64_encoded <- parsed_json[["isBase64Encoded"]]
+  body_parameters <- if (!base64_encoded) {
+    parse_json_or_empty(body)
+  } else if (lambda$decode_base64) {
+    parse_json_or_empty(from_base64(body))
+  } else {
+    body
   }
 
   # query parameters always named, should go last

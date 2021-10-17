@@ -13,6 +13,8 @@ automatically. But for highly custom serialisation/deserialisation or edge cases
 it may be helpful to understand how content via API Gateways is structured and
 responded to.
 
+## Events via API Gateways
+
 When a Lambda runtime, like that implemented by `lambdr`, starts listening for
 inputs it queries the "next invocation" HTTP endpoint. The response to this
 is what's called here an _event_. The content of this event contains the
@@ -20,8 +22,14 @@ arguments (if any) to the function. After the result has been calculate, the
 runtime must format the result and submit it to the "result" HTTP endpoint.
 
 With direct invocation the content of the event contains a string which --- when interpreted as JSON --- gives the arguments for the handler function. When a
-Lambda is invoked via an API Gateway then the content of the event contains significantly more detail and requires careful parsing. An example is given at 
-the bottom of this section but the two most important sections are `body` and
+Lambda is invoked via an API Gateway then the content of the event contains significantly more detail and requires careful parsing.
+
+There are two types of API Gateways to consider: REST and HTML.
+
+### REST API Gateway events
+
+An example of REST API Gateway event content is given at the bottom of this
+section but the two most important sections are `body` and
 `queryStringParameters`.
 
 The `queryStringParameters` contain standard JSON. So if the request contains
@@ -137,5 +145,66 @@ API Gateway. The invocation is a call to a `parity` function with an argument
 },
 "body": "{\"number\":9}",
 "isBase64Encoded": false
+}
+```
+
+### HTML API Gateway events
+
+HTML API Gateway events are similar to REST API Gateway events, except that the
+body is more likely to be Base64 encoded, and the query parameters are presented
+as string values. That is, we might expect to see a `rawQueryString` of "parameter1=value1&parameter1=value2&parameter2=value". In this case however the
+`queryStringParameters` (if present) will be easier to work with:
+
+```json
+"queryStringParameters": {
+    "parameter1": "value1,value2",
+    "parameter2": "value"
+  }
+```
+
+A full example of an event body is shown below. Note that the
+`queryStringParameters` will not appear if `rawQueryString` is an empty string.
+
+```json
+{
+    "version": "2.0",
+    "routeKey": "ANY /parity",
+    "rawPath": "/default/parity",
+    "rawQueryString": "parameter1=value1&parameter1=value2&parameter2=value",
+    "queryStringParameters": {
+      "parameter1": "value1,value2",
+      "parameter2": "value"
+    },
+    "headers": {
+        "accept": "*/*",
+        "content-length": "12",
+        "content-type": "application/x-www-form-urlencoded",
+        "host": "abcdefghi.execute-api.ap-southeast-2.amazonaws.com",
+        "user-agent": "curl/7.64.1",
+        "x-amzn-trace-id": "Root=1-6167f9fb-1ada874811eaf2bc1464c679",
+        "x-forwarded-for": "192.168.1.1",
+        "x-forwarded-port": "443",
+        "x-forwarded-proto": "https"
+    },
+    "requestContext": {
+        "accountId": "123456789",
+        "apiId": "abcdefghi",
+        "domainName": "abcdefghi.execute-api.ap-southeast-2.amazonaws.com",
+        "domainPrefix": "abcdefghi",
+        "http": {
+            "method": "POST",
+            "path": "/default/parity",
+            "protocol": "HTTP/1.1",
+            "sourceIp": "192.168.1.1",
+            "userAgent": "curl/7.64.1"
+        },
+        "requestId": "HMP_QiusywMEPEg=",
+        "routeKey": "ANY /parity",
+        "stage": "default",
+        "time": "14/Oct/2021:09:35:55 +0000",
+        "timeEpoch": 1634204155055
+    },
+    "body": "eyJudW1iZXIiOjd9",
+    "isBase64Encoded": true
 }
 ```
