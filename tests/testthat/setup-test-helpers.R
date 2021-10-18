@@ -39,8 +39,6 @@ mock_response <- function(input,
                           expected_response_headers = default_response_headers,
                           request_id = "abc123",
                           timeout_seconds = 0.5,
-                          deserialiser = NULL,
-                          serialiser = NULL,
                           config = basic_lambda_config()) {
 
   # Make webmockr intercept HTTP requests
@@ -66,12 +64,9 @@ mock_response <- function(input,
     ) %>%
     webmockr::to_return(status = 200)
 
-  # 1 second should be plenty of time to calculate some square roots.
   start_listening(
     config = config,
-    timeout_seconds = timeout_seconds,
-    deserialiser = deserialiser,
-    serialiser = serialiser
+    timeout_seconds = timeout_seconds
   )
 
   requests <- webmockr::request_registry()

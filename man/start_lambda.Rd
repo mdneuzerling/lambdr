@@ -6,25 +6,12 @@
 \usage{
 start_lambda(
   config = lambda_config(environ = parent.frame()),
-  deserialiser = NULL,
-  serialiser = NULL,
   timeout_seconds = NULL
 )
 }
 \arguments{
 \item{config}{A list of configuration values as created by the
 \code{lambda_config} function.}
-
-\item{deserialiser}{function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the \code{identity} function. If input is
-coming via an API Gateway this will require some complicated parsing (see
-below).}
-
-\item{serialiser}{function for serialising the result before sending.
-By default, will attempt to serialise the body as JSON, based on the
-request type. To send the result as is, pass the \code{identity} function.}
 
 \item{timeout_seconds}{If set, the function will stop listening for events
 after this timeout. The timeout is checked between events, so this won't

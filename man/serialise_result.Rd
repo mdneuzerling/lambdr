@@ -4,15 +4,14 @@
 \alias{serialise_result}
 \title{Serialise a result}
 \usage{
-serialise_result(event, serialiser = NULL)
+serialise_result(event, config)
 }
 \arguments{
 \item{event}{the response received from querying the next invocation
 endpoint.}
 
-\item{serialiser}{function for serialising the result before sending.
-By default, will attempt to serialise the body as JSON, based on the
-request type. To send the result as is, pass the \code{identity} function.}
+\item{config}{A list of configuration values as created by the
+\code{lambda_config} function.}
 }
 \value{
 character.

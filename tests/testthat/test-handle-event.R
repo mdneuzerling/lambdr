@@ -20,12 +20,15 @@ test_that("Custom deserialisers are used in event handling", {
   custom_deserialiser <- function(event_content) {
     list(number = 0)
   }
+  config <- basic_lambda_config(
+    handler = "parity",
+    deserialiser = custom_deserialiser
+  )
 
   mock_response_success <- mock_response(
     input = as_json(list(number = 5)),
     expected_response_body = as_json(list(parity = "even")),
-    deserialiser = custom_deserialiser,
-    config = basic_lambda_config(handler = "parity")
+    config = config
   )
   expect_true(mock_response_success)
 })
@@ -34,12 +37,15 @@ test_that("Custom serialisers are used in event handling", {
   custom_serialiser <- function(result) {
     "my heart is a fish"
   }
+  config <- basic_lambda_config(
+    handler = "parity",
+    serialiser = custom_serialiser
+  )
 
   mock_response_success <- mock_response(
     input = as_json(list(number = 5)),
     expected_response_body = "my heart is a fish",
-    serialiser = custom_serialiser,
-    config = basic_lambda_config(handler = "parity")
+    config = config
   )
   expect_true(mock_response_success)
 })

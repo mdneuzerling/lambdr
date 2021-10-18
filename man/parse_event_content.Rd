@@ -4,15 +4,11 @@
 \alias{parse_event_content}
 \title{Parse the body of the Lambda event}
 \usage{
-parse_event_content(event, config, deserialiser = NULL)
+parse_event_content(event, config)
 }
 \arguments{
-\item{deserialiser}{function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the \code{identity} function. If input is
-coming via an API Gateway this will require some complicated parsing (see
-below).}
+\item{config}{A list of configuration values as created by the
+\code{lambda_config} function.}
 
 \item{event_content}{the content of the response received from querying the
 text invocation endpoint, as a character}

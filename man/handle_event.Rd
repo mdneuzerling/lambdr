@@ -4,12 +4,7 @@
 \alias{handle_event}
 \title{Process the input of an event, and submit the result to Lambda}
 \usage{
-handle_event(
-  event,
-  config = lambda_config(),
-  deserialiser = NULL,
-  serialiser = NULL
-)
+handle_event(event, config = lambda_config())
 }
 \arguments{
 \item{event}{the response received from querying the next invocation
@@ -17,17 +12,6 @@ endpoint.}
 
 \item{config}{A list of configuration values as created by the
 \code{lambda_config} function.}
-
-\item{deserialiser}{function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the \code{identity} function. If input is
-coming via an API Gateway this will require some complicated parsing (see
-below).}
-
-\item{serialiser}{function for serialising the result before sending.
-By default, will attempt to serialise the body as JSON, based on the
-request type. To send the result as is, pass the \code{identity} function.}
 }
 \description{
 If the handler function accepts a named \code{context} argument then the Lambda

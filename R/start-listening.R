@@ -127,15 +127,12 @@ wait_for_event <- function(config = lambda_config()) {
 #' Combines \code{\link{wait_for_event}} and \code{\link{handle_event}} along
 #' with
 #'
-#' @inheritParams parse_event_content
-#' @inheritParams post_result
+#' @inheritParams validate_lambda_config
 #'
 #' @return `NULL`
 #'
 #' @keywords internal
-wait_for_and_handle_event <- function(config = lambda_config(),
-                                      deserialiser = deserialiser,
-                                      serialiser = serialiser) {
+wait_for_and_handle_event <- function(config) {
 
   event <- NULL
 
@@ -150,9 +147,7 @@ wait_for_and_handle_event <- function(config = lambda_config(),
 
   tryCatch(
     handle_event(event,
-                 config = config,
-                 deserialiser = deserialiser,
-                 serialiser = serialiser),
+                 config = config),
     error = handle_event_error(event, config)
   )
 
@@ -162,8 +157,6 @@ wait_for_and_handle_event <- function(config = lambda_config(),
 #' Start listening for events, and process them as they come
 #'
 #' @inheritParams validate_lambda_config
-#' @inheritParams parse_event_content
-#' @inheritParams post_result
 #' @param timeout_seconds If set, the function will stop listening for events
 #' after this timeout. The timeout is checked between events, so this won't
 #' interrupt the function while it is waiting for a new event. This argument
@@ -172,27 +165,17 @@ wait_for_and_handle_event <- function(config = lambda_config(),
 #'
 #' @export
 start_listening <- function(config = lambda_config(),
-                            deserialiser = NULL,
-                            serialiser = NULL,
                             timeout_seconds = NULL) {
   validate_lambda_config(config)
 
   if (!is.null(timeout_seconds)) {
     expire_after <- Sys.time() + timeout_seconds
     while (Sys.time() < expire_after) {
-      wait_for_and_handle_event(
-        config = config,
-        deserialiser = deserialiser,
-        serialiser = serialiser
-      )
+      wait_for_and_handle_event(config = config)
     }
   } else {
     while (TRUE) {
-      wait_for_and_handle_event(
-        config = config,
-        deserialiser = deserialiser,
-        serialiser = serialiser
-      )
+      wait_for_and_handle_event(config = config)
     }
   }
 }

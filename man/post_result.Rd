@@ -4,7 +4,7 @@
 \alias{post_result}
 \title{Post an event with a result to the response endpoint}
 \usage{
-post_result(event, config = lambda_config(), serialiser = NULL)
+post_result(event, config)
 }
 \arguments{
 \item{event}{the response received from querying the next invocation
@@ -12,10 +12,6 @@ endpoint.}
 
 \item{config}{A list of configuration values as created by the
 \code{lambda_config} function.}
-
-\item{serialiser}{function for serialising the result before sending.
-By default, will attempt to serialise the body as JSON, based on the
-request type. To send the result as is, pass the \code{identity} function.}
 }
 \description{
 This function will first serialise the event result according to its class

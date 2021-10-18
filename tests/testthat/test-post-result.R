@@ -21,9 +21,13 @@ test_that("custom serialisers are used", {
   )
 
   custom_serialiser <- function(result) "my heart is a fish"
+  config <- structure(
+    list(serialiser = custom_serialiser),
+    class = "lambda_config"
+  )
 
   expect_equal(
-    serialise_result(event, serialiser = custom_serialiser),
+    serialise_result(event, config = config),
     "my heart is a fish"
   )
 })

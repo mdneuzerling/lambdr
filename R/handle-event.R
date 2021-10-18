@@ -71,7 +71,7 @@ extract_context.default <- function(event, ...) {
 generate_result <- function(event,
                             config = lambda_config(),
                             deserialiser = NULL) {
-  parsed_event_content <- parse_event_content(event, deserialiser = deserialiser)
+  parsed_event_content <- parse_event_content(event, config)
   logger::log_debug("Parsed event body:", prettify_list(parsed_event_content))
 
   # if the handler function accepts either a `context` argument then calculate
@@ -109,16 +109,12 @@ generate_result <- function(event,
 #' @param event the response received from querying the next invocation
 #'   endpoint.
 #' @inheritParams validate_lambda_config
-#' @inheritParams parse_event_content
-#' @inheritParams post_result
 #'
 #' @inheritSection extract_context Event context
 #'
 #' @keywords internal
 handle_event <- function(event,
-                         config = lambda_config(),
-                         deserialiser = NULL,
-                         serialiser = NULL) {
+                         config = lambda_config()) {
 
   # According to the AWS guide, we need to set the trace ID as an env var
   # https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html
@@ -127,7 +123,7 @@ handle_event <- function(event,
     Sys.setenv("_X_AMZN_TRACE_ID" = runtime_trace_id)
   }
 
-  event_with_result <- generate_result(event, config, deserialiser = deserialiser)
+  event_with_result <- generate_result(event, config)
 
-  post_result(event_with_result, config, serialiser = serialiser)
+  post_result(event_with_result, config)
 }

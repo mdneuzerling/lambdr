@@ -6,20 +6,18 @@
 #' @inheritSection is_from_rest_api_gateway Invocations via an API Gateway
 #'
 #' @inheritParams handle_event
-#' @param serialiser function for serialising the result before sending.
-#'   By default, will attempt to serialise the body as JSON, based on the
-#'   request type. To send the result as is, pass the `identity` function.
+#' @inheritParams validate_lambda_config
 #'
 #' @return character.
 #'
 #' @keywords internal
 #' @export
-serialise_result <- function(event, serialiser = NULL) {
+serialise_result <- function(event, config) {
   if (!attr(event, "result_calculated")) {
     stop("The result for event ", event$request_id, " has not been calculated")
   }
-  if (!is.null(serialiser)) {
-    return(serialiser(event$result))
+  if (!is.null(config$serialiser)) {
+    return(config$serialiser(event$result))
   }
   UseMethod("serialise_result")
 }
@@ -43,9 +41,9 @@ serialise_result.default <- function(event, ...) {
 #' @inheritParams serialise_result
 #'
 #' @keywords internal
-post_result <- function(event, config = lambda_config(), serialiser = NULL) {
+post_result <- function(event, config) {
   logger::log_debug("Raw result:", event$result)
-  serialised_result <- serialise_result(event, serialiser = serialiser)
+  serialised_result <- serialise_result(event, config)
   logger::log_debug("Result to be posted:", serialised_result)
 
   httr::POST(

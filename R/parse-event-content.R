@@ -4,20 +4,15 @@
 #'
 #' @param event_content the content of the response received from querying the
 #'   text invocation endpoint, as a character
-#' @param deserialiser function for deserialising the body of the event.
-#'   By default, will attempt to deserialise the body as JSON, based on whether
-#'   the input is coming from an API Gateway, scheduled Cloudwatch event, or
-#'   direct. To use the body as is, pass the `identity` function. If input is
-#'   coming via an API Gateway this will require some complicated parsing (see
-#'   below).
+#' @inheritParams validate_lambda_config
 #'
 #' @return A list containing the arguments to be passed to the handler function
 #'
 #' @keywords internal
 #' @export
-parse_event_content <- function(event, config, deserialiser = NULL) {
-  if (!is.null(deserialiser)) {
-    return(deserialiser(event$event_content))
+parse_event_content <- function(event, config) {
+  if (!is.null(config$deserialiser)) {
+    return(config$deserialiser(event$event_content))
   }
   UseMethod("parse_event_content")
 }

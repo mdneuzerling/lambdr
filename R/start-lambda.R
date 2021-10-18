@@ -31,13 +31,9 @@
 #' start_lambda()
 #' }
 start_lambda <- function(config = lambda_config(environ = parent.frame()),
-                         deserialiser = NULL,
-                         serialiser = NULL,
                          timeout_seconds = NULL) {
   start_listening(
     config = config,
-    deserialiser = deserialiser,
-    serialiser = serialiser,
     timeout_seconds = timeout_seconds
   )
 }

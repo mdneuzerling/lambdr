@@ -79,12 +79,54 @@ function_accepts_context <- function(func) {
   "context" %in% names(function_formals)
 }
 
+#' Determine the function referred to by the "_HANDLER" environment variable
+#'
+#' This function will try to identify the function referred to by the "_HANDLER"
+#' environment variable. This environment variable is configured by AWS Lambda,
+#' either through the CMD of the Dockerfile containing the runtime or through
+#' the AWS Lambda console (which takes priority). This function also performs
+#' some checks, making sure that the environment variable is defined and that
+#' it exists in the given environment, and that it's a function.
+#'
+#' @inheritParams lambda_config
+#'
+#' @keywords internal
+get_handler_function_from_env_var <- function(environ) {
+  handler_character <- Sys.getenv("_HANDLER")
+  if (handler_character == "") {
+    stop("The _HANDLER environment variable is undefined.\n",
+         "This environment variable is configured by AWS Lambda based\n",
+         "the value configured either as the Dockerfile CMD or in the\n",
+         "AWS Lambda console (which will always take priority).\n",
+         "Alternatively, pass a function to the `handler` argument\n",
+         "of `lambda_config`, although note that `lambda_config` will\n",
+         "always defer to the environment variables if available.")
+  }
+
+  logger::log_info("Using handler function ", handler_character)
+  if (!exists(handler_character, envir = environ)) {
+    stop(
+      handler_character, ", as defined by the _HANDLER environment\n",
+      "variable, can't be found. Check that this exists in the",
+      "environment passed to `lambda_config` (defaults to the parent\n",
+      "frame)"
+    )
+  }
+
+  handler <- get(handler_character, envir = environ)
+
+  if (!is.function(handler)) {
+    stop(handler_character, " is not a function")
+  }
+
+  handler
+}
+
 #' Set up endpoints, variables, and configuration for AWS Lambda
 #'
-#' @param handler character. Name of function to use for processing inputs from
-#'   events. This argument is provided for debugging and testing only. The
-#'   "_HANDLER" environment variable, as configured in AWS, will always override
-#'   this value if present.
+#' @param handler the function to use for processing inputs from
+#'   events. The "_HANDLER" environment variable, as configured in AWS, will
+#'   always override this value if present.
 #' @param runtime_api character. Used as the host in the various endpoints used
 #'   by AWS Lambda. This argument is provided for debugging and testing only.
 #'   The "AWS_LAMBDA_RUNTIME_API" environment variable, as configured by AWS,
@@ -94,11 +136,21 @@ function_accepts_context <- function(func) {
 #'   "LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
 #'   override this value if present.
 #' @param environ environment in which to search for the function given by the
-#'   handler. Defaults to the parent frame.
+#'   "_HANDLER" environment variable. Defaults to the parent frame.
+#' @param deserialiser function for deserialising the body of the event.
+#'   By default, will attempt to deserialise the body as JSON, based on whether
+#'   the input is coming from an API Gateway, scheduled Cloudwatch event, or
+#'   direct. To use the body as is, pass the `identity` function. If input is
+#'   coming via an API Gateway this will require some complicated parsing (see
+#'   below).
+#' @param serialiser function for serialising the result before sending.
+#'   By default, will attempt to serialise the body as JSON, based on the
+#'   request type. To send the result as is, pass the `identity` function.
 #' @param decode_base64 logical. Should Base64 input be automatically decoded?
 #'   This is only used for events coming via an API Gateway. Complicated input
 #'   (such as images) may be better left as is, so that the handler function can
-#'   deal with it appropriately. Defaults to `TRUE`.
+#'   deal with it appropriately. Defaults to `TRUE`. Ignored if a custom
+#'   `deserialiser` is used.
 #'
 #' @details
 #' As a rule of thumb, it takes longer to retrieve a value from an environment
@@ -133,6 +185,8 @@ function_accepts_context <- function(func) {
 lambda_config <- function(handler = NULL,
                           runtime_api = NULL,
                           task_root = NULL,
+                          deserialiser = NULL,
+                          serialiser = NULL,
                           decode_base64 = TRUE,
                           environ = parent.frame()) {
 
@@ -148,20 +202,23 @@ lambda_config <- function(handler = NULL,
 
   tryCatch(
     {
-      handler_character <- get_lambda_environment_variable(
-        "_HANDLER",
-        handler
-      )
+      if (!is.null(deserialiser) && !is.function(deserialiser)) {
+        stop("custom deserialiser is not a function")
+      }
+      lambda$deserialiser <- deserialiser
 
-      if (!exists(handler_character, envir = environ)) {
-        stop(handler_character, " not found")
+      if (!is.null(serialiser) && !is.function(serialiser)) {
+        stop("custom serialiser is not a function")
+      }
+      lambda$serialiser <- serialiser
+      lambda$decode_base64 <- as.logical(decode_base64)
+
+      if (is.null(handler)) {
+        handler <- get_handler_function_from_env_var(environ = environ)
+      } else if (!is.function(handler)) {
+        stop("The handler function is not a function")
       }
 
-      handler <- get(handler_character, envir = environ)
-      if (!is.function(handler)) {
-        stop(handler_character, " is not a function")
-      }
-      lambda$handler_character <- handler_character
       lambda$handler <- handler
       lambda$pass_context_argument <- function_accepts_context(handler)
 
@@ -178,8 +235,6 @@ lambda_config <- function(handler = NULL,
       stop(e)
     }
   )
-
-  lambda$decode_base64 <- as.logical(decode_base64)
 
   structure(lambda, class = "lambda_config")
 }

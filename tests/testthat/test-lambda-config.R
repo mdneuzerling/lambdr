@@ -31,7 +31,6 @@ test_that("Lambda config retrieved from environment variable", {
   expect_s3_class(config, "lambda_config")
   expect_equal(config$runtime_api, "red_panda")
   expect_equal(config$task_root, "giraffe")
-  expect_equal(config$handler_character, "sqrt")
   expect_equal(config$handler, sqrt)
 })
 
@@ -57,25 +56,32 @@ test_that("outright error when runtime_api not provided", {
   )
 })
 
-test_that("initialisation error recorded when task_root undefined", {
-  error_received <- trigger_initialisation_error(
-    expected_error = paste(
-      "LAMBDA_TASK_ROOT environment variable is not set. This environment",
-      "variable is set by AWS when Lambda is instantiated. It will not appear",
-      "when running local tests."
-    ),
-    task_root = "",
-    handler = "sqrt"
-  )
-  expect_true(error_received)
-})
+# We no longer demand that the task root be defined, since it doesn't actually
+# affect anything in the runtime.
+
+# test_that("initialisation error recorded when task_root undefined", {
+#   error_received <- trigger_initialisation_error(
+#     expected_error = paste(
+#       "LAMBDA_TASK_ROOT environment variable is not set. This environment",
+#       "variable is set by AWS when Lambda is instantiated. It will not appear",
+#       "when running local tests."
+#     ),
+#     task_root = "",
+#     handler = "sqrt"
+#   )
+#   expect_true(error_received)
+# })
 
 test_that("initialisation error recorded when handler undefined", {
   error_received <- trigger_initialisation_error(
-    expected_error = paste(
-      "_HANDLER environment variable is not set. This environment",
-      "variable is set by AWS when Lambda is instantiated. It will not appear",
-      "when running local tests."
+    expected_error = paste0(
+      "The _HANDLER environment variable is undefined.\n",
+      "This environment variable is configured by AWS Lambda based\n",
+      "the value configured either as the Dockerfile CMD or in the\n",
+      "AWS Lambda console (which will always take priority).\n",
+      "Alternatively, pass a function to the `handler` argument\n",
+      "of `lambda_config`, although note that `lambda_config` will\n",
+      "always defer to the environment variables if available."
     ),
     task_root = "giraffe",
     handler = ""
@@ -84,10 +90,19 @@ test_that("initialisation error recorded when handler undefined", {
 })
 
 test_that("undefined handlers are caught", {
+  handler_character <- "undefined_handler"
+
+  expected_error <- paste0(
+    handler_character, ", as defined by the _HANDLER environment\n",
+    "variable, can't be found. Check that this exists in the",
+    "environment passed to `lambda_config` (defaults to the parent\n",
+    "frame)"
+  )
+
   error_received <- trigger_initialisation_error(
-    expected_error = "undefined_handler not found",
+    expected_error = expected_error,
     task_root = "giraffe",
-    handler = "undefined_handler"
+    handler = handler_character
   )
   expect_true(error_received)
 })

@@ -8,15 +8,16 @@ lambda_config(
   handler = NULL,
   runtime_api = NULL,
   task_root = NULL,
+  deserialiser = NULL,
+  serialiser = NULL,
   decode_base64 = TRUE,
   environ = parent.frame()
 )
 }
 \arguments{
-\item{handler}{character. Name of function to use for processing inputs from
-events. This argument is provided for debugging and testing only. The
-"_HANDLER" environment variable, as configured in AWS, will always override
-this value if present.}
+\item{handler}{the function to use for processing inputs from
+events. The "_HANDLER" environment variable, as configured in AWS, will
+always override this value if present.}
 
 \item{runtime_api}{character. Used as the host in the various endpoints used
 by AWS Lambda. This argument is provided for debugging and testing only.
@@ -28,13 +29,25 @@ This argument is provided for debugging and testing only. The
 "LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
 override this value if present.}
 
+\item{deserialiser}{function for deserialising the body of the event.
+By default, will attempt to deserialise the body as JSON, based on whether
+the input is coming from an API Gateway, scheduled Cloudwatch event, or
+direct. To use the body as is, pass the \code{identity} function. If input is
+coming via an API Gateway this will require some complicated parsing (see
+below).}
+
+\item{serialiser}{function for serialising the result before sending.
+By default, will attempt to serialise the body as JSON, based on the
+request type. To send the result as is, pass the \code{identity} function.}
+
 \item{decode_base64}{logical. Should Base64 input be automatically decoded?
 This is only used for events coming via an API Gateway. Complicated input
 (such as images) may be better left as is, so that the handler function can
-deal with it appropriately. Defaults to \code{TRUE}.}
+deal with it appropriately. Defaults to \code{TRUE}. Ignored if a custom
+\code{deserialiser} is used.}
 
 \item{environ}{environment in which to search for the function given by the
-handler. Defaults to the parent frame.}
+"_HANDLER" environment variable. Defaults to the parent frame.}
 }
 \description{
 Set up endpoints, variables, and configuration for AWS Lambda
