@@ -39,16 +39,17 @@ serialise_result.default <- function(event, ...) {
 #' @inheritSection is_from_rest_api_gateway Invocations via an API Gateway
 #'
 #' @inheritParams handle_event
+#' @inheritParams validate_lambda_config
 #' @inheritParams serialise_result
 #'
 #' @keywords internal
-post_result <- function(event, serialiser = NULL) {
+post_result <- function(event, config = lambda_config(), serialiser = NULL) {
   logger::log_debug("Raw result:", event$result)
   serialised_result <- serialise_result(event, serialiser = serialiser)
   logger::log_debug("Result to be posted:", serialised_result)
 
   httr::POST(
-    url = get_response_endpoint(event$request_id),
+    url = get_response_endpoint(config = config, request_id = event$request_id),
     body = serialised_result,
     encode = "raw"
   )

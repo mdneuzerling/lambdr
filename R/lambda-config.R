@@ -1,101 +1,27 @@
-#' Assert that the Lambda runtime has been set up
+#' Validate a Lambda config object
 #'
-#' This package maintains a package-internal environment that, amongst other
-#' uses, records if Lambda runtime has been set up via the
-#' \verb{\link{setup_lambda}} or \verb{\link{start_lambda}} functions. This
-#' function asserts that this setup has been completed and recorded, and
-#' errors otherwise.
+#' This function only verifies that an object has a "lambda_config" S3 class.
+#'
+#' @param config A list of configuration values as created by the
+#'   `lambda_config` function.
 #'
 #' @return TRUE
 #' @keywords internal
-assert_lambda_is_setup <- function() {
-  if (is.null(lambda$is_setup) || !lambda$is_setup) {
-    stop(
-      "The AWS Lambda runtime is not configured. Run `setup_lambda()` once ",
-      "at the beginning of your runtime script."
-    )
+validate_lambda_config <- function(config) {
+  if (!("lambda_config" %in% class(config))) {
+    stop("The Lambda runtime configuration should be provided by the ",
+         "lambda_config function. See `?lambda_config` for more details.")
   }
-  TRUE
-}
-
-#' Retrieve AWS Lambda configuration values
-#'
-#' @description
-#' These functions can only be called after the `setup_lambda` function has
-#' been run. They return the various configuration values provided by AWS
-#' Lambda. These values are described in the section below.
-#'
-#' The handler, as a character, is returned by `get_handler_character`. The
-#' function defined by the handler is returned by `get_handler`.
-#'
-#' @section AWS Lambda variables:
-#'
-#' The \code{\link{setup_lambda}} function, which is also run as part of
-#' \code{\link{start_lambda}} configures the R session for Lambda based on
-#' environment variables made available by Lambda. The following environment
-#' variables are available:
-#'
-#' * Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
-#'   variable, is the host of the various HTTP endpoints through which the
-#'   runtime interacts with Lambda.
-#' * Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
-#'   defines the path to the Lambda function code. It isn't used in container
-#'   environments with a custom runtime, as that runtime is responsible for
-#'   finding and sourcing the function code.
-#' * The handler, available as the "_HANDLER" environment variable, is
-#'   interpreted by R as the function that is executed when the Lambda is
-#'   called. This value could be anything, as the interpretation is solely up
-#'   to the runtime, so requiring it to be a function is a standard imposed by
-#'   this package.
-#'
-#' @return character
-#' @keywords internal
-#' @name lambda_variables
-NULL
-
-#' @rdname lambda_variables
-#' @keywords internal
-get_lambda_runtime_api <- function() {
-  # It's possible for the runtime API to be used before the runtime is set-up.
-  # This will happen if there's an error during setup. In this case, we need
-  # the runtime API in order to report the initialisation error.
-  if (is.null(lambda$runtime_api) || lambda$runtime_api == "") {
-    stop(
-      "The AWS Lambda runtime is not configured. Run `setup_lambda()` once ",
-      "at the beginning of your runtime script."
-    )
-  }
-
-  lambda$runtime_api
-}
-
-#' @rdname lambda_variables
-#' @keywords internal
-get_lambda_task_root <- function() {
-  assert_lambda_is_setup()
-  lambda$task_root
-}
-
-#' @rdname lambda_variables
-#' @keywords internal
-get_handler <- function() {
-  assert_lambda_is_setup()
-  lambda$handler
-}
-
-#' @rdname lambda_variables
-#' @keywords internal
-get_handler_character <- function() {
-  assert_lambda_is_setup()
-  lambda$handler_character
+  invisible(TRUE)
 }
 
 #' Retrieve a Lambda environment variable if available, and error otherwise
 #'
 #' @description
 #' This function is provided to return a specific error if an environment
-#' variable is not defined. This is used by `setup_lambda` to ensure that the
-#' environment variables that are expected to be defined by AWS are present.
+#' variable is not defined. This is used by \code{\link{lambda_config}} to
+#' ensure that the environment variables that are expected to be defined by AWS
+#' are present.
 #'
 #' If the environment variable is undefined but a `default` value is provided,
 #' then that default value will be returned. However, the environment variable
@@ -181,15 +107,36 @@ function_accepts_context <- function(func) {
 #' variables do not change in a Lambda instance, we fetch them once and set them
 #' to a package environment.
 #'
-#' @inheritSection lambda_variables AWS Lambda variables
+#' @section AWS Lambda variables:
+#'
+#' The \code{\link{lambda_config}} function, which is also run as part of
+#' \code{\link{start_lambda}} configures the R session for Lambda based on
+#' environment variables made available by Lambda. The following environment
+#' variables are available:
+#'
+#' * Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
+#'   variable, is the host of the various HTTP endpoints through which the
+#'   runtime interacts with Lambda.
+#' * Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
+#'   defines the path to the Lambda function code. It isn't used in container
+#'   environments with a custom runtime, as that runtime is responsible for
+#'   finding and sourcing the function code.
+#' * The handler, available as the "_HANDLER" environment variable, is
+#'   interpreted by R as the function that is executed when the Lambda is
+#'   called. This value could be anything, as the interpretation is solely up
+#'   to the runtime, so requiring it to be a function is a standard imposed by
+#'   this package.
+#'
 #' @inheritSection extract_context Event context
 #'
 #' @export
-setup_lambda <- function(handler = NULL,
-                         runtime_api = NULL,
-                         task_root = NULL,
-                         decode_base64 = TRUE,
-                         environ = parent.frame()) {
+lambda_config <- function(handler = NULL,
+                          runtime_api = NULL,
+                          task_root = NULL,
+                          decode_base64 = TRUE,
+                          environ = parent.frame()) {
+
+  lambda <- list()
 
   # There's no point in wrapping this in a TryCatch. If we don't have the
   # runtime API, we can't construct the endpoints to which to send errors.
@@ -224,24 +171,15 @@ setup_lambda <- function(handler = NULL,
       )
     },
     error = function(e) {
-      post_lambda_error(e, get_initialisation_error_endpoint())
+      post_lambda_error(
+        e,
+        get_initialisation_error_endpoint(lambda$runtime_api)
+      )
       stop(e)
     }
   )
 
   lambda$decode_base64 <- as.logical(decode_base64)
-  lambda$is_setup <- TRUE
-}
 
-#' Undo the Lambda runtime setup
-#'
-#' This function removes all detected variables and setup initiated by either
-#' \verb{\link{setup_lambda}} or \verb{\link{start_lambda}}. It does not affect
-#' the logging handlers setup by these functions.
-#'
-#' @keywords internal
-reset_lambda <- function() {
-  # delete all objects in Lambda environment
-  rm(list = ls(envir = lambda), envir = lambda)
-  lambda$is_setup <- FALSE
+  structure(lambda, class = "lambda_config")
 }

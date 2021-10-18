@@ -15,7 +15,7 @@
 #'
 #' @keywords internal
 #' @export
-parse_event_content <- function(event, deserialiser = NULL) {
+parse_event_content <- function(event, config, deserialiser = NULL) {
   if (!is.null(deserialiser)) {
     return(deserialiser(event$event_content))
   }

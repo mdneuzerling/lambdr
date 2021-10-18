@@ -1,15 +1,19 @@
 #' AWS Lambda endpoints
 #'
+#' @param config A list of configuration values as created by the
+#'   \code{\link{lambda_config}} function. Alternatively, a runtime API host can
+#'   be provided directly. This would be the case if there's not enough
+#'   information available to build a full configuration object due to an error.
 #' @param request_id For `get_response_endpoint` and
-#' `get_invocation_error_endpoint`, the ID of the particular event/request. This
-#' is provided in the "lambda-runtime-aws-request-id" header of the event.
+#'   `get_invocation_error_endpoint`, the ID of the particular event/request.
+#'   This is provided in the "lambda-runtime-aws-request-id" header of the
+#'   event.
 #'
 #' @description
 #' These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API"
 #' environment variable set by AWS Lambda during initialisation. They generally
 #' won't be available locally. The "AWS_LAMBDA_RUNTIME_API" environment variable
-#' can be retrieved with \code{\link{get_lambda_runtime_api}} after
-#' \verb{\code{setup_lambda}} has been run, and is used in the following
+#' (accessed through \code{\link{lambda_config}}) is used in the following
 #' functions:
 #'
 #' * `get_next_invocation_endpoint` returns the endpoint which R must query for
@@ -41,8 +45,8 @@ NULL
 
 #' @rdname endpoints
 #' @keywords internal
-get_next_invocation_endpoint <- function() {
-  lambda_runtime_api <- get_lambda_runtime_api()
+get_next_invocation_endpoint <- function(config, runtime_api) {
+  lambda_runtime_api <- config_or_runtime_api(config)
   next_invocation_endpoint <- paste0(
     "http://", lambda_runtime_api, "/2018-06-01/runtime/invocation/next"
   )
@@ -51,8 +55,8 @@ get_next_invocation_endpoint <- function() {
 
 #' @rdname endpoints
 #' @keywords internal
-get_initialisation_error_endpoint <- function() {
-  lambda_runtime_api <- get_lambda_runtime_api()
+get_initialisation_error_endpoint <- function(config, runtime_api) {
+  lambda_runtime_api <- config_or_runtime_api(config)
   initialisation_error_endpoint <- paste0(
     "http://", lambda_runtime_api, "/2018-06-01/runtime/init/error"
   )
@@ -61,8 +65,8 @@ get_initialisation_error_endpoint <- function() {
 
 #' @rdname endpoints
 #' @keywords internal
-get_response_endpoint <- function(request_id) {
-  lambda_runtime_api <- get_lambda_runtime_api()
+get_response_endpoint <- function(config, request_id) {
+  lambda_runtime_api <- config_or_runtime_api(config)
   paste0(
     "http://", lambda_runtime_api, "/2018-06-01/runtime/invocation/",
     request_id, "/response"
@@ -71,10 +75,23 @@ get_response_endpoint <- function(request_id) {
 
 #' @rdname endpoints
 #' @keywords internal
-get_invocation_error_endpoint <- function(request_id) {
-  lambda_runtime_api <- get_lambda_runtime_api()
+get_invocation_error_endpoint <- function(config, request_id) {
+  lambda_runtime_api <- config_or_runtime_api(config)
   paste0(
     "http://", lambda_runtime_api, "/2018-06-01/runtime/invocation/",
     request_id, "/error"
   )
+}
+
+#' Convert a config to a runtime API if necessary
+#'
+#' Endpoint functions need to accept either a config (as created by
+#' \code{\link{lambda_config}}) or a runtime API. This function will accept
+#' either and ensure that the runtime API is returned.
+#'
+#' @inheritParams validate_lambda_config
+#'
+#' @keywords internal
+config_or_runtime_api <- function(config) {
+  if ("lambda_config" %in% class(config)) config$runtime_api else config
 }

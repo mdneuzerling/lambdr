@@ -1,24 +1,22 @@
 test_that("Mock square root function", {
-  use_basic_lambda_setup(handler = "sqrt")
   mock_response_success <- mock_response(
     input = as_json(list(x = 4)),
-    expected_response_body = 2
+    expected_response_body = 2,
+    config = basic_lambda_config(handler = "sqrt")
   )
   expect_true(mock_response_success)
 })
 
 test_that("Mock custom function", {
-  use_basic_lambda_setup(handler = "parity")
-
   mock_response_success <- mock_response(
     input = as_json(list(number = 5)),
-    expected_response_body = as_json(list(parity = "odd"))
+    expected_response_body = as_json(list(parity = "odd")),
+    config = basic_lambda_config(handler = "parity")
   )
   expect_true(mock_response_success)
 })
 
 test_that("Custom deserialisers are used in event handling", {
-  use_basic_lambda_setup(handler = "parity")
   custom_deserialiser <- function(event_content) {
     list(number = 0)
   }
@@ -26,13 +24,13 @@ test_that("Custom deserialisers are used in event handling", {
   mock_response_success <- mock_response(
     input = as_json(list(number = 5)),
     expected_response_body = as_json(list(parity = "even")),
-    deserialiser = custom_deserialiser
+    deserialiser = custom_deserialiser,
+    config = basic_lambda_config(handler = "parity")
   )
   expect_true(mock_response_success)
 })
 
 test_that("Custom serialisers are used in event handling", {
-  use_basic_lambda_setup(handler = "parity")
   custom_serialiser <- function(result) {
     "my heart is a fish"
   }
@@ -40,19 +38,19 @@ test_that("Custom serialisers are used in event handling", {
   mock_response_success <- mock_response(
     input = as_json(list(number = 5)),
     expected_response_body = "my heart is a fish",
-    serialiser = custom_serialiser
+    serialiser = custom_serialiser,
+    config = basic_lambda_config(handler = "parity")
   )
   expect_true(mock_response_success)
 })
 
 test_that("Mock function with no inputs", {
-  use_basic_lambda_setup(handler = "no_arguments")
-
   mock_response_success <- mock_response(
     input = as_json(list()),
     expected_response_body = as_json(
       list(animal = "dog", breed = "corgi")
-    )
+    ),
+    config = basic_lambda_config(handler = "no_arguments")
   )
 
   expect_true(mock_response_success)
@@ -65,22 +63,18 @@ test_that("handlers that accept a context argument receive it", {
     }
     list(animal = "dog", breed = "corgi")
   }
-
-  use_basic_lambda_setup(handler = "assert_context_exists")
-
   mock_response_success <- mock_response(
     input = as_json(list()),
     expected_response_body = as_json(
       list(animal = "dog", breed = "corgi")
-    )
+    ),
+    config = basic_lambda_config(handler = "assert_context_exists")
   )
 
   expect_true(mock_response_success)
 })
 
 test_that("errors are sent to invocation error endpoint", {
-  use_basic_lambda_setup(handler = "no_arguments")
-
   mock_invocation_error_success <- mock_invocation_error(
     input = as_json(list(x = 3)),
     expected_error_body = as_json(
@@ -89,7 +83,8 @@ test_that("errors are sent to invocation error endpoint", {
         errorType = "simpleError",
         stackTrace = list()
       )
-    )
+    ),
+    config = basic_lambda_config(handler = "no_arguments")
   )
 
   expect_true(mock_invocation_error_success)

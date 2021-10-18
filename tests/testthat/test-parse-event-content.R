@@ -9,7 +9,7 @@ test_that("custom deserialisers are used", {
   )
 
   expect_equal(
-    parse_event_content(event, custom_deserialiser),
+    parse_event_content(event, deserialiser = custom_deserialiser),
     "my heart is a fish"
   )
 })

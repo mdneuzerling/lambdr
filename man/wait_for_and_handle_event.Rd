@@ -4,9 +4,16 @@
 \alias{wait_for_and_handle_event}
 \title{Wait for and handle event}
 \usage{
-wait_for_and_handle_event(deserialiser = deserialiser, serialiser = serialiser)
+wait_for_and_handle_event(
+  config = lambda_config(),
+  deserialiser = deserialiser,
+  serialiser = serialiser
+)
 }
 \arguments{
+\item{config}{A list of configuration values as created by the
+\code{lambda_config} function.}
+
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
 the input is coming from an API Gateway, scheduled Cloudwatch event, or

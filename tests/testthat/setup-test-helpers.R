@@ -15,10 +15,11 @@ expect_setup_failure <- function(endpoint_function, ...) {
   }))
 }
 
-use_basic_lambda_setup <- function(handler = "sqrt",
-                                   runtime_api = "red_panda",
-                                   task_root = "giraffe",
-                                   log_threshold = test_debug_level) {
+basic_lambda_config <- function(handler = "sqrt",
+                                runtime_api = "red_panda",
+                                task_root = "giraffe",
+                                log_threshold = test_debug_level,
+                                ...) {
   setup_logging(log_threshold = log_threshold)
   withr::with_envvar(
     c(
@@ -28,10 +29,9 @@ use_basic_lambda_setup <- function(handler = "sqrt",
     ),
     withr::with_environment(
       parent.frame(),
-      setup_lambda()
+      lambda_config(...)
     )
   )
-  withr::defer(reset_lambda(), envir = parent.frame())
 }
 
 mock_response <- function(input,
@@ -40,14 +40,15 @@ mock_response <- function(input,
                           request_id = "abc123",
                           timeout_seconds = 0.5,
                           deserialiser = NULL,
-                          serialiser = NULL) {
+                          serialiser = NULL,
+                          config = basic_lambda_config()) {
 
   # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
   withr::defer(webmockr::disable(quiet = TRUE))
 
-  invocation_endpoint <- get_next_invocation_endpoint()
-  response_endpoint <- get_response_endpoint(request_id)
+  invocation_endpoint <- get_next_invocation_endpoint(config)
+  response_endpoint <- get_response_endpoint(config, request_id)
 
   # Mock the invocation to return a Lambda input with mock request ID and input
   webmockr::stub_request("get", invocation_endpoint) %>%
@@ -67,6 +68,7 @@ mock_response <- function(input,
 
   # 1 second should be plenty of time to calculate some square roots.
   start_listening(
+    config = config,
     timeout_seconds = timeout_seconds,
     deserialiser = deserialiser,
     serialiser = serialiser
@@ -83,14 +85,15 @@ mock_response <- function(input,
 mock_invocation_error <- function(input,
                                   expected_error_body,
                                   request_id = "abc123",
-                                  timeout_seconds = 0.5) {
+                                  timeout_seconds = 0.5,
+                                  config = basic_lambda_config()) {
 
   # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
   withr::defer(webmockr::disable(quiet = TRUE))
 
-  invocation_endpoint <- get_next_invocation_endpoint()
-  invocation_error_endpoint <- get_invocation_error_endpoint(request_id)
+  invocation_endpoint <- get_next_invocation_endpoint(config)
+  invocation_error_endpoint <- get_invocation_error_endpoint(config, request_id)
 
   # Mock the invocation to return a Lambda input with mock request ID and input
   webmockr::stub_request("get", invocation_endpoint) %>%
@@ -111,7 +114,7 @@ mock_invocation_error <- function(input,
     ) %>%
     webmockr::to_return(status = 202) # accepted
 
-  start_listening(timeout_seconds = timeout_seconds)
+  start_listening(config = config, timeout_seconds = timeout_seconds)
 
   requests <- webmockr::request_registry()
   n_responses <- requests$times_executed(
@@ -119,46 +122,6 @@ mock_invocation_error <- function(input,
   )
 
   n_responses >= 1
-}
-
-mock_initialisation_error <- function(expected_error_body,
-                                      request_id = "abc123",
-                                      timeout_seconds = 0.5) {
-
-  # Make webmockr intercept HTTP requests
-  webmockr::enable(quiet = TRUE)
-  withr::defer(webmockr::disable(quiet = TRUE))
-
-  invocation_endpoint <- get_next_invocation_endpoint()
-  initialisation_error_endpoint <- get_initialisation_error_endpoint()
-
-  # Mock the invocation to return a Lambda input with mock request ID and input
-  webmockr::stub_request("get", invocation_endpoint) %>%
-    webmockr::to_return(
-      body = list(), # input is irrelevant here --- it's never used
-      headers = list("lambda-runtime-aws-request-id" = request_id),
-      status = 200
-    )
-
-  # Mock the initialisation error endpoint.
-  webmockr::stub_request("post", initialisation_error_endpoint) %>%
-    webmockr::wi_th(
-      headers = list(
-        "Accept" = "application/json, text/xml, application/xml, */*",
-        "Content-Type" = "application/vnd.aws.lambda.error+json"
-      ),
-      body = expected_error_body
-    ) %>%
-    webmockr::to_return(status = 202) # accepted
-
-  # start_listening(timeout_seconds = timeout_seconds)
-  #
-  # requests <- webmockr::request_registry()
-  # n_responses <- requests$times_executed(
-  #   webmockr::RequestPattern$new("post", initialisation_error_endpoint)
-  # )
-  #
-  # n_responses >= 1
 }
 
 trigger_initialisation_error <- function(expected_error,
@@ -205,7 +168,7 @@ trigger_initialisation_error <- function(expected_error,
 
   # Failure when task_root not set-up
   error_message <- tryCatch(
-    use_basic_lambda_setup(
+    basic_lambda_config(
       runtime_api = "red_panda",
       task_root = task_root,
       handler = handler

@@ -78,15 +78,19 @@ post_lambda_error <- function(e, endpoint) {
 #'
 #' @keywords internal
 #' @export
-handle_event_error <- function(event, ...) {
-  logger::log_debug("Preparing invocation error for request ID:", event$request_id)
+handle_event_error <- function(event, config, ...) {
+  logger::log_debug("Preparing invocation error for request ID:",
+                    event$request_id)
   UseMethod("handle_event_error")
 }
 
 #' @export
-handle_event_error.default <- function(event, ...) {
+handle_event_error.default <- function(event, config, ...) {
   error_handling_function <- function(e) {
-    post_lambda_error(e, endpoint = get_invocation_error_endpoint(event$request_id))
+    post_lambda_error(
+      e,
+      endpoint = get_invocation_error_endpoint(config, event$request_id)
+    )
   }
 
   error_handling_function
@@ -141,6 +145,11 @@ condition <- function(subclass,
 #' Otherwise, the error is simply logged. In either case the error does not
 #' stop the kernel, and the runtime can move onto the next event.
 #'
+#' `handle_decomposition_error` accepts a `config` object, created through the
+#' \code{\link{lambda_config}} function. It returns a function that accepts an
+#' error `e`, which means that `handle_decomposition_error(event)` can be passed
+#' as a value to the `tryCatch` `error` argument.
+#'
 #' @inheritParams condition
 #'
 #' @keywords internal
@@ -156,14 +165,21 @@ stop_decomposition <- function(..., request_id = NULL) {
 
 #' @inheritParams post_lambda_error
 #' @rdname stop_decomposition
-handle_decomposition_error <- function(e) {
-  logger::log_error(e$message)
+handle_decomposition_error <- function(config) {
+  error_handling_function <- function(e) {
+    logger::log_error(e$message)
 
-  if (is.null(e$request_id)) {
-    return(NULL)
+    if (is.null(e$request_id)) {
+      return(NULL)
+    }
+
+    post_lambda_error(
+      e,
+      endpoint = get_invocation_error_endpoint(config, e$request_id)
+    )
   }
 
-  post_lambda_error(e, endpoint = get_invocation_error_endpoint(e$request_id))
+  error_handling_function
 }
 
 ################################################################################

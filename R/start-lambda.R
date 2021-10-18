@@ -3,18 +3,17 @@
 #' @description
 #' Runs the following three functions in order:
 #' * \code{\link{setup_logging}}
-#' * \code{\link{setup_lambda}}
+#' * \code{\link{lambda_config}}
 #' * \code{\link{start_listening}}
 #'
 #' See \code{vignette("lambda-runtime-in-container", package = "lambdr")} for an
 #' example of how to use this function to place an R Lambda Runtime in a
 #' container.
 #'
-#' @inheritParams setup_logging
-#' @inheritParams setup_lambda
+#' @inheritParams validate_lambda_config
 #' @inheritParams start_listening
 #'
-#' @inheritSection lambda_variables AWS Lambda variables
+#' @inheritSection lambda_config AWS Lambda variables
 #' @inheritSection extract_context Event context
 #'
 #' @export
@@ -31,26 +30,12 @@
 #'
 #' start_lambda()
 #' }
-start_lambda <- function(log_threshold = logger::INFO,
-                         handler = NULL,
-                         runtime_api = NULL,
-                         task_root = NULL,
+start_lambda <- function(config = lambda_config(environ = parent.frame()),
                          deserialiser = NULL,
                          serialiser = NULL,
-                         decode_base64 = TRUE,
-                         timeout_seconds = NULL,
-                         environ = parent.frame()) {
-  setup_logging(log_threshold = log_threshold)
-
-  setup_lambda(
-    handler = handler,
-    runtime_api = runtime_api,
-    task_root = task_root,
-    decode_base64 = decode_base64,
-    environ = environ
-  )
-
+                         timeout_seconds = NULL) {
   start_listening(
+    config = config,
     deserialiser = deserialiser,
     serialiser = serialiser,
     timeout_seconds = timeout_seconds

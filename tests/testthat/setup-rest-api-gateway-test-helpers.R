@@ -4,6 +4,7 @@ mock_rest_api_gateway_event <- function(query_parameters = NULL,
                                         expected_response_headers = default_response_headers,
                                         expect_result_as_is = FALSE,
                                         request_id = "abc123",
+                                        config = basic_lambda_config(),
                                         timeout_seconds = 0.5) {
   api_gateway_event_body <- mock_rest_api_gateway_event_body(
     query_parameters,
@@ -14,8 +15,8 @@ mock_rest_api_gateway_event <- function(query_parameters = NULL,
   webmockr::enable(quiet = TRUE)
   withr::defer(webmockr::disable(quiet = TRUE))
 
-  invocation_endpoint <- get_next_invocation_endpoint()
-  response_endpoint <- get_response_endpoint(request_id)
+  invocation_endpoint <- get_next_invocation_endpoint(config)
+  response_endpoint <- get_response_endpoint(config, request_id)
 
   # Mock the invocation to return a Lambda input with mock request ID and input
   webmockr::stub_request("get", invocation_endpoint) %>%
@@ -45,7 +46,7 @@ mock_rest_api_gateway_event <- function(query_parameters = NULL,
     ) %>%
     webmockr::to_return(status = 200)
 
-  start_listening(timeout_seconds = timeout_seconds)
+  start_listening(config = config, timeout_seconds = timeout_seconds)
 
   requests <- webmockr::request_registry()
   n_responses <- requests$times_executed(

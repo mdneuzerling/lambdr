@@ -4,7 +4,11 @@
 \alias{wait_for_event}
 \title{Query the next invocation endpoint to get the next input}
 \usage{
-wait_for_event()
+wait_for_event(config = lambda_config())
+}
+\arguments{
+\item{config}{A list of configuration values as created by the
+\code{lambda_config} function.}
 }
 \description{
 The query will receive a response when an input is queued up. If there is no

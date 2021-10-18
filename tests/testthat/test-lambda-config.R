@@ -18,64 +18,42 @@ test_that("Defaults in setup are considered after environment variables ", {
   )
 })
 
-test_that("Lambda can be set up and reset", {
-  expect_false(lambda$is_setup)
-  expect_error(assert_lambda_is_setup(), "is not configured")
+test_that("Lambda config retrieved from environment variable", {
+  config <- withr::with_envvar(
+      c(
+        "AWS_LAMBDA_RUNTIME_API" = "red_panda",
+        "LAMBDA_TASK_ROOT" = "giraffe",
+        "_HANDLER" = "sqrt"
+      ),
+      lambda_config()
+    )
 
-  withr::with_envvar(
-    c(
-      "AWS_LAMBDA_RUNTIME_API" = "red_panda",
-      "LAMBDA_TASK_ROOT" = "giraffe",
-      "_HANDLER" = "sqrt"
-    ),
-    setup_lambda()
+  expect_s3_class(config, "lambda_config")
+  expect_equal(config$runtime_api, "red_panda")
+  expect_equal(config$task_root, "giraffe")
+  expect_equal(config$handler_character, "sqrt")
+  expect_equal(config$handler, sqrt)
+})
+
+test_that("lambda config can record if Base64 is to be used for decoding", {
+  default_config <- basic_lambda_config()
+  no_base64_config <- basic_lambda_config(decode_base64 = FALSE)
+  base64_config <- basic_lambda_config(decode_base64 = TRUE)
+
+  expect_true(default_config$decode_base64)
+  expect_false(no_base64_config$decode_base64)
+  expect_true(base64_config$decode_base64)
+})
+
+test_that("outright error when runtime_api not provided", {
+  expected_error = paste(
+    "AWS_LAMBDA_RUNTIME_API environment variable is not set. This environment",
+    "variable is set by AWS when Lambda is instantiated. It will not appear",
+    "when running local tests."
   )
-  withr::defer(reset_lambda())
-  expect_true(lambda$is_setup)
-
-  reset_lambda()
-  expect_false(lambda$is_setup)
-  expect_error(assert_lambda_is_setup(), "is not configured")
-})
-
-test_that("Lambda runtime API retrieval fails before setup", {
-  expect_setup_failure(get_lambda_runtime_api)
-})
-
-test_that("Lambda task root retrieval fails before setup", {
-  expect_setup_failure(get_lambda_task_root)
-})
-
-test_that("Lambda handler retrieval fails before setup", {
-  expect_setup_failure(get_handler)
-  expect_setup_failure(get_handler_character)
-})
-
-test_that("we can retrieve the Lambda runtime API variable", {
-  use_basic_lambda_setup()
-  expect_equal(
-    get_lambda_runtime_api(),
-    "red_panda"
-  )
-})
-
-test_that("we can retrieve the Lambda task root variable", {
-  use_basic_lambda_setup()
-  expect_equal(
-    get_lambda_task_root(),
-    "giraffe"
-  )
-})
-
-test_that("we can retrieve the Lambda handler", {
-  use_basic_lambda_setup(handler = "sqrt")
-  expect_equal(
-    get_handler_character(),
-    "sqrt"
-  )
-  expect_equal(
-    get_handler(),
-    sqrt
+  expect_error(
+    basic_lambda_config(runtime_api = ""),
+    expected_error
   )
 })
 
@@ -125,11 +103,8 @@ test_that("non-function handlers are caught", {
 
 test_that("handler can be a custom function", {
   plus_one <- function(x) x + 1
-
-  use_basic_lambda_setup(handler = "plus_one")
-  withr::defer(reset_lambda(), envir = parent.frame())
-
-  expect_equal(get_handler()(1), 2)
+  config <- basic_lambda_config(handler = "plus_one")
+  expect_equal(config$handler(1), 2)
 })
 
 test_that("can recognise context argument in function formals", {
@@ -141,13 +116,13 @@ test_that("can recognise context argument in function formals", {
 })
 
 test_that("context argument recognised in handler formals", {
-  # similar to the test above, but we're checking that the `setup_lambda` uses
+  # similar to the test above, but we're checking that the `lambda_config` uses
   # the function and stores the correct result
-  doesnt_accept_context <- function() {}
-  use_basic_lambda_setup(handler = "doesnt_accept_context")
-  expect_false(lambda$pass_context_argument)
+  no_context <- function() {}
+  no_context_config <- basic_lambda_config(handler = "no_context")
+  expect_false(no_context_config$pass_context_argument)
 
-  accepts_context <- function(context) {}
-  use_basic_lambda_setup(handler = "accepts_context")
-  expect_true(lambda$pass_context_argument)
+  yes_context <- function(context) {}
+  yes_context_config <- basic_lambda_config(handler = "yes_context")
+  expect_true(yes_context_config$pass_context_argument)
 })

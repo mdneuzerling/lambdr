@@ -1,6 +1,4 @@
 test_that("start_lambda starts lambda runtime", {
-  expect_false(lambda$is_setup)
-
   lambda_runtime_api <- "red_panda"
   request_id <- "abc123"
 
@@ -8,12 +6,10 @@ test_that("start_lambda starts lambda runtime", {
   webmockr::enable(quiet = TRUE)
   withr::defer(webmockr::disable(quiet = TRUE))
 
-  invocation_endpoint <- paste0(
-    "http://", lambda_runtime_api, "/2018-06-01/runtime/invocation/next"
-  )
-  response_endpoint <- paste0(
-    "http://", lambda_runtime_api, "/2018-06-01/runtime/invocation/",
-    request_id, "/response"
+  invocation_endpoint <- get_next_invocation_endpoint(lambda_runtime_api)
+  response_endpoint <- get_response_endpoint(
+    lambda_runtime_api,
+    request_id
   )
 
   # Mock the invocation to return a Lambda input with mock request ID and input
@@ -40,14 +36,11 @@ test_that("start_lambda starts lambda runtime", {
     ),
     start_lambda(timeout_seconds = 0.5)
   )
-  withr::defer(reset_lambda())
-
-  expect_true(lambda$is_setup)
 
   requests <- webmockr::request_registry()
   n_responses <- requests$times_executed(
     webmockr::RequestPattern$new("post", response_endpoint)
   )
 
-  n_responses >= 1
+  expect_gte(n_responses, 1)
 })

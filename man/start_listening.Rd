@@ -4,9 +4,17 @@
 \alias{start_listening}
 \title{Start listening for events, and process them as they come}
 \usage{
-start_listening(deserialiser = NULL, serialiser = NULL, timeout_seconds = NULL)
+start_listening(
+  config = lambda_config(),
+  deserialiser = NULL,
+  serialiser = NULL,
+  timeout_seconds = NULL
+)
 }
 \arguments{
+\item{config}{A list of configuration values as created by the
+\code{lambda_config} function.}
+
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
 the input is coming from an API Gateway, scheduled Cloudwatch event, or

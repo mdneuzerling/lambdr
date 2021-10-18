@@ -50,6 +50,7 @@ extract_context <- function(event, ...) {
   UseMethod("extract_context")
 }
 
+#' @export
 extract_context.default <- function(event, ...) {
   list(
     aws_request_id = event$event_headers[["lambda-runtime-aws-request-id"]],
@@ -60,19 +61,22 @@ extract_context.default <- function(event, ...) {
 #' Parse the content of an event and pass it through the handler function
 #'
 #' @inheritParams handle_event
+#' @inheritParams validate_lambda_config
 #' @inheritParams parse_event_content
 #'
 #' @return An object of class the same as `event`. The object contains a
 #'   `result` value, and the `result_calculated` attribute is set to `TRUE`.
 #'
 #' @keywords internal
-generate_result <- function(event, deserialiser) {
+generate_result <- function(event,
+                            config = lambda_config(),
+                            deserialiser = NULL) {
   parsed_event_content <- parse_event_content(event, deserialiser = deserialiser)
   logger::log_debug("Parsed event body:", prettify_list(parsed_event_content))
 
   # if the handler function accepts either a `context` argument then calculate
   # the event context and append it to the function arguments.
-  if (lambda$pass_context_argument) {
+  if (config$pass_context_argument) {
     event_arguments <- c(
       parsed_event_content,
       list(context = extract_context(event))
@@ -81,7 +85,7 @@ generate_result <- function(event, deserialiser) {
     event_arguments <- parsed_event_content
   }
 
-  result <- do.call(lambda$handler, args = event_arguments)
+  result <- do.call(config$handler, args = event_arguments)
   logger::log_debug("Result:", as.character(result))
 
   # NULL is a valid result, so we track whether this event has had its result
@@ -104,14 +108,17 @@ generate_result <- function(event, deserialiser) {
 #'
 #' @param event the response received from querying the next invocation
 #'   endpoint.
+#' @inheritParams validate_lambda_config
 #' @inheritParams parse_event_content
 #' @inheritParams post_result
 #'
 #' @inheritSection extract_context Event context
 #'
 #' @keywords internal
-handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
-
+handle_event <- function(event,
+                         config = lambda_config(),
+                         deserialiser = NULL,
+                         serialiser = NULL) {
 
   # According to the AWS guide, we need to set the trace ID as an env var
   # https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html
@@ -120,7 +127,7 @@ handle_event <- function(event, deserialiser = NULL, serialiser = NULL) {
     Sys.setenv("_X_AMZN_TRACE_ID" = runtime_trace_id)
   }
 
-  event_with_result <- generate_result(event, deserialiser = deserialiser)
+  event_with_result <- generate_result(event, config, deserialiser = deserialiser)
 
-  post_result(event_with_result, serialiser = serialiser)
+  post_result(event_with_result, config, serialiser = serialiser)
 }

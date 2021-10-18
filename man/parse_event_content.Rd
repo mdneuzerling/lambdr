@@ -4,7 +4,7 @@
 \alias{parse_event_content}
 \title{Parse the body of the Lambda event}
 \usage{
-parse_event_content(event, deserialiser = NULL)
+parse_event_content(event, config, deserialiser = NULL)
 }
 \arguments{
 \item{deserialiser}{function for deserialising the body of the event.

@@ -8,18 +8,24 @@
 \alias{get_invocation_error_endpoint}
 \title{AWS Lambda endpoints}
 \usage{
-get_next_invocation_endpoint()
+get_next_invocation_endpoint(config, runtime_api)
 
-get_initialisation_error_endpoint()
+get_initialisation_error_endpoint(config, runtime_api)
 
-get_response_endpoint(request_id)
+get_response_endpoint(config, request_id)
 
-get_invocation_error_endpoint(request_id)
+get_invocation_error_endpoint(config, request_id)
 }
 \arguments{
+\item{config}{A list of configuration values as created by the
+\code{\link{lambda_config}} function. Alternatively, a runtime API host can
+be provided directly. This would be the case if there's not enough
+information available to build a full configuration object due to an error.}
+
 \item{request_id}{For \code{get_response_endpoint} and
-\code{get_invocation_error_endpoint}, the ID of the particular event/request. This
-is provided in the "lambda-runtime-aws-request-id" header of the event.}
+\code{get_invocation_error_endpoint}, the ID of the particular event/request.
+This is provided in the "lambda-runtime-aws-request-id" header of the
+event.}
 }
 \value{
 character
@@ -28,8 +34,7 @@ character
 These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API"
 environment variable set by AWS Lambda during initialisation. They generally
 won't be available locally. The "AWS_LAMBDA_RUNTIME_API" environment variable
-can be retrieved with \code{\link{get_lambda_runtime_api}} after
-\verb{\code{setup_lambda}} has been run, and is used in the following
+(accessed through \code{\link{lambda_config}}) is used in the following
 functions:
 \itemize{
 \item \code{get_next_invocation_endpoint} returns the endpoint which R must query for

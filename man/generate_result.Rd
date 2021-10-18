@@ -4,11 +4,14 @@
 \alias{generate_result}
 \title{Parse the content of an event and pass it through the handler function}
 \usage{
-generate_result(event, deserialiser)
+generate_result(event, config = lambda_config(), deserialiser = NULL)
 }
 \arguments{
 \item{event}{the response received from querying the next invocation
 endpoint.}
+
+\item{config}{A list of configuration values as created by the
+\code{lambda_config} function.}
 
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether

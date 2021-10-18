@@ -3,7 +3,7 @@ reference:
 - title: "Set-up a Lambda runtime and start listening for events"
   desc: >
     This combines the three individual setup steps: `setup_logging`,
-    `setup_lambda`, and `start_listening`. For most applications this is the
+    `lambda_config`, and `start_listening`. For most applications this is the
     only necessary function.
   contents:
     - start_lambda
@@ -12,11 +12,11 @@ reference:
     Specific scenarios may require breaking the runtime setup into individual
     steps. For example, perhaps certain checks need to be run during
     initialisation. These functions --- in the order of `setup_logging`,
-    `setup_lambda`, and `start_listening` --- have the same outcome as
+    `lambda_config`, and `start_listening` --- have the same outcome as
     `start_lambda`.
   contents:
     - setup_logging
-    - setup_lambda
+    - lambda_config
     - start_listening
 - title: "Helper functions"
   contents:

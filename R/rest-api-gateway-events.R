@@ -14,7 +14,7 @@ is_from_rest_api_gateway <- function(event_content) {
 }
 
 #' @export
-parse_event_content.rest_api_gateway_event <- function(event, ...) {
+parse_event_content.rest_api_gateway_event <- function(event, config, ...) {
   logger::log_debug("Input coming via REST API Gateway")
   parsed_json <- parse_json_or_empty(event$event_content)
 
@@ -26,7 +26,7 @@ parse_event_content.rest_api_gateway_event <- function(event, ...) {
   base64_encoded <- parsed_json[["isBase64Encoded"]]
   body_parameters <- if (!base64_encoded) {
     parse_json_or_empty(body)
-  } else if (lambda$decode_base64) {
+  } else if (config$decode_base64) {
     parse_json_or_empty(from_base64(body))
   } else {
     body
@@ -48,7 +48,7 @@ serialise_result.rest_api_gateway_event <- function(event, ...) {
 }
 
 #' @export
-handle_event_error.rest_api_gateway_event <- function(event, ...) {
+handle_event_error.rest_api_gateway_event <- function(event, config, ...) {
   error_handling_function <- function(e) {
     html_code <- if (is.null(e$code)) 500L else e$code # internal server error
     logger::log_error(e$message)
@@ -63,7 +63,7 @@ handle_event_error.rest_api_gateway_event <- function(event, ...) {
     )
 
     httr::POST(
-      url = get_response_endpoint(event$request_id),
+      url = get_response_endpoint(config, event$request_id),
       body = as_stringified_json(error_response),
       encode = "raw",
       httr::content_type("application/vnd.aws.lambda.error+json")

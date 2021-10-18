@@ -75,11 +75,13 @@ classify_event <- function(event_content) {
 #' to the invocation error endpoint as that is determined by the Request ID. We
 #' log the error and move on.
 #'
+#' @inheritParams validate_lambda_config
+#'
 #' @keywords internal
-wait_for_event <- function() {
+wait_for_event <- function(config = lambda_config()) {
 
   logger::log_debug("Waiting for event")
-  invocation <- httr::GET(url = get_next_invocation_endpoint())
+  invocation <- httr::GET(get_next_invocation_endpoint(config))
   logger::log_debug("Event received")
 
   event_headers <- extract_event_headers(invocation)
@@ -131,14 +133,15 @@ wait_for_event <- function() {
 #' @return `NULL`
 #'
 #' @keywords internal
-wait_for_and_handle_event <- function(deserialiser = deserialiser,
+wait_for_and_handle_event <- function(config = lambda_config(),
+                                      deserialiser = deserialiser,
                                       serialiser = serialiser) {
 
   event <- NULL
 
   tryCatch(
-    event <- wait_for_event(),
-    error = function(e) handle_decomposition_error(e)
+    event <- wait_for_event(config = config),
+    error = handle_decomposition_error(config)
   )
 
   if (is.null(event)) {
@@ -146,10 +149,11 @@ wait_for_and_handle_event <- function(deserialiser = deserialiser,
   }
 
   tryCatch(
-    handle_event(event, deserialiser = deserialiser, serialiser = serialiser),
-    error = function(e) {
-      handle_event_error(event)(e)
-    }
+    handle_event(event,
+                 config = config,
+                 deserialiser = deserialiser,
+                 serialiser = serialiser),
+    error = handle_event_error(event, config)
   )
 
   return(NULL)
@@ -157,6 +161,7 @@ wait_for_and_handle_event <- function(deserialiser = deserialiser,
 
 #' Start listening for events, and process them as they come
 #'
+#' @inheritParams validate_lambda_config
 #' @inheritParams parse_event_content
 #' @inheritParams post_result
 #' @param timeout_seconds If set, the function will stop listening for events
@@ -166,15 +171,17 @@ wait_for_and_handle_event <- function(deserialiser = deserialiser,
 #' AWS should handle the shutdown of idle Lambda instances.
 #'
 #' @export
-start_listening <- function(deserialiser = NULL,
+start_listening <- function(config = lambda_config(),
+                            deserialiser = NULL,
                             serialiser = NULL,
                             timeout_seconds = NULL) {
-  assert_lambda_is_setup()
+  validate_lambda_config(config)
 
   if (!is.null(timeout_seconds)) {
     expire_after <- Sys.time() + timeout_seconds
     while (Sys.time() < expire_after) {
       wait_for_and_handle_event(
+        config = config,
         deserialiser = deserialiser,
         serialiser = serialiser
       )
@@ -182,6 +189,7 @@ start_listening <- function(deserialiser = NULL,
   } else {
     while (TRUE) {
       wait_for_and_handle_event(
+        config = config,
         deserialiser = deserialiser,
         serialiser = serialiser
       )

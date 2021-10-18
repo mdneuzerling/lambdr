@@ -4,7 +4,7 @@
 \alias{handle_event_error}
 \title{Generate a handling function for an invocation error}
 \usage{
-handle_event_error(event, ...)
+handle_event_error(event, config, ...)
 }
 \value{
 A function that accepts an error \code{e} as caught by

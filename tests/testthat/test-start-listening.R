@@ -48,9 +48,7 @@ test_that("event headers extracted, prettified and distilled", {
   request_id <- "abc123"
   request_arn <- "arn:aws:lambda:us-west-2:123456789012:function:my-function"
 
-  invocation_endpoint <- paste0(
-    "http://", lambda_runtime_api, "/2018-06-01/runtime/invocation/next"
-  )
+  invocation_endpoint <- get_next_invocation_endpoint(lambda_runtime_api)
 
   # Mock the invocation to return a Lambda input with mock request ID and input
   webmockr::stub_request("get", invocation_endpoint) %>%
@@ -87,7 +85,9 @@ test_that("event headers extracted, prettified and distilled", {
   )
 
   expect_equal(
-    extract_context(list(event_headers = headers)), # mock event class
+    extract_context(
+      structure(list(event_headers = headers), class = "event")
+    ),
     list(
       aws_request_id = request_id,
       invoked_function_arn = request_arn
@@ -110,9 +110,7 @@ test_that("error occurs when request ID not in headers", {
   request_id <- "abc123"
   request_arn <- "arn:aws:lambda:us-west-2:123456789012:function:my-function"
 
-  invocation_endpoint <- paste0(
-    "http://", lambda_runtime_api, "/2018-06-01/runtime/invocation/next"
-  )
+  invocation_endpoint <- get_next_invocation_endpoint(lambda_runtime_api)
 
   # Mock the invocation to return a Lambda input with mock request ID and input
   webmockr::stub_request("get", invocation_endpoint) %>%
@@ -124,13 +122,14 @@ test_that("error occurs when request ID not in headers", {
       status = 200
     )
 
-  use_basic_lambda_setup(handler = "sqrt")
-
   # Errors are simply logged and shouldn't stop the runtime.
   # They aren't reported to any endpoints (there's no request_id so there's no
   # endpoint) so we expect no errors from webmockr here either.
   expect_error(
-    start_listening(timeout_seconds = 0.5),
+    start_listening(
+      config = basic_lambda_config(handler = "sqrt"),
+      timeout_seconds = 0.5
+    ),
     NA
   )
 

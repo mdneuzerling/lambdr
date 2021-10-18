@@ -11,7 +11,7 @@ is_from_html_api_gateway <- function(event_content) {
 }
 
 #' @export
-parse_event_content.html_api_gateway_event <- function(event, ...) {
+parse_event_content.html_api_gateway_event <- function(event, config, ...) {
   logger::log_debug("Input coming via HTML API Gateway")
   parsed_json <- parse_json_or_empty(event$event_content)
 
@@ -31,7 +31,7 @@ parse_event_content.html_api_gateway_event <- function(event, ...) {
   base64_encoded <- parsed_json[["isBase64Encoded"]]
   body_parameters <- if (!base64_encoded) {
     parse_json_or_empty(body)
-  } else if (lambda$decode_base64) {
+  } else if (config$decode_base64) {
     parse_json_or_empty(from_base64(body))
   } else {
     body

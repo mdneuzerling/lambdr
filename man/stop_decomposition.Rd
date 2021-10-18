@@ -7,7 +7,7 @@
 \usage{
 stop_decomposition(..., request_id = NULL)
 
-handle_decomposition_error(e)
+handle_decomposition_error(config)
 }
 \arguments{
 \item{...}{zero or more objects which can be coerced to character (and which
@@ -16,8 +16,6 @@ are pasted together with no separator). This forms the error message.}
 \item{request_id}{character. Used in error handling during event
 decomposition, when it's possible that a request ID might be known but the
 event hasn't been fully examined yet.}
-
-\item{e}{an error as caught by \code{\link[base]{tryCatch}}}
 }
 \description{
 During decomposition from an invocation into an event, it is possible for an
@@ -30,5 +28,10 @@ can then be processed by \code{handle_decomposition_error}. If a \code{request_i
 present then the error can be posted to the invocation error endpoint.
 Otherwise, the error is simply logged. In either case the error does not
 stop the kernel, and the runtime can move onto the next event.
+
+\code{handle_decomposition_error} accepts a \code{config} object, created through the
+\code{\link{lambda_config}} function. It returns a function that accepts an
+error \code{e}, which means that \code{handle_decomposition_error(event)} can be passed
+as a value to the \code{tryCatch} \code{error} argument.
 }
 \keyword{internal}

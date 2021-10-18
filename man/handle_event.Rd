@@ -4,11 +4,19 @@
 \alias{handle_event}
 \title{Process the input of an event, and submit the result to Lambda}
 \usage{
-handle_event(event, deserialiser = NULL, serialiser = NULL)
+handle_event(
+  event,
+  config = lambda_config(),
+  deserialiser = NULL,
+  serialiser = NULL
+)
 }
 \arguments{
 \item{event}{the response received from querying the next invocation
 endpoint.}
+
+\item{config}{A list of configuration values as created by the
+\code{lambda_config} function.}
 
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether

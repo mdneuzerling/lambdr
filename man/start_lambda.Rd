@@ -5,37 +5,15 @@
 \title{Set-up logging and a Lambda runtime, and start listening for events}
 \usage{
 start_lambda(
-  log_threshold = logger::INFO,
-  handler = NULL,
-  runtime_api = NULL,
-  task_root = NULL,
+  config = lambda_config(environ = parent.frame()),
   deserialiser = NULL,
   serialiser = NULL,
-  decode_base64 = TRUE,
-  timeout_seconds = NULL,
-  environ = parent.frame()
+  timeout_seconds = NULL
 )
 }
 \arguments{
-\item{log_threshold}{Threshold for recording and displaying log entries.
-Defaults to \code{logger::INFO}. To debug a failing Lambda container, set this
-to \code{logger::DEBUG} to log verbose information about how each request is
-processed.}
-
-\item{handler}{character. Name of function to use for processing inputs from
-events. This argument is provided for debugging and testing only. The
-"_HANDLER" environment variable, as configured in AWS, will always override
-this value if present.}
-
-\item{runtime_api}{character. Used as the host in the various endpoints used
-by AWS Lambda. This argument is provided for debugging and testing only.
-The "AWS_LAMBDA_RUNTIME_API" environment variable, as configured by AWS,
-will always override this value if present.}
-
-\item{task_root}{character. Defines the path to the Lambda function code.
-This argument is provided for debugging and testing only. The
-"LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
-override this value if present.}
+\item{config}{A list of configuration values as created by the
+\code{lambda_config} function.}
 
 \item{deserialiser}{function for deserialising the body of the event.
 By default, will attempt to deserialise the body as JSON, based on whether
@@ -48,25 +26,17 @@ below).}
 By default, will attempt to serialise the body as JSON, based on the
 request type. To send the result as is, pass the \code{identity} function.}
 
-\item{decode_base64}{logical. Should Base64 input be automatically decoded?
-This is only used for events coming via an API Gateway. Complicated input
-(such as images) may be better left as is, so that the handler function can
-deal with it appropriately. Defaults to \code{TRUE}.}
-
 \item{timeout_seconds}{If set, the function will stop listening for events
 after this timeout. The timeout is checked between events, so this won't
 interrupt the function while it is waiting for a new event. This argument
 is provided for testing purposes, and shouldn't otherwise need to be set:
 AWS should handle the shutdown of idle Lambda instances.}
-
-\item{environ}{environment in which to search for the function given by the
-handler. Defaults to the parent frame.}
 }
 \description{
 Runs the following three functions in order:
 \itemize{
 \item \code{\link{setup_logging}}
-\item \code{\link{setup_lambda}}
+\item \code{\link{lambda_config}}
 \item \code{\link{start_listening}}
 }
 
@@ -77,7 +47,7 @@ container.
 \section{AWS Lambda variables}{
 
 
-The \code{\link{setup_lambda}} function, which is also run as part of
+The \code{\link{lambda_config}} function, which is also run as part of
 \code{\link{start_lambda}} configures the R session for Lambda based on
 environment variables made available by Lambda. The following environment
 variables are available:

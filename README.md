@@ -180,7 +180,7 @@ can be configured in one of two ways:
 * as the `CMD` to the Dockerfile which contains the runtime, or
 * as configured through the Lambda console (this takes precedence)
 
-The `setup_lambda` function (run as part of `start_lambda`) picks up on this
+The `lambda_config` function (run as part of `start_lambda`) picks up on this
 environment variable and identifies the R function to which it refers. This
 handler function is used to process all invocations.
 
@@ -207,7 +207,7 @@ following functions dispatch on this class:
 The main function --- `start_lambda` --- runs three functions in sequence:
 
 * `setup_logging`
-* `setup_lambda`
+* `lambda_config`
 * `start_listening`
 
 The `start_listening` function sets up an infinite loop that listens for
