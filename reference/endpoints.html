@@ -43,8 +43,7 @@
 <meta property="og:description" content="These endpoints are configured based on the &quot;AWS_LAMBDA_RUNTIME_API&quot;
 environment variable set by AWS Lambda during initialisation. They generally
 won't be available locally. The &quot;AWS_LAMBDA_RUNTIME_API&quot; environment variable
-can be retrieved with get_lambda_runtime_api after
-\code{setup_lambda} has been run, and is used in the following
+(accessed through lambda_config) is used in the following
 functions:
 get_next_invocation_endpoint returns the endpoint which R must query for
 the next input. R must send a GET request to this endpoint and will wait
@@ -158,8 +157,7 @@ recalculated for each event. The request ID is given in the
     <p>These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API"
 environment variable set by AWS Lambda during initialisation. They generally
 won't be available locally. The "AWS_LAMBDA_RUNTIME_API" environment variable
-can be retrieved with <code><a href='lambda_variables.html'>get_lambda_runtime_api</a></code> after
-<code>\code{setup_lambda}</code> has been run, and is used in the following
+(accessed through <code><a href='lambda_config.html'>lambda_config</a></code>) is used in the following
 functions:</p><ul>
 <li><p><code>get_next_invocation_endpoint</code> returns the endpoint which R must query for
 the next input. R must send a <code>GET</code> request to this endpoint and will wait
@@ -184,22 +182,30 @@ recalculated for each event. The request ID is given in the
 "lambda-runtime-aws-request-id" header in the event.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_next_invocation_endpoint</span><span class='op'>(</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>get_next_invocation_endpoint</span><span class='op'>(</span><span class='va'>config</span>, <span class='va'>runtime_api</span><span class='op'>)</span>
 
-<span class='fu'>get_initialisation_error_endpoint</span><span class='op'>(</span><span class='op'>)</span>
+<span class='fu'>get_initialisation_error_endpoint</span><span class='op'>(</span><span class='va'>config</span>, <span class='va'>runtime_api</span><span class='op'>)</span>
 
-<span class='fu'>get_response_endpoint</span><span class='op'>(</span><span class='va'>request_id</span><span class='op'>)</span>
+<span class='fu'>get_response_endpoint</span><span class='op'>(</span><span class='va'>config</span>, <span class='va'>request_id</span><span class='op'>)</span>
 
-<span class='fu'>get_invocation_error_endpoint</span><span class='op'>(</span><span class='va'>request_id</span><span class='op'>)</span></pre>
+<span class='fu'>get_invocation_error_endpoint</span><span class='op'>(</span><span class='va'>config</span>, <span class='va'>request_id</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>config</th>
+      <td><p>A list of configuration values as created by the
+<code><a href='lambda_config.html'>lambda_config</a></code> function. Alternatively, a runtime API host can
+be provided directly. This would be the case if there's not enough
+information available to build a full configuration object due to an error.</p></td>
+    </tr>
+    <tr>
       <th>request_id</th>
       <td><p>For <code>get_response_endpoint</code> and
-<code>get_invocation_error_endpoint</code>, the ID of the particular event/request. This
-is provided in the "lambda-runtime-aws-request-id" header of the event.</p></td>
+<code>get_invocation_error_endpoint</code>, the ID of the particular event/request.
+This is provided in the "lambda-runtime-aws-request-id" header of the
+event.</p></td>
     </tr>
     </table>
 

@@ -93,8 +93,16 @@
     
     
 <p>Invocations via an API Gateway require extra care when parsing the input event, and when formatting results. For the most part, <code>lambdr</code> will handle this automatically. But for highly custom serialisation/deserialisation or edge cases it may be helpful to understand how content via API Gateways is structured and responded to.</p>
+<div id="events-via-api-gateways" class="section level2">
+<h2 class="hasAnchor">
+<a href="#events-via-api-gateways" class="anchor"></a>Events via API Gateways</h2>
 <p>When a Lambda runtime, like that implemented by <code>lambdr</code>, starts listening for inputs it queries the “next invocation” HTTP endpoint. The response to this is what’s called here an <em>event</em>. The content of this event contains the arguments (if any) to the function. After the result has been calculate, the runtime must format the result and submit it to the “result” HTTP endpoint.</p>
-<p>With direct invocation the content of the event contains a string which — when interpreted as JSON — gives the arguments for the handler function. When a Lambda is invoked via an API Gateway then the content of the event contains significantly more detail and requires careful parsing. An example is given at the bottom of this section but the two most important sections are <code>body</code> and <code>queryStringParameters</code>.</p>
+<p>With direct invocation the content of the event contains a string which — when interpreted as JSON — gives the arguments for the handler function. When a Lambda is invoked via an API Gateway then the content of the event contains significantly more detail and requires careful parsing.</p>
+<p>There are two types of API Gateways to consider: REST and HTML.</p>
+<div id="rest-api-gateway-events" class="section level3">
+<h3 class="hasAnchor">
+<a href="#rest-api-gateway-events" class="anchor"></a>REST API Gateway events</h3>
+<p>An example of REST API Gateway event content is given at the bottom of this section but the two most important sections are <code>body</code> and <code>queryStringParameters</code>.</p>
 <p>The <code>queryStringParameters</code> contain standard JSON. So if the request contains a parameter <code>?number=9</code> in the query then the event will contain <code>"queryStringParameters": {"number": "9"}</code> (note the string).</p>
 <p>The <code>body</code> of the event contains the data passed during a <code>POST</code> operation. It contains <em>stringified</em> JSON. That is, instead of <code>"body": {"number": 9}</code> we would see <code>"body": "{\"number\":9}"</code>.</p>
 <p>Stringified JSON can be produced with the <code>as_stringified_json</code> helper function which wraps <code>jsonlite</code>’s  function. There is a slight difference in behaviour, as this function also automatically unboxes singleton values and also represents <code>NULL</code>s as JSON <code>nulls</code> — a convention that is used by the event body provided by AWS Lambda.</p>
@@ -185,11 +193,66 @@
 <a class="sourceLine" id="cb2-71" title="71"><span class="dt">"body"</span><span class="fu">:</span> <span class="st">"{</span><span class="ch">\"</span><span class="st">number</span><span class="ch">\"</span><span class="st">:9}"</span><span class="fu">,</span></a>
 <a class="sourceLine" id="cb2-72" title="72"><span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">false</span></a>
 <a class="sourceLine" id="cb2-73" title="73"><span class="fu">}</span></a></code></pre></div>
+</div>
+<div id="html-api-gateway-events" class="section level3">
+<h3 class="hasAnchor">
+<a href="#html-api-gateway-events" class="anchor"></a>HTML API Gateway events</h3>
+<p>HTML API Gateway events are similar to REST API Gateway events, except that the body is more likely to be Base64 encoded, and the query parameters are presented as string values. That is, we might expect to see a <code>rawQueryString</code> of “parameter1=value1&amp;parameter1=value2&amp;parameter2=value”. In this case however the <code>queryStringParameters</code> (if present) will be easier to work with:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><a class="sourceLine" id="cb3-1" title="1"><span class="er">"queryStringParameters":</span> <span class="fu">{</span></a>
+<a class="sourceLine" id="cb3-2" title="2">    <span class="dt">"parameter1"</span><span class="fu">:</span> <span class="st">"value1,value2"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb3-3" title="3">    <span class="dt">"parameter2"</span><span class="fu">:</span> <span class="st">"value"</span></a>
+<a class="sourceLine" id="cb3-4" title="4">  <span class="fu">}</span></a></code></pre></div>
+<p>A full example of an event body is shown below. Note that the <code>queryStringParameters</code> will not appear if <code>rawQueryString</code> is an empty string.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><a class="sourceLine" id="cb4-1" title="1"><span class="fu">{</span></a>
+<a class="sourceLine" id="cb4-2" title="2">    <span class="dt">"version"</span><span class="fu">:</span> <span class="st">"2.0"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-3" title="3">    <span class="dt">"routeKey"</span><span class="fu">:</span> <span class="st">"ANY /parity"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-4" title="4">    <span class="dt">"rawPath"</span><span class="fu">:</span> <span class="st">"/default/parity"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-5" title="5">    <span class="dt">"rawQueryString"</span><span class="fu">:</span> <span class="st">"parameter1=value1&amp;parameter1=value2&amp;parameter2=value"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-6" title="6">    <span class="dt">"queryStringParameters"</span><span class="fu">:</span> <span class="fu">{</span></a>
+<a class="sourceLine" id="cb4-7" title="7">      <span class="dt">"parameter1"</span><span class="fu">:</span> <span class="st">"value1,value2"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-8" title="8">      <span class="dt">"parameter2"</span><span class="fu">:</span> <span class="st">"value"</span></a>
+<a class="sourceLine" id="cb4-9" title="9">    <span class="fu">},</span></a>
+<a class="sourceLine" id="cb4-10" title="10">    <span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></a>
+<a class="sourceLine" id="cb4-11" title="11">        <span class="dt">"accept"</span><span class="fu">:</span> <span class="st">"*/*"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-12" title="12">        <span class="dt">"content-length"</span><span class="fu">:</span> <span class="st">"12"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-13" title="13">        <span class="dt">"content-type"</span><span class="fu">:</span> <span class="st">"application/x-www-form-urlencoded"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-14" title="14">        <span class="dt">"host"</span><span class="fu">:</span> <span class="st">"abcdefghi.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-15" title="15">        <span class="dt">"user-agent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-16" title="16">        <span class="dt">"x-amzn-trace-id"</span><span class="fu">:</span> <span class="st">"Root=1-6167f9fb-1ada874811eaf2bc1464c679"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-17" title="17">        <span class="dt">"x-forwarded-for"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-18" title="18">        <span class="dt">"x-forwarded-port"</span><span class="fu">:</span> <span class="st">"443"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-19" title="19">        <span class="dt">"x-forwarded-proto"</span><span class="fu">:</span> <span class="st">"https"</span></a>
+<a class="sourceLine" id="cb4-20" title="20">    <span class="fu">},</span></a>
+<a class="sourceLine" id="cb4-21" title="21">    <span class="dt">"requestContext"</span><span class="fu">:</span> <span class="fu">{</span></a>
+<a class="sourceLine" id="cb4-22" title="22">        <span class="dt">"accountId"</span><span class="fu">:</span> <span class="st">"123456789"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-23" title="23">        <span class="dt">"apiId"</span><span class="fu">:</span> <span class="st">"abcdefghi"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-24" title="24">        <span class="dt">"domainName"</span><span class="fu">:</span> <span class="st">"abcdefghi.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-25" title="25">        <span class="dt">"domainPrefix"</span><span class="fu">:</span> <span class="st">"abcdefghi"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-26" title="26">        <span class="dt">"http"</span><span class="fu">:</span> <span class="fu">{</span></a>
+<a class="sourceLine" id="cb4-27" title="27">            <span class="dt">"method"</span><span class="fu">:</span> <span class="st">"POST"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-28" title="28">            <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"/default/parity"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-29" title="29">            <span class="dt">"protocol"</span><span class="fu">:</span> <span class="st">"HTTP/1.1"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-30" title="30">            <span class="dt">"sourceIp"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-31" title="31">            <span class="dt">"userAgent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span></a>
+<a class="sourceLine" id="cb4-32" title="32">        <span class="fu">},</span></a>
+<a class="sourceLine" id="cb4-33" title="33">        <span class="dt">"requestId"</span><span class="fu">:</span> <span class="st">"HMP_QiusywMEPEg="</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-34" title="34">        <span class="dt">"routeKey"</span><span class="fu">:</span> <span class="st">"ANY /parity"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-35" title="35">        <span class="dt">"stage"</span><span class="fu">:</span> <span class="st">"default"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-36" title="36">        <span class="dt">"time"</span><span class="fu">:</span> <span class="st">"14/Oct/2021:09:35:55 +0000"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-37" title="37">        <span class="dt">"timeEpoch"</span><span class="fu">:</span> <span class="dv">1634204155055</span></a>
+<a class="sourceLine" id="cb4-38" title="38">    <span class="fu">},</span></a>
+<a class="sourceLine" id="cb4-39" title="39">    <span class="dt">"body"</span><span class="fu">:</span> <span class="st">"eyJudW1iZXIiOjd9"</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb4-40" title="40">    <span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">true</span></a>
+<a class="sourceLine" id="cb4-41" title="41"><span class="fu">}</span></a></code></pre></div>
+</div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-      </div>
+        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
+    </nav>
+</div>
 
 </div>
 

@@ -134,11 +134,20 @@ with" />
 with</p>
     </div>
 
-    <pre class="usage"><span class='fu'>wait_for_and_handle_event</span><span class='op'>(</span>deserialiser <span class='op'>=</span> <span class='va'>deserialiser</span>, serialiser <span class='op'>=</span> <span class='va'>serialiser</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>wait_for_and_handle_event</span><span class='op'>(</span>
+  config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span><span class='op'>)</span>,
+  deserialiser <span class='op'>=</span> <span class='va'>deserialiser</span>,
+  serialiser <span class='op'>=</span> <span class='va'>serialiser</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>config</th>
+      <td><p>A list of configuration values as created by the
+<code>lambda_config</code> function.</p></td>
+    </tr>
     <tr>
       <th>deserialiser</th>
       <td><p>function for deserialising the body of the event.

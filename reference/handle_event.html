@@ -136,7 +136,12 @@ invocation context will be included as an argument. See the section below for
 more details.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>handle_event</span><span class='op'>(</span><span class='va'>event</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>handle_event</span><span class='op'>(</span>
+  <span class='va'>event</span>,
+  config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span><span class='op'>)</span>,
+  deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
+  serialiser <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -145,6 +150,11 @@ more details.</p>
       <th>event</th>
       <td><p>the response received from querying the next invocation
 endpoint.</p></td>
+    </tr>
+    <tr>
+      <th>config</th>
+      <td><p>A list of configuration values as created by the
+<code>lambda_config</code> function.</p></td>
     </tr>
     <tr>
       <th>deserialiser</th>
@@ -175,13 +185,18 @@ both in parsing the event content and in posting the results. Refer to
     
 
 <p>The <em>context</em> of an event is a list of metadata about the invocation. It is
-derived from the headers of a next event invocation response. It consists of:</p><ul>
+derived from the headers of a next event invocation response. By default it
+consists of:</p><ul>
 <li><p><code>aws_request_id</code> - The identifier of the invocation request</p></li>
 <li><p><code>invoked_function_arn</code> – The Amazon Resource Name (ARN) that's used to
 invoke the function. Indicates if the invoker specified a version number or
 alias.</p></li>
 </ul>
 
+<p>Alternatively, a particular event <em>class</em> (determined by invocation method)
+can implement an <code>extract_context</code> method. This is useful for, say,
+invocations coming via API Gateway, in which the context includes details
+about the HTTP request. In all cases the context should be a list.</p>
 <p>If the handler function accepts a <code>context</code> argument then it will
 automatically receive at runtime a named list consisting of these values
 along with the arguments in the body (if any). For example, a function such

@@ -10,9 +10,6 @@
     <loc>https://lambdr.mdneuzerling.com/reference/as_stringified_json.html</loc>
   </url>
   <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/assert_lambda_is_setup.html</loc>
-  </url>
-  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/assert_status_code_is_good.html</loc>
   </url>
   <url>
@@ -20,6 +17,9 @@
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/condition.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/config_or_runtime_api.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/endpoints.html</loc>
@@ -58,7 +58,7 @@
     <loc>https://lambdr.mdneuzerling.com/reference/is_scheduled_event_content.html</loc>
   </url>
   <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/lambda_variables.html</loc>
+    <loc>https://lambdr.mdneuzerling.com/reference/lambda_config.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/lambdr.html</loc>
@@ -79,13 +79,7 @@
     <loc>https://lambdr.mdneuzerling.com/reference/prettify_list.html</loc>
   </url>
   <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/reset_lambda.html</loc>
-  </url>
-  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/serialise_result.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/setup_lambda.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/setup_logging.html</loc>
@@ -101,6 +95,9 @@
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/stop_html.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/validate_lambda_config.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/wait_for_and_handle_event.html</loc>

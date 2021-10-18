@@ -42,7 +42,7 @@
 <meta property="og:title" content="Set-up logging and a Lambda runtime, and start listening for events — start_lambda" />
 <meta property="og:description" content="Runs the following three functions in order:
 setup_logging
-setup_lambda
+lambda_config
 start_listening
 
 
@@ -139,7 +139,7 @@ container." />
     <div class="ref-description">
     <p>Runs the following three functions in order:</p><ul>
 <li><p><code><a href='setup_logging.html'>setup_logging</a></code></p></li>
-<li><p><code><a href='setup_lambda.html'>setup_lambda</a></code></p></li>
+<li><p><code><a href='lambda_config.html'>lambda_config</a></code></p></li>
 <li><p><code><a href='start_listening.html'>start_listening</a></code></p></li>
 </ul>
 
@@ -149,47 +149,19 @@ container.</p>
     </div>
 
     <pre class="usage"><span class='fu'>start_lambda</span><span class='op'>(</span>
-  log_threshold <span class='op'>=</span> <span class='fu'>logger</span><span class='fu'>::</span><span class='va'><a href='https://daroczig.github.io/logger/reference/log_levels.html'>INFO</a></span>,
-  handler <span class='op'>=</span> <span class='cn'>NULL</span>,
-  runtime_api <span class='op'>=</span> <span class='cn'>NULL</span>,
-  task_root <span class='op'>=</span> <span class='cn'>NULL</span>,
+  config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span>environ <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>,
   deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
   serialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
-  decode_base64 <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  timeout_seconds <span class='op'>=</span> <span class='cn'>NULL</span>,
-  environ <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span>
+  timeout_seconds <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>log_threshold</th>
-      <td><p>Threshold for recording and displaying log entries.
-Defaults to <code><a href='https://daroczig.github.io/logger/reference/log_levels.html'>logger::INFO</a></code>. To debug a failing Lambda container, set this
-to <code><a href='https://daroczig.github.io/logger/reference/log_levels.html'>logger::DEBUG</a></code> to log verbose information about how each request is
-processed.</p></td>
-    </tr>
-    <tr>
-      <th>handler</th>
-      <td><p>character. Name of function to use for processing inputs from
-events. This argument is provided for debugging and testing only. The
-"_HANDLER" environment variable, as configured in AWS, will always override
-this value if present.</p></td>
-    </tr>
-    <tr>
-      <th>runtime_api</th>
-      <td><p>character. Used as the host in the various endpoints used
-by AWS Lambda. This argument is provided for debugging and testing only.
-The "AWS_LAMBDA_RUNTIME_API" environment variable, as configured by AWS,
-will always override this value if present.</p></td>
-    </tr>
-    <tr>
-      <th>task_root</th>
-      <td><p>character. Defines the path to the Lambda function code.
-This argument is provided for debugging and testing only. The
-"LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
-override this value if present.</p></td>
+      <th>config</th>
+      <td><p>A list of configuration values as created by the
+<code>lambda_config</code> function.</p></td>
     </tr>
     <tr>
       <th>deserialiser</th>
@@ -207,24 +179,12 @@ By default, will attempt to serialise the body as JSON, based on the
 request type. To send the result as is, pass the <code>identity</code> function.</p></td>
     </tr>
     <tr>
-      <th>decode_base64</th>
-      <td><p>logical. Should Base64 input be automatically decoded?
-This is only used for events coming via an API Gateway. Complicated input
-(such as images) may be better left as is, so that the handler function can
-deal with it appropriately. Defaults to <code>TRUE</code>.</p></td>
-    </tr>
-    <tr>
       <th>timeout_seconds</th>
       <td><p>If set, the function will stop listening for events
 after this timeout. The timeout is checked between events, so this won't
 interrupt the function while it is waiting for a new event. This argument
 is provided for testing purposes, and shouldn't otherwise need to be set:
 AWS should handle the shutdown of idle Lambda instances.</p></td>
-    </tr>
-    <tr>
-      <th>environ</th>
-      <td><p>environment in which to search for the function given by the
-handler. Defaults to the parent frame.</p></td>
     </tr>
     </table>
 
@@ -233,7 +193,7 @@ handler. Defaults to the parent frame.</p></td>
     
 
 
-<p>The <code><a href='setup_lambda.html'>setup_lambda</a></code> function, which is also run as part of
+<p>The <code><a href='lambda_config.html'>lambda_config</a></code> function, which is also run as part of
 <code>start_lambda</code> configures the R session for Lambda based on
 environment variables made available by Lambda. The following environment
 variables are available:</p><ul>
@@ -256,13 +216,18 @@ this package.</p></li>
     
 
 <p>The <em>context</em> of an event is a list of metadata about the invocation. It is
-derived from the headers of a next event invocation response. It consists of:</p><ul>
+derived from the headers of a next event invocation response. By default it
+consists of:</p><ul>
 <li><p><code>aws_request_id</code> - The identifier of the invocation request</p></li>
 <li><p><code>invoked_function_arn</code> – The Amazon Resource Name (ARN) that's used to
 invoke the function. Indicates if the invoker specified a version number or
 alias.</p></li>
 </ul>
 
+<p>Alternatively, a particular event <em>class</em> (determined by invocation method)
+can implement an <code>extract_context</code> method. This is useful for, say,
+invocations coming via API Gateway, in which the context includes details
+about the HTTP request. In all cases the context should be a list.</p>
 <p>If the handler function accepts a <code>context</code> argument then it will
 automatically receive at runtime a named list consisting of these values
 along with the arguments in the body (if any). For example, a function such

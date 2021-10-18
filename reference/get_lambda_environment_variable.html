@@ -41,8 +41,9 @@
 
 <meta property="og:title" content="Retrieve a Lambda environment variable if available, and error otherwise — get_lambda_environment_variable" />
 <meta property="og:description" content="This function is provided to return a specific error if an environment
-variable is not defined. This is used by setup_lambda to ensure that the
-environment variables that are expected to be defined by AWS are present.
+variable is not defined. This is used by lambda_config to
+ensure that the environment variables that are expected to be defined by AWS
+are present.
 If the environment variable is undefined but a default value is provided,
 then that default value will be returned. However, the environment variable
 will always take precedence." />
@@ -129,14 +130,15 @@ will always take precedence." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Retrieve a Lambda environment variable if available, and error otherwise</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/setup-lambda.R'><code>R/setup-lambda.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/lambda-config.R'><code>R/lambda-config.R</code></a></small>
     <div class="hidden name"><code>get_lambda_environment_variable.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>This function is provided to return a specific error if an environment
-variable is not defined. This is used by <code>setup_lambda</code> to ensure that the
-environment variables that are expected to be defined by AWS are present.</p>
+variable is not defined. This is used by <code><a href='lambda_config.html'>lambda_config</a></code> to
+ensure that the environment variables that are expected to be defined by AWS
+are present.</p>
 <p>If the environment variable is undefined but a <code>default</code> value is provided,
 then that default value will be returned. However, the environment variable
 will always take precedence.</p>

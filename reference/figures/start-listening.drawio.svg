@@ -367,14 +367,14 @@
                         <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
                             <div style="display: inline-block; font-size: 11px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
                                 <font face="Courier New" style="font-size: 11px">
-                                    setup_lambda
+                                    lambda_config
                                 </font>
                             </div>
                         </div>
                     </div>
                 </foreignObject>
                 <text x="120" y="163" fill="#000000" font-family="Helvetica" font-size="11px" text-anchor="middle">
-                    setup_lambda
+                    lambda_config
                 </text>
             </switch>
         </g>

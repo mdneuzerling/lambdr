@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extract the context of a Lambda invocation from the headers of an event — extract_context • lambdr</title>
+<title>Set up endpoints, variables, and configuration for AWS Lambda — lambda_config • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Extract the context of a Lambda invocation from the headers of an event — extract_context" />
-<meta property="og:description" content="Extract the context of a Lambda invocation from the headers of an event" />
+<meta property="og:title" content="Set up endpoints, variables, and configuration for AWS Lambda — lambda_config" />
+<meta property="og:description" content="Set up endpoints, variables, and configuration for AWS Lambda" />
 
 
 
@@ -123,30 +123,91 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Extract the context of a Lambda invocation from the headers of an event</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/handle-event.R'><code>R/handle-event.R</code></a></small>
-    <div class="hidden name"><code>extract_context.Rd</code></div>
+    <h1>Set up endpoints, variables, and configuration for AWS Lambda</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/lambda-config.R'><code>R/lambda-config.R</code></a></small>
+    <div class="hidden name"><code>lambda_config.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Extract the context of a Lambda invocation from the headers of an event</p>
+    <p>Set up endpoints, variables, and configuration for AWS Lambda</p>
     </div>
 
-    <pre class="usage"><span class='fu'>extract_context</span><span class='op'>(</span><span class='va'>event</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>lambda_config</span><span class='op'>(</span>
+  handler <span class='op'>=</span> <span class='cn'>NULL</span>,
+  runtime_api <span class='op'>=</span> <span class='cn'>NULL</span>,
+  task_root <span class='op'>=</span> <span class='cn'>NULL</span>,
+  decode_base64 <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  environ <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>event</th>
-      <td><p>the response received from querying the next invocation
-endpoint.</p></td>
+      <th>handler</th>
+      <td><p>character. Name of function to use for processing inputs from
+events. This argument is provided for debugging and testing only. The
+"_HANDLER" environment variable, as configured in AWS, will always override
+this value if present.</p></td>
+    </tr>
+    <tr>
+      <th>runtime_api</th>
+      <td><p>character. Used as the host in the various endpoints used
+by AWS Lambda. This argument is provided for debugging and testing only.
+The "AWS_LAMBDA_RUNTIME_API" environment variable, as configured by AWS,
+will always override this value if present.</p></td>
+    </tr>
+    <tr>
+      <th>task_root</th>
+      <td><p>character. Defines the path to the Lambda function code.
+This argument is provided for debugging and testing only. The
+"LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
+override this value if present.</p></td>
+    </tr>
+    <tr>
+      <th>decode_base64</th>
+      <td><p>logical. Should Base64 input be automatically decoded?
+This is only used for events coming via an API Gateway. Complicated input
+(such as images) may be better left as is, so that the handler function can
+deal with it appropriately. Defaults to <code>TRUE</code>.</p></td>
+    </tr>
+    <tr>
+      <th>environ</th>
+      <td><p>environment in which to search for the function given by the
+handler. Defaults to the parent frame.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>list</p>
+    <p>As a rule of thumb, it takes longer to retrieve a value from an environment
+variable than it does to retrieve a value from R. This is because retrieving
+an environment variable requires a system call. Since the environment
+variables do not change in a Lambda instance, we fetch them once and set them
+to a package environment.</p>
+    <h2 class="hasAnchor" id="aws-lambda-variables"><a class="anchor" href="#aws-lambda-variables"></a>AWS Lambda variables</h2>
+
+    
+
+
+<p>The <code>lambda_config</code> function, which is also run as part of
+<code><a href='start_lambda.html'>start_lambda</a></code> configures the R session for Lambda based on
+environment variables made available by Lambda. The following environment
+variables are available:</p><ul>
+<li><p>Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
+variable, is the host of the various HTTP endpoints through which the
+runtime interacts with Lambda.</p></li>
+<li><p>Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
+defines the path to the Lambda function code. It isn't used in container
+environments with a custom runtime, as that runtime is responsible for
+finding and sourcing the function code.</p></li>
+<li><p>The handler, available as the "_HANDLER" environment variable, is
+interpreted by R as the function that is executed when the Lambda is
+called. This value could be anything, as the interpretation is solely up
+to the runtime, so requiring it to be a function is a standard imposed by
+this package.</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="event-context"><a class="anchor" href="#event-context"></a>Event context</h2>
 
     

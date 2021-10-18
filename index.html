@@ -222,7 +222,7 @@
 <li>as the <code>CMD</code> to the Dockerfile which contains the runtime, or</li>
 <li>as configured through the Lambda console (this takes precedence)</li>
 </ul>
-<p>The <code>setup_lambda</code> function (run as part of <code>start_lambda</code>) picks up on this environment variable and identifies the R function to which it refers. This handler function is used to process all invocations.</p>
+<p>The <code>lambda_config</code> function (run as part of <code>start_lambda</code>) picks up on this environment variable and identifies the R function to which it refers. This handler function is used to process all invocations.</p>
 </div>
 <div id="event-classification-according-to-invocation" class="section level3">
 <h3 class="hasAnchor">
@@ -234,6 +234,8 @@
 <li>
 <code>seralise_result</code> converts the result into the form that will be sent back to Lambda</li>
 <li>
+<code>extract_context</code> extracts metadata about the event as a list. If the handler function accepts a named <code>context</code> argument then it will receive the context as a value to that argument.</li>
+<li>
 <code>handle_event_error</code> deals with errors that occur during event handling. Some invocation types require errors to be formatted or handled in a very specific way.</li>
 </ul>
 </div>
@@ -243,7 +245,7 @@
 <p>The main function — <code>start_lambda</code> — runs three functions in sequence:</p>
 <ul>
 <li><code>setup_logging</code></li>
-<li><code>setup_lambda</code></li>
+<li><code>lambda_config</code></li>
 <li><code>start_listening</code></li>
 </ul>
 <p>The <code>start_listening</code> function sets up an infinite loop that listens for <em>invocations</em>, interprets them as <em>events</em>, and processes them with the handler function.</p>

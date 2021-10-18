@@ -48,7 +48,11 @@ stop_decomposition raises an error with an optional request_id. The error
 can then be processed by handle_decomposition_error. If a request_id is
 present then the error can be posted to the invocation error endpoint.
 Otherwise, the error is simply logged. In either case the error does not
-stop the kernel, and the runtime can move onto the next event." />
+stop the kernel, and the runtime can move onto the next event.
+handle_decomposition_error accepts a config object, created through the
+lambda_config function. It returns a function that accepts an
+error e, which means that handle_decomposition_error(event) can be passed
+as a value to the tryCatch error argument." />
 
 
 
@@ -146,11 +150,15 @@ can then be processed by <code>handle_decomposition_error</code>. If a <code>req
 present then the error can be posted to the invocation error endpoint.
 Otherwise, the error is simply logged. In either case the error does not
 stop the kernel, and the runtime can move onto the next event.</p>
+<p><code>handle_decomposition_error</code> accepts a <code>config</code> object, created through the
+<code><a href='lambda_config.html'>lambda_config</a></code> function. It returns a function that accepts an
+error <code>e</code>, which means that <code>handle_decomposition_error(event)</code> can be passed
+as a value to the <code>tryCatch</code> <code>error</code> argument.</p>
     </div>
 
     <pre class="usage"><span class='fu'>stop_decomposition</span><span class='op'>(</span><span class='va'>...</span>, request_id <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
-<span class='fu'>handle_decomposition_error</span><span class='op'>(</span><span class='va'>e</span><span class='op'>)</span></pre>
+<span class='fu'>handle_decomposition_error</span><span class='op'>(</span><span class='va'>config</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -165,10 +173,6 @@ are pasted together with no separator). This forms the error message.</p></td>
       <td><p>character. Used in error handling during event
 decomposition, when it's possible that a request ID might be known but the
 event hasn't been fully examined yet.</p></td>
-    </tr>
-    <tr>
-      <th>e</th>
-      <td><p>an error as caught by <code><a href='https://rdrr.io/r/base/conditions.html'>tryCatch</a></code></p></td>
     </tr>
     </table>
 

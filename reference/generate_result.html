@@ -132,7 +132,7 @@
     <p>Parse the content of an event and pass it through the handler function</p>
     </div>
 
-    <pre class="usage"><span class='fu'>generate_result</span><span class='op'>(</span><span class='va'>event</span>, <span class='va'>deserialiser</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>generate_result</span><span class='op'>(</span><span class='va'>event</span>, config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span><span class='op'>)</span>, deserialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -141,6 +141,11 @@
       <th>event</th>
       <td><p>the response received from querying the next invocation
 endpoint.</p></td>
+    </tr>
+    <tr>
+      <th>config</th>
+      <td><p>A list of configuration values as created by the
+<code>lambda_config</code> function.</p></td>
     </tr>
     <tr>
       <th>deserialiser</th>
