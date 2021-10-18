@@ -150,13 +150,13 @@
         <td>
           <p><code><a href="start_lambda.html">start_lambda()</a></code> </p>
         </td>
-        <td><p>Set-up logging and a Lambda runtime, and start listening for events</p></td>
+        <td><p>Start the Lambda runtime</p></td>
       </tr>
     </tbody><tbody>
       <tr>
         <th colspan="2">
-          <h2 id="section-individual-set-up-steps" class="hasAnchor"><a href="#section-individual-set-up-steps" class="anchor"></a>Individual set-up steps</h2>
-          <p class="section-desc"><p>Specific scenarios may require breaking the runtime setup into individual steps. For example, perhaps certain checks need to be run during initialisation. These functions — in the order of <code>setup_logging</code>, <code>lambda_config</code>, and <code>start_listening</code> — have the same outcome as <code>start_lambda</code>.</p></p>
+          <h2 id="section-lambda-configuration" class="hasAnchor"><a href="#section-lambda-configuration" class="anchor"></a>Lambda configuration</h2>
+          <p class="section-desc"><p>The <code>start_lambda</code> function accepts a configuration object provided by <code>lambda_config</code>. If the Lambda environment is configured correctly (eg. the handler function is set through the Lambda console) then this will often be unnecessary. Bespoke solutions may require additional configuration options such as Base64 decoding, custom serialisation, etc.</p></p>
         </th>
       </tr>
       
@@ -167,21 +167,9 @@
       <tr>
         
         <td>
-          <p><code><a href="setup_logging.html">setup_logging()</a></code> </p>
-        </td>
-        <td><p>Set up logging with the <code>logger</code> package</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="lambda_config.html">lambda_config()</a></code> </p>
         </td>
         <td><p>Set up endpoints, variables, and configuration for AWS Lambda</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="start_listening.html">start_listening()</a></code> </p>
-        </td>
-        <td><p>Start listening for events, and process them as they come</p></td>
       </tr>
     </tbody><tbody>
       <tr>
@@ -196,6 +184,12 @@
       
       
       <tr>
+        
+        <td>
+          <p><code><a href="setup_logging.html">setup_logging()</a></code> </p>
+        </td>
+        <td><p>Set up logging with the <code>logger</code> package</p></td>
+      </tr><tr>
         
         <td>
           <p><code><a href="as_stringified_json.html">as_stringified_json()</a></code> </p>

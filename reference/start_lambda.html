@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Set-up logging and a Lambda runtime, and start listening for events — start_lambda • lambdr</title>
+<title>Start the Lambda runtime — start_lambda • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,16 +39,11 @@
 
 
 
-<meta property="og:title" content="Set-up logging and a Lambda runtime, and start listening for events — start_lambda" />
-<meta property="og:description" content="Runs the following three functions in order:
-setup_logging
-lambda_config
-start_listening
-
-
-See vignette(&quot;lambda-runtime-in-container&quot;, package = &quot;lambdr&quot;) for an
-example of how to use this function to place an R Lambda Runtime in a
-container." />
+<meta property="og:title" content="Start the Lambda runtime — start_lambda" />
+<meta property="og:description" content="This is the main function of the package, responsible for starting the
+infinite loop of listening for new invocations. It relies on configuration
+provided to the config argument and produced by the
+lambda_config function." />
 
 
 
@@ -131,21 +126,16 @@ container." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Set-up logging and a Lambda runtime, and start listening for events</h1>
+    <h1>Start the Lambda runtime</h1>
     <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/start-lambda.R'><code>R/start-lambda.R</code></a></small>
     <div class="hidden name"><code>start_lambda.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Runs the following three functions in order:</p><ul>
-<li><p><code><a href='setup_logging.html'>setup_logging</a></code></p></li>
-<li><p><code><a href='lambda_config.html'>lambda_config</a></code></p></li>
-<li><p><code><a href='start_listening.html'>start_listening</a></code></p></li>
-</ul>
-
-<p>See <code><a href='../articles/lambda-runtime-in-container.html'>vignette("lambda-runtime-in-container", package = "lambdr")</a></code> for an
-example of how to use this function to place an R Lambda Runtime in a
-container.</p>
+    <p>This is the main function of the package, responsible for starting the
+infinite loop of listening for new invocations. It relies on configuration
+provided to the <code>config</code> argument and produced by the
+<code><a href='lambda_config.html'>lambda_config</a></code> function.</p>
     </div>
 
     <pre class="usage"><span class='fu'>start_lambda</span><span class='op'>(</span>
@@ -171,13 +161,18 @@ AWS should handle the shutdown of idle Lambda instances.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>See <code><a href='../articles/lambda-runtime-in-container.html'>vignette("lambda-runtime-in-container", package = "lambdr")</a></code> for an
+example of how to use this function to place an R Lambda Runtime in a
+container.</p>
     <h2 class="hasAnchor" id="aws-lambda-variables"><a class="anchor" href="#aws-lambda-variables"></a>AWS Lambda variables</h2>
 
     
 
 
-<p>The <code><a href='lambda_config.html'>lambda_config</a></code> function, which is also run as part of
-<code>start_lambda</code> configures the R session for Lambda based on
+<p>The <code><a href='lambda_config.html'>lambda_config</a></code> function obtains the configuration values
+for the Lambda runtime configures the R session for Lambda based on
 environment variables made available by Lambda. The following environment
 variables are available:</p><ul>
 <li><p>Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
@@ -186,7 +181,8 @@ runtime interacts with Lambda.</p></li>
 <li><p>Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
 defines the path to the Lambda function code. It isn't used in container
 environments with a custom runtime, as that runtime is responsible for
-finding and sourcing the function code.</p></li>
+finding and sourcing the function code. Hence, a missing task root is
+ignored by this package.</p></li>
 <li><p>The handler, available as the "_HANDLER" environment variable, is
 interpreted by R as the function that is executed when the Lambda is
 called. This value could be anything, as the interpretation is solely up
@@ -194,6 +190,12 @@ to the runtime, so requiring it to be a function is a standard imposed by
 this package.</p></li>
 </ul>
 
+<p>These <code>handler</code>, <code>runtime_api</code> and <code>task_root</code> arguments to the
+<code><a href='lambda_config.html'>lambda_config</a></code> function can also provide values to these
+configuration options, although the environment variables will always be
+used if available. While it may be sensible to provide the <code>handler</code>
+function directly, the other two configuration options are only provided for
+debugging and testing purposes.</p>
     <h2 class="hasAnchor" id="event-context"><a class="anchor" href="#event-context"></a>Event context</h2>
 
     
@@ -229,6 +231,12 @@ The <code>context</code> argument must be named (<code>...</code> will not work)
 <span class='op'>}</span>
 
 <span class='fu'>start_lambda</span><span class='op'>(</span><span class='op'>)</span>
+
+<span class='co'># Alternatively, it can be passed as an argument `handler = parity` to</span>
+<span class='co'># the lambda configuration. If the handler is configured through other means</span>
+<span class='co'># then this will be ignored:</span>
+
+<span class='fu'>start_lambda</span><span class='op'>(</span>config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span>handler <span class='op'>=</span> <span class='va'>parity</span><span class='op'>)</span><span class='op'>)</span>
 <span class='op'>}</span>
 </div></pre>
   </div>

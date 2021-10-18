@@ -40,7 +40,25 @@
 
 
 <meta property="og:title" content="Set up endpoints, variables, and configuration for AWS Lambda — lambda_config" />
-<meta property="og:description" content="Set up endpoints, variables, and configuration for AWS Lambda" />
+<meta property="og:description" content="This function provides a configuration object that can be passed to
+start_lambda. By default it will use the environment variables
+configured by AWS Lambda and so will often work without arguments.
+The most important configuration variable is the handler function which
+processes invocations of the Lambda. This is configured in any of the three
+below ways, in order of decreasing priority:
+configured directly through the AWS Lambda console
+configured as the CMD argument of the Docker container holding the
+runtime
+passed as a value to the handler argument of lambda_config
+
+
+In the first two options, the handler will be made available to the runtime
+through the &quot;_HANDLER&quot; environment variable. This function will search for
+the function in the given environment.
+If the handler accepts a context argument then it will receive a list of
+suitable event context for every invocation. This argument must be named
+(... will not work), and the configuration may be different for each
+invocation type. See the section below for more details." />
 
 
 
@@ -129,7 +147,25 @@
     </div>
 
     <div class="ref-description">
-    <p>Set up endpoints, variables, and configuration for AWS Lambda</p>
+    <p>This function provides a configuration object that can be passed to
+<code><a href='start_lambda.html'>start_lambda</a></code>. By default it will use the environment variables
+configured by AWS Lambda and so will often work without arguments.</p>
+<p>The most important configuration variable is the handler function which
+processes invocations of the Lambda. This is configured in any of the three
+below ways, in order of decreasing priority:</p><ol>
+<li><p>configured directly through the AWS Lambda console</p></li>
+<li><p>configured as the <code>CMD</code> argument of the Docker container holding the
+runtime</p></li>
+<li><p>passed as a value to the <code>handler</code> argument of <code>lambda_config</code></p></li>
+</ol>
+
+<p>In the first two options, the handler will be made available to the runtime
+through the "_HANDLER" environment variable. This function will search for
+the function in the given <code>environ</code>ment.</p>
+<p>If the handler accepts a <code>context</code> argument then it will receive a list of
+suitable event context for every invocation. This argument must be named
+(<code>...</code> will not work), and the configuration may be different for each
+invocation type. See the section below for more details.</p>
     </div>
 
     <pre class="usage"><span class='fu'>lambda_config</span><span class='op'>(</span>
@@ -200,15 +236,16 @@ deal with it appropriately. Defaults to <code>TRUE</code>. Ignored if a custom
     <p>As a rule of thumb, it takes longer to retrieve a value from an environment
 variable than it does to retrieve a value from R. This is because retrieving
 an environment variable requires a system call. Since the environment
-variables do not change in a Lambda instance, we fetch them once and set them
-to a package environment.</p>
+variables do not change in a Lambda instance, we fetch them once and store
+them in a configuration object which is passed to the various internal
+functions.</p>
     <h2 class="hasAnchor" id="aws-lambda-variables"><a class="anchor" href="#aws-lambda-variables"></a>AWS Lambda variables</h2>
 
     
 
 
-<p>The <code>lambda_config</code> function, which is also run as part of
-<code><a href='start_lambda.html'>start_lambda</a></code> configures the R session for Lambda based on
+<p>The <code>lambda_config</code> function obtains the configuration values
+for the Lambda runtime configures the R session for Lambda based on
 environment variables made available by Lambda. The following environment
 variables are available:</p><ul>
 <li><p>Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
@@ -217,7 +254,8 @@ runtime interacts with Lambda.</p></li>
 <li><p>Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
 defines the path to the Lambda function code. It isn't used in container
 environments with a custom runtime, as that runtime is responsible for
-finding and sourcing the function code.</p></li>
+finding and sourcing the function code. Hence, a missing task root is
+ignored by this package.</p></li>
 <li><p>The handler, available as the "_HANDLER" environment variable, is
 interpreted by R as the function that is executed when the Lambda is
 called. This value could be anything, as the interpretation is solely up
@@ -225,6 +263,12 @@ to the runtime, so requiring it to be a function is a standard imposed by
 this package.</p></li>
 </ul>
 
+<p>These <code>handler</code>, <code>runtime_api</code> and <code>task_root</code> arguments to the
+<code>lambda_config</code> function can also provide values to these
+configuration options, although the environment variables will always be
+used if available. While it may be sensible to provide the <code>handler</code>
+function directly, the other two configuration options are only provided for
+debugging and testing purposes.</p>
     <h2 class="hasAnchor" id="event-context"><a class="anchor" href="#event-context"></a>Event context</h2>
 
     
