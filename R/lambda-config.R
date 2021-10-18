@@ -9,8 +9,10 @@
 #' @keywords internal
 validate_lambda_config <- function(config) {
   if (!("lambda_config" %in% class(config))) {
-    stop("The Lambda runtime configuration should be provided by the ",
-         "lambda_config function. See `?lambda_config` for more details.")
+    stop(
+      "The Lambda runtime configuration should be provided by the ",
+      "lambda_config function. See `?lambda_config` for more details."
+    )
   }
   invisible(TRUE)
 }
@@ -94,13 +96,15 @@ function_accepts_context <- function(func) {
 get_handler_function_from_env_var <- function(environ) {
   handler_character <- Sys.getenv("_HANDLER")
   if (handler_character == "") {
-    stop("The _HANDLER environment variable is undefined.\n",
-         "This environment variable is configured by AWS Lambda based\n",
-         "the value configured either as the Dockerfile CMD or in the\n",
-         "AWS Lambda console (which will always take priority).\n",
-         "Alternatively, pass a function to the `handler` argument\n",
-         "of `lambda_config`, although note that `lambda_config` will\n",
-         "always defer to the environment variables if available.")
+    stop(
+      "The _HANDLER environment variable is undefined.\n",
+      "This environment variable is configured by AWS Lambda based\n",
+      "the value configured either as the Dockerfile CMD or in the\n",
+      "AWS Lambda console (which will always take priority).\n",
+      "Alternatively, pass a function to the `handler` argument\n",
+      "of `lambda_config`, although note that `lambda_config` will\n",
+      "always defer to the environment variables if available."
+    )
   }
 
   logger::log_info("Using handler function ", handler_character)
@@ -123,6 +127,29 @@ get_handler_function_from_env_var <- function(environ) {
 }
 
 #' Set up endpoints, variables, and configuration for AWS Lambda
+#'
+#' @description
+#' This function provides a configuration object that can be passed to
+#' \code{\link{start_lambda}}. By default it will use the environment variables
+#' configured by AWS Lambda and so will often work without arguments.
+#'
+#' The most important configuration variable is the handler function which
+#' processes invocations of the Lambda. This is configured in any of the three
+#' below ways, in order of decreasing priority:
+#'
+#' 1. configured directly through the AWS Lambda console
+#' 2. configured as the `CMD` argument of the Docker container holding the
+#'    runtime
+#' 3. passed as a value to the `handler` argument of `lambda_config`
+#'
+#' In the first two options, the handler will be made available to the runtime
+#' through the "_HANDLER" environment variable. This function will search for
+#' the function in the given `environ`ment.
+#'
+#' If the handler accepts a `context` argument then it will receive a list of
+#' suitable event context for every invocation. This argument must be named
+#' (`...` will not work), and the configuration may be different for each
+#' invocation type. See the section below for more details.
 #'
 #' @param handler the function to use for processing inputs from
 #'   events. The "_HANDLER" environment variable, as configured in AWS, will
@@ -156,13 +183,14 @@ get_handler_function_from_env_var <- function(environ) {
 #' As a rule of thumb, it takes longer to retrieve a value from an environment
 #' variable than it does to retrieve a value from R. This is because retrieving
 #' an environment variable requires a system call. Since the environment
-#' variables do not change in a Lambda instance, we fetch them once and set them
-#' to a package environment.
+#' variables do not change in a Lambda instance, we fetch them once and store
+#' them in a configuration object which is passed to the various internal
+#' functions.
 #'
 #' @section AWS Lambda variables:
 #'
-#' The \code{\link{lambda_config}} function, which is also run as part of
-#' \code{\link{start_lambda}} configures the R session for Lambda based on
+#' The \code{\link{lambda_config}} function obtains the configuration values
+#' for the Lambda runtime configures the R session for Lambda based on
 #' environment variables made available by Lambda. The following environment
 #' variables are available:
 #'
@@ -172,12 +200,20 @@ get_handler_function_from_env_var <- function(environ) {
 #' * Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
 #'   defines the path to the Lambda function code. It isn't used in container
 #'   environments with a custom runtime, as that runtime is responsible for
-#'   finding and sourcing the function code.
+#'   finding and sourcing the function code. Hence, a missing task root is
+#'   ignored by this package.
 #' * The handler, available as the "_HANDLER" environment variable, is
 #'   interpreted by R as the function that is executed when the Lambda is
 #'   called. This value could be anything, as the interpretation is solely up
 #'   to the runtime, so requiring it to be a function is a standard imposed by
 #'   this package.
+#'
+#' These `handler`, `runtime_api` and `task_root` arguments to the
+#' \code{\link{lambda_config}} function can also provide values to these
+#' configuration options, although the environment variables will always be
+#' used if available. While it may be sensible to provide the `handler`
+#' function directly, the other two configuration options are only provided for
+#' debugging and testing purposes.
 #'
 #' @inheritSection extract_context Event context
 #'
@@ -189,7 +225,6 @@ lambda_config <- function(handler = NULL,
                           serialiser = NULL,
                           decode_base64 = TRUE,
                           environ = parent.frame()) {
-
   lambda <- list()
 
   # There's no point in wrapping this in a TryCatch. If we don't have the

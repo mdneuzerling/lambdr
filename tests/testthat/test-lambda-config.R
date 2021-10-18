@@ -20,13 +20,13 @@ test_that("Defaults in setup are considered after environment variables ", {
 
 test_that("Lambda config retrieved from environment variable", {
   config <- withr::with_envvar(
-      c(
-        "AWS_LAMBDA_RUNTIME_API" = "red_panda",
-        "LAMBDA_TASK_ROOT" = "giraffe",
-        "_HANDLER" = "sqrt"
-      ),
-      lambda_config()
-    )
+    c(
+      "AWS_LAMBDA_RUNTIME_API" = "red_panda",
+      "LAMBDA_TASK_ROOT" = "giraffe",
+      "_HANDLER" = "sqrt"
+    ),
+    lambda_config()
+  )
 
   expect_s3_class(config, "lambda_config")
   expect_equal(config$runtime_api, "red_panda")
@@ -45,7 +45,7 @@ test_that("lambda config can record if Base64 is to be used for decoding", {
 })
 
 test_that("outright error when runtime_api not provided", {
-  expected_error = paste(
+  expected_error <- paste(
     "AWS_LAMBDA_RUNTIME_API environment variable is not set. This environment",
     "variable is set by AWS when Lambda is instantiated. It will not appear",
     "when running local tests."

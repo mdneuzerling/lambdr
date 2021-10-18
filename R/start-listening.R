@@ -79,7 +79,6 @@ classify_event <- function(event_content) {
 #'
 #' @keywords internal
 wait_for_event <- function(config = lambda_config()) {
-
   logger::log_debug("Waiting for event")
   invocation <- httr::GET(get_next_invocation_endpoint(config))
   logger::log_debug("Event received")
@@ -87,8 +86,9 @@ wait_for_event <- function(config = lambda_config()) {
   event_headers <- extract_event_headers(invocation)
   if (!("lambda-runtime-aws-request-id" %in% names(event_headers))) {
     stop_decomposition("Event doesn't contain request ID ",
-                       "Can't clear this request from the queue.",
-                       request_id = NULL)
+      "Can't clear this request from the queue.",
+      request_id = NULL
+    )
   }
   request_id <- event_headers[["lambda-runtime-aws-request-id"]]
   logger::log_debug("Request ID: ", request_id)
@@ -133,7 +133,6 @@ wait_for_event <- function(config = lambda_config()) {
 #'
 #' @keywords internal
 wait_for_and_handle_event <- function(config) {
-
   event <- NULL
 
   tryCatch(
@@ -147,7 +146,8 @@ wait_for_and_handle_event <- function(config) {
 
   tryCatch(
     handle_event(event,
-                 config = config),
+      config = config
+    ),
     error = handle_event_error(event, config)
   )
 
@@ -163,7 +163,7 @@ wait_for_and_handle_event <- function(config) {
 #' is provided for testing purposes, and shouldn't otherwise need to be set:
 #' AWS should handle the shutdown of idle Lambda instances.
 #'
-#' @export
+#' @keywords internal
 start_listening <- function(config = lambda_config(),
                             timeout_seconds = NULL) {
   validate_lambda_config(config)

@@ -19,3 +19,4 @@ AWS should handle the shutdown of idle Lambda instances.}
 \description{
 Start listening for events, and process them as they come
 }
+\keyword{internal}

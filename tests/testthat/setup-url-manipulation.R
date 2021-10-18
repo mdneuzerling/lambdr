@@ -66,7 +66,6 @@ make_url_friendly <- function(input) {
 #'   c(1, 2, 3),
 #'   .combine = "repeat_names"
 #' )
-#'
 add_parameter <- function(request,
                           parameter_name,
                           parameter_value,
@@ -139,7 +138,6 @@ add_parameter <- function(request,
 #'   numbers = c(1, 2, 3),
 #'   .combine = "repeat_names"
 #' )
-#'
 add_parameters <- function(request, ..., .combine = "repeat_name") {
   dots <- list(...)
   dots_names <- names(dots)

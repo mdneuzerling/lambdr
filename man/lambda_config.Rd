@@ -50,20 +50,42 @@ deal with it appropriately. Defaults to \code{TRUE}. Ignored if a custom
 "_HANDLER" environment variable. Defaults to the parent frame.}
 }
 \description{
-Set up endpoints, variables, and configuration for AWS Lambda
+This function provides a configuration object that can be passed to
+\code{\link{start_lambda}}. By default it will use the environment variables
+configured by AWS Lambda and so will often work without arguments.
+
+The most important configuration variable is the handler function which
+processes invocations of the Lambda. This is configured in any of the three
+below ways, in order of decreasing priority:
+\enumerate{
+\item configured directly through the AWS Lambda console
+\item configured as the \code{CMD} argument of the Docker container holding the
+runtime
+\item passed as a value to the \code{handler} argument of \code{lambda_config}
+}
+
+In the first two options, the handler will be made available to the runtime
+through the "_HANDLER" environment variable. This function will search for
+the function in the given \code{environ}ment.
+
+If the handler accepts a \code{context} argument then it will receive a list of
+suitable event context for every invocation. This argument must be named
+(\code{...} will not work), and the configuration may be different for each
+invocation type. See the section below for more details.
 }
 \details{
 As a rule of thumb, it takes longer to retrieve a value from an environment
 variable than it does to retrieve a value from R. This is because retrieving
 an environment variable requires a system call. Since the environment
-variables do not change in a Lambda instance, we fetch them once and set them
-to a package environment.
+variables do not change in a Lambda instance, we fetch them once and store
+them in a configuration object which is passed to the various internal
+functions.
 }
 \section{AWS Lambda variables}{
 
 
-The \code{\link{lambda_config}} function, which is also run as part of
-\code{\link{start_lambda}} configures the R session for Lambda based on
+The \code{\link{lambda_config}} function obtains the configuration values
+for the Lambda runtime configures the R session for Lambda based on
 environment variables made available by Lambda. The following environment
 variables are available:
 \itemize{
@@ -73,13 +95,21 @@ runtime interacts with Lambda.
 \item Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
 defines the path to the Lambda function code. It isn't used in container
 environments with a custom runtime, as that runtime is responsible for
-finding and sourcing the function code.
+finding and sourcing the function code. Hence, a missing task root is
+ignored by this package.
 \item The handler, available as the "_HANDLER" environment variable, is
 interpreted by R as the function that is executed when the Lambda is
 called. This value could be anything, as the interpretation is solely up
 to the runtime, so requiring it to be a function is a standard imposed by
 this package.
 }
+
+These \code{handler}, \code{runtime_api} and \code{task_root} arguments to the
+\code{\link{lambda_config}} function can also provide values to these
+configuration options, although the environment variables will always be
+used if available. While it may be sensible to provide the \code{handler}
+function directly, the other two configuration options are only provided for
+debugging and testing purposes.
 }
 
 \section{Event context}{

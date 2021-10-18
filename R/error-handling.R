@@ -79,8 +79,10 @@ post_lambda_error <- function(e, endpoint) {
 #' @keywords internal
 #' @export
 handle_event_error <- function(event, config, ...) {
-  logger::log_debug("Preparing invocation error for request ID:",
-                    event$request_id)
+  logger::log_debug(
+    "Preparing invocation error for request ID:",
+    event$request_id
+  )
   UseMethod("handle_event_error")
 }
 

@@ -1,10 +1,9 @@
-#' Set-up logging and a Lambda runtime, and start listening for events
+#' Start the Lambda runtime
 #'
-#' @description
-#' Runs the following three functions in order:
-#' * \code{\link{setup_logging}}
-#' * \code{\link{lambda_config}}
-#' * \code{\link{start_listening}}
+#' This is the main function of the package, responsible for starting the
+#' infinite loop of listening for new invocations. It relies on configuration
+#' provided to the `config` argument and produced by the
+#' \code{\link{lambda_config}} function.
 #'
 #' See \code{vignette("lambda-runtime-in-container", package = "lambdr")} for an
 #' example of how to use this function to place an R Lambda Runtime in a
@@ -29,6 +28,12 @@
 #' }
 #'
 #' start_lambda()
+#'
+#' # Alternatively, it can be passed as an argument `handler = parity` to
+#' # the lambda configuration. If the handler is configured through other means
+#' # then this will be ignored:
+#'
+#' start_lambda(config = lambda_config(handler = parity))
 #' }
 start_lambda <- function(config = lambda_config(environ = parent.frame()),
                          timeout_seconds = NULL) {

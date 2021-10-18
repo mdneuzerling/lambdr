@@ -2,7 +2,7 @@
 % Please edit documentation in R/start-lambda.R
 \name{start_lambda}
 \alias{start_lambda}
-\title{Set-up logging and a Lambda runtime, and start listening for events}
+\title{Start the Lambda runtime}
 \usage{
 start_lambda(
   config = lambda_config(environ = parent.frame()),
@@ -20,13 +20,12 @@ is provided for testing purposes, and shouldn't otherwise need to be set:
 AWS should handle the shutdown of idle Lambda instances.}
 }
 \description{
-Runs the following three functions in order:
-\itemize{
-\item \code{\link{setup_logging}}
-\item \code{\link{lambda_config}}
-\item \code{\link{start_listening}}
+This is the main function of the package, responsible for starting the
+infinite loop of listening for new invocations. It relies on configuration
+provided to the \code{config} argument and produced by the
+\code{\link{lambda_config}} function.
 }
-
+\details{
 See \code{vignette("lambda-runtime-in-container", package = "lambdr")} for an
 example of how to use this function to place an R Lambda Runtime in a
 container.
@@ -34,8 +33,8 @@ container.
 \section{AWS Lambda variables}{
 
 
-The \code{\link{lambda_config}} function, which is also run as part of
-\code{\link{start_lambda}} configures the R session for Lambda based on
+The \code{\link{lambda_config}} function obtains the configuration values
+for the Lambda runtime configures the R session for Lambda based on
 environment variables made available by Lambda. The following environment
 variables are available:
 \itemize{
@@ -45,13 +44,21 @@ runtime interacts with Lambda.
 \item Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
 defines the path to the Lambda function code. It isn't used in container
 environments with a custom runtime, as that runtime is responsible for
-finding and sourcing the function code.
+finding and sourcing the function code. Hence, a missing task root is
+ignored by this package.
 \item The handler, available as the "_HANDLER" environment variable, is
 interpreted by R as the function that is executed when the Lambda is
 called. This value could be anything, as the interpretation is solely up
 to the runtime, so requiring it to be a function is a standard imposed by
 this package.
 }
+
+These \code{handler}, \code{runtime_api} and \code{task_root} arguments to the
+\code{\link{lambda_config}} function can also provide values to these
+configuration options, although the environment variables will always be
+used if available. While it may be sensible to provide the \code{handler}
+function directly, the other two configuration options are only provided for
+debugging and testing purposes.
 }
 
 \section{Event context}{
@@ -90,5 +97,11 @@ parity <- function(number) {
 }
 
 start_lambda()
+
+# Alternatively, it can be passed as an argument `handler = parity` to
+# the lambda configuration. If the handler is configured through other means
+# then this will be ignored:
+
+start_lambda(config = lambda_config(handler = parity))
 }
 }

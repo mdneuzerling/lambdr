@@ -72,7 +72,7 @@ test_that("we can parse input with no arguments from a REST API Gateway", {
 
 test_that("REST API Gateway event errors are handled as responses", {
   give_error <- function() stop("my heart is a fish")
-  config = basic_lambda_config(handler = "give_error")
+  config <- basic_lambda_config(handler = "give_error")
 
   mock_response_success <- mock_rest_api_gateway_event(
     query_parameters = NULL,
