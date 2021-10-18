@@ -136,6 +136,8 @@
   handler <span class='op'>=</span> <span class='cn'>NULL</span>,
   runtime_api <span class='op'>=</span> <span class='cn'>NULL</span>,
   task_root <span class='op'>=</span> <span class='cn'>NULL</span>,
+  deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
+  serialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
   decode_base64 <span class='op'>=</span> <span class='cn'>TRUE</span>,
   environ <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span>
 <span class='op'>)</span></pre>
@@ -145,10 +147,9 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>handler</th>
-      <td><p>character. Name of function to use for processing inputs from
-events. This argument is provided for debugging and testing only. The
-"_HANDLER" environment variable, as configured in AWS, will always override
-this value if present.</p></td>
+      <td><p>the function to use for processing inputs from
+events. The "_HANDLER" environment variable, as configured in AWS, will
+always override this value if present.</p></td>
     </tr>
     <tr>
       <th>runtime_api</th>
@@ -165,16 +166,32 @@ This argument is provided for debugging and testing only. The
 override this value if present.</p></td>
     </tr>
     <tr>
+      <th>deserialiser</th>
+      <td><p>function for deserialising the body of the event.
+By default, will attempt to deserialise the body as JSON, based on whether
+the input is coming from an API Gateway, scheduled Cloudwatch event, or
+direct. To use the body as is, pass the <code>identity</code> function. If input is
+coming via an API Gateway this will require some complicated parsing (see
+below).</p></td>
+    </tr>
+    <tr>
+      <th>serialiser</th>
+      <td><p>function for serialising the result before sending.
+By default, will attempt to serialise the body as JSON, based on the
+request type. To send the result as is, pass the <code>identity</code> function.</p></td>
+    </tr>
+    <tr>
       <th>decode_base64</th>
       <td><p>logical. Should Base64 input be automatically decoded?
 This is only used for events coming via an API Gateway. Complicated input
 (such as images) may be better left as is, so that the handler function can
-deal with it appropriately. Defaults to <code>TRUE</code>.</p></td>
+deal with it appropriately. Defaults to <code>TRUE</code>. Ignored if a custom
+<code>deserialiser</code> is used.</p></td>
     </tr>
     <tr>
       <th>environ</th>
       <td><p>environment in which to search for the function given by the
-handler. Defaults to the parent frame.</p></td>
+"_HANDLER" environment variable. Defaults to the parent frame.</p></td>
     </tr>
     </table>
 

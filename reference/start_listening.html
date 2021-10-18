@@ -132,12 +132,7 @@
     <p>Start listening for events, and process them as they come</p>
     </div>
 
-    <pre class="usage"><span class='fu'>start_listening</span><span class='op'>(</span>
-  config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span><span class='op'>)</span>,
-  deserialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
-  serialiser <span class='op'>=</span> <span class='cn'>NULL</span>,
-  timeout_seconds <span class='op'>=</span> <span class='cn'>NULL</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>start_listening</span><span class='op'>(</span>config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span><span class='op'>)</span>, timeout_seconds <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -146,21 +141,6 @@
       <th>config</th>
       <td><p>A list of configuration values as created by the
 <code>lambda_config</code> function.</p></td>
-    </tr>
-    <tr>
-      <th>deserialiser</th>
-      <td><p>function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the <code>identity</code> function. If input is
-coming via an API Gateway this will require some complicated parsing (see
-below).</p></td>
-    </tr>
-    <tr>
-      <th>serialiser</th>
-      <td><p>function for serialising the result before sending.
-By default, will attempt to serialise the body as JSON, based on the
-request type. To send the result as is, pass the <code>identity</code> function.</p></td>
     </tr>
     <tr>
       <th>timeout_seconds</th>

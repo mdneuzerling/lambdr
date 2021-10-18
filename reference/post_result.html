@@ -138,7 +138,7 @@ serialisation is posted <strong>as is</strong> to the response endpoint; this fu
 will not perform any JSON serialisation, for example.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>post_result</span><span class='op'>(</span><span class='va'>event</span>, config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span><span class='op'>)</span>, serialiser <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>post_result</span><span class='op'>(</span><span class='va'>event</span>, <span class='va'>config</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -152,12 +152,6 @@ endpoint.</p></td>
       <th>config</th>
       <td><p>A list of configuration values as created by the
 <code>lambda_config</code> function.</p></td>
-    </tr>
-    <tr>
-      <th>serialiser</th>
-      <td><p>function for serialising the result before sending.
-By default, will attempt to serialise the body as JSON, based on the
-request type. To send the result as is, pass the <code>identity</code> function.</p></td>
     </tr>
     </table>
 

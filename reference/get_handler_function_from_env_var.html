@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Parse the body of the Lambda event — parse_event_content • lambdr</title>
+<title>Determine the function referred to by the "_HANDLER" environment variable — get_handler_function_from_env_var • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,13 @@
 
 
 
-<meta property="og:title" content="Parse the body of the Lambda event — parse_event_content" />
-<meta property="og:description" content="Parse the body of the Lambda event" />
+<meta property="og:title" content="Determine the function referred to by the "_HANDLER" environment variable — get_handler_function_from_env_var" />
+<meta property="og:description" content="This function will try to identify the function referred to by the &quot;_HANDLER&quot;
+environment variable. This environment variable is configured by AWS Lambda,
+either through the CMD of the Dockerfile containing the runtime or through
+the AWS Lambda console (which takes priority). This function also performs
+some checks, making sure that the environment variable is defined and that
+it exists in the given environment, and that it's a function." />
 
 
 
@@ -123,42 +128,32 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Parse the body of the Lambda event</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/parse-event-content.R'><code>R/parse-event-content.R</code></a></small>
-    <div class="hidden name"><code>parse_event_content.Rd</code></div>
+    <h1>Determine the function referred to by the "_HANDLER" environment variable</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/lambda-config.R'><code>R/lambda-config.R</code></a></small>
+    <div class="hidden name"><code>get_handler_function_from_env_var.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Parse the body of the Lambda event</p>
+    <p>This function will try to identify the function referred to by the "_HANDLER"
+environment variable. This environment variable is configured by AWS Lambda,
+either through the CMD of the Dockerfile containing the runtime or through
+the AWS Lambda console (which takes priority). This function also performs
+some checks, making sure that the environment variable is defined and that
+it exists in the given environment, and that it's a function.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>parse_event_content</span><span class='op'>(</span><span class='va'>event</span>, <span class='va'>config</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>get_handler_function_from_env_var</span><span class='op'>(</span><span class='va'>environ</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>config</th>
-      <td><p>A list of configuration values as created by the
-<code>lambda_config</code> function.</p></td>
-    </tr>
-    <tr>
-      <th>event_content</th>
-      <td><p>the content of the response received from querying the
-text invocation endpoint, as a character</p></td>
+      <th>environ</th>
+      <td><p>environment in which to search for the function given by the
+"_HANDLER" environment variable. Defaults to the parent frame.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>A list containing the arguments to be passed to the handler function</p>
-    <h2 class="hasAnchor" id="invocations-via-an-api-gateway"><a class="anchor" href="#invocations-via-an-api-gateway"></a>Invocations via an API Gateway</h2>
-
-    
-
-<p>Events coming from an API Gateway need to be treated a little differently,
-both in parsing the event content and in posting the results. Refer to
-<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code> for details.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
