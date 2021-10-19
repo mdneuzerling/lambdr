@@ -1,11 +1,12 @@
-mock_rest_api_gateway_event <- function(query_parameters = NULL,
+mock_html_api_gateway_event <- function(query_parameters = NULL,
                                         body_parameters = NULL,
                                         result,
                                         expected_response_headers = default_response_headers,
                                         expect_result_as_is = FALSE,
                                         request_id = "abc123",
+                                        config = basic_lambda_config(),
                                         timeout_seconds = 0.5) {
-  api_gateway_event_body <- mock_rest_api_gateway_event_body(
+  api_gateway_event_body <- mock_html_api_gateway_event_body(
     query_parameters,
     body_parameters
   )
@@ -14,8 +15,8 @@ mock_rest_api_gateway_event <- function(query_parameters = NULL,
   webmockr::enable(quiet = TRUE)
   withr::defer(webmockr::disable(quiet = TRUE))
 
-  invocation_endpoint <- get_next_invocation_endpoint()
-  response_endpoint <- get_response_endpoint(request_id)
+  invocation_endpoint <- get_next_invocation_endpoint(config)
+  response_endpoint <- get_response_endpoint(config, request_id)
 
   # Mock the invocation to return a Lambda input with mock request ID and input
   webmockr::stub_request("get", invocation_endpoint) %>%
@@ -45,7 +46,7 @@ mock_rest_api_gateway_event <- function(query_parameters = NULL,
     ) %>%
     webmockr::to_return(status = 200)
 
-  start_listening(timeout_seconds = timeout_seconds)
+  start_listening(config = config, timeout_seconds = timeout_seconds)
 
   requests <- webmockr::request_registry()
   n_responses <- requests$times_executed(
@@ -55,70 +56,65 @@ mock_rest_api_gateway_event <- function(query_parameters = NULL,
   n_responses >= 1
 }
 
-mock_rest_api_gateway_event_body <- function(query_parameters = NULL,
+mock_html_api_gateway_event_body <- function(query_parameters = NULL,
                                              body_parameters = NULL) {
-  # Bizarrely, the body needs to be a stringified JSON but the query parameters
-  # need to be just a normal JSON
+  # path_arameters ?
+  rawQueryString <- ""
+  for (i in seq_along(query_parameters)) {
+    rawQueryString <- add_parameter(
+      rawQueryString,
+      names(query_parameters[i]),
+      as.character(query_parameters[[i]])
+    )
+  }
+  rawQueryString <- gsub("^\\?", "", rawQueryString)
+  body <- jsonlite::base64_enc(as_stringified_json(body_parameters))
+
+  queryStringParameters <- lapply(
+    query_parameters,
+    function(x) paste(as.character(x), collapse = ",")
+  )
+
   as_json(
     list(
-      resource = "/parity",
-      path = "/parity",
-      httpMethod = "POST",
+      version = "2.0",
+      routeKey = "ANY /parity",
+      rawPath = "/default/parity",
+      rawQueryString = rawQueryString,
+      queryStringParameters = queryStringParameters,
       headers = list(
-        accept = "*/*",
-        Host = "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
-        "User-Agent" = "curl/7.64.1",
-        "X-Amzn-Trace-Id" = "Root=1-615e4711-5f239aad2b046b5609e43b1c",
-        "X-Forwarded-For" = "192.168.1.1",
-        "X-Forwarded-Port" = "443",
-        "X-Forwarded-Proto" = "https"
+        "accept" = "*/*",
+        "content-length" = "12",
+        "content-type" = "application/x-www-form-urlencoded",
+        "host" = "abcdefghi.execute-api.ap-southeast-2.amazonaws.com",
+        "user-agent" = "curl/7.64.1",
+        "x-amzn-trace-id" = "Root=1-6167f9fb-1ada874811eaf2bc1464c679",
+        "x-forwarded-for" = "192.168.1.1",
+        "x-forwarded-port" = "443",
+        "x-forwarded-proto" = "https"
       ),
-      multiValueHeaders = list(
-        accept = list("*/*"),
-        Host = list("abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"),
-        "User-Agent" = list("curl/7.64.1"),
-        "X-Amzn-Trace-Id" = list("Root=1-615e4711-5f239aad2b046b5609e43b1c"),
-        "X-Forwarded-For" = list("192.168.1.1"),
-        "X-Forwarded-Port" = list("443"),
-        "X-Forwarded-Proto" = list("https")
-      ),
-      "queryStringParameters" = query_parameters,
-      "multiValueQueryStringParameters" = query_parameters, # should be boxed
-      pathParameters = NULL,
-      stageVariables = NULL,
       requestContext = list(
-        resourceId = "abcdef",
-        resourcePath = "/parity",
-        httpMethod = "POST",
-        extendedRequestId = "G0AKsFXISwMFsGA=",
-        requestTime = "07/Oct/2021:01:02:09 +0000",
-        path = "/test/parity",
-        accountId = "1234567890",
-        protocol = "HTTP/1.1",
-        stage = "test",
-        domainPrefix = "abcdefghijk",
-        requestTimeEpoch = 1.633569e+12,
-        requestId = "59bbb4c9-9d24-4cbb-941b-60dd4969e9c5",
-        identity = list(
-          cognitoIdentityPoolId = NULL,
-          accountId = NULL,
-          cognitoIdentityId = NULL,
-          caller = NULL,
-          sourceIp = "192.168.1.1",
-          principalOrgId = NULL,
-          accessKey = NULL,
-          cognitoAuthenticationType = NULL,
-          cognitoAuthenticationProvider = NULL,
-          userArn = NULL,
-          userAgent = "curl/7.64.1",
-          user = NULL
+        "accountId" = "123456789",
+        "apiId" = "abcdefghi",
+        "domainName" = "abcdefghi.execute-api.ap-southeast-2.amazonaws.com",
+        "domainPrefix" = "abcdefghi",
+        "http" = list(
+          "method" = "POST",
+          "path" = "/default/parity",
+          "protocol" = "HTTP/1.1",
+          "sourceIp" = "192.168.1.1",
+          "userAgent" = "curl/7.64.1"
         ),
-        domainName = "abcdefghijk.execute-api.ap-southeast-2.amazonaws.com",
-        apiId = "abcdefghijk"
+        "requestId" = "HMP_QiusywMEPEg=",
+        "routeKey" = "ANY /parity",
+        "stage" = "default",
+        "time" = "14/Oct/2021:09:35:55 +0000",
+        "timeEpoch" = 1634204155055
       ),
-      body = as_stringified_json(body_parameters),
-      isBase64Encoded = FALSE
+      body = body,
+      isBase64Encoded = TRUE
     ),
-    pretty = TRUE
+    pretty = TRUE,
+    na = "null"
   )
 }

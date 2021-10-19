@@ -49,3 +49,7 @@ test_that("we can decode Base64 strings", {
     "{\"number\":7}"
   )
 })
+
+test_that("from_base64 propagates NULLs", {
+  expect_null(from_base64(NULL))
+})

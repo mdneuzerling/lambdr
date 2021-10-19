@@ -15,14 +15,14 @@ parse_event_content.html_api_gateway_event <- function(event, config, ...) {
   logger::log_debug("Input coming via HTML API Gateway")
   parsed_json <- parse_json_or_empty(event$event_content)
 
-  raw_query_parameters <- parsed_json[["queryStringParameters"]]
-  query_parameters <- if (is.null(raw_query_parameters)) {
+  query_string_parameters <- parsed_json[["queryStringParameters"]]
+  query_parameters <- if (is.null(query_string_parameters)) {
     list()
   } else {
     # convert "value1,value2" to c("value1", "value2")
     Map(
       function(x) strsplit(x, ",")[[1]],
-      jsonlite::fromJSON(raw_query_parameters)
+      query_string_parameters
     )
   }
 

@@ -89,9 +89,13 @@ default_response_headers <- list(
 
 #' Decode a Base64 encoded value to a string
 #'
+#' @description
 #' Events coming via an API Gateway can have content with bodies encoded as
 #' Base64. This is especially true for HTML API Gateways (as opposed to REST
 #' API Gateways).
+#'
+#' This function propagates `NULL`s. That is, `from_base64(NULL)` returns
+#' `NULL`.
 #'
 #' @param x a Base64 string
 #'
@@ -101,5 +105,8 @@ default_response_headers <- list(
 #' @examples
 #' from_base64("eyJudW1iZXIiOjd9")
 from_base64 <- function(x) {
+  if (is.null(x)) {
+    return(NULL)
+  }
   rawToChar(jsonlite::base64_dec(x))
 }
