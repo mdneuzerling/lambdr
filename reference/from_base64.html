@@ -42,7 +42,9 @@
 <meta property="og:title" content="Decode a Base64 encoded value to a string — from_base64" />
 <meta property="og:description" content="Events coming via an API Gateway can have content with bodies encoded as
 Base64. This is especially true for HTML API Gateways (as opposed to REST
-API Gateways)." />
+API Gateways).
+This function propagates NULLs. That is, from_base64(NULL) returns
+NULL." />
 
 
 
@@ -134,6 +136,8 @@ API Gateways)." />
     <p>Events coming via an API Gateway can have content with bodies encoded as
 Base64. This is especially true for HTML API Gateways (as opposed to REST
 API Gateways).</p>
+<p>This function propagates <code>NULL</code>s. That is, <code>from_base64(NULL)</code> returns
+<code>NULL</code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>from_base64</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre>
