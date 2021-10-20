@@ -18,18 +18,30 @@ expect_setup_failure <- function(endpoint_function, ...) {
 basic_lambda_config <- function(handler = "sqrt",
                                 runtime_api = "red_panda",
                                 task_root = "giraffe",
+                                direct_handler = NULL,
                                 log_threshold = test_debug_level,
                                 ...) {
   setup_logging(log_threshold = log_threshold)
-  withr::with_envvar(
+
+  # The handler is configured via an environment variable, UNLESS direct_handler
+  # is provided, in which it's passed through to `lambda_config`
+  env_vars <- if (is.null(direct_handler)) {
     c(
       "AWS_LAMBDA_RUNTIME_API" = runtime_api,
       "LAMBDA_TASK_ROOT" = task_root,
       "_HANDLER" = handler
-    ),
+    )
+  } else {
+    c(
+      "AWS_LAMBDA_RUNTIME_API" = runtime_api,
+      "LAMBDA_TASK_ROOT" = task_root
+    )
+  }
+
+  withr::with_envvar(env_vars,
     withr::with_environment(
       parent.frame(),
-      lambda_config(...)
+      lambda_config(handler = direct_handler, ...)
     )
   )
 }
@@ -121,7 +133,10 @@ mock_invocation_error <- function(input,
 
 trigger_initialisation_error <- function(expected_error,
                                          task_root = "giraffe",
-                                         handler = "sqrt") {
+                                         handler = "sqrt",
+                                         direct_handler = NULL,
+                                         deserialiser = NULL,
+                                         serialiser = NULL) {
 
   # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
@@ -166,7 +181,10 @@ trigger_initialisation_error <- function(expected_error,
     basic_lambda_config(
       runtime_api = "red_panda",
       task_root = task_root,
-      handler = handler
+      handler = handler,
+      direct_handler = direct_handler,
+      deserialiser = deserialiser,
+      serialiser = serialiser
     ),
     error = function(e) e$message
   )

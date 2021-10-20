@@ -110,3 +110,25 @@ from_base64 <- function(x) {
   }
   rawToChar(jsonlite::base64_dec(x))
 }
+
+#' Decode the body of event content coming via an API Gateway
+#'
+#' @param body character body of an event received via an API Gateway
+#'   invocation. Usually this isn't the entire content of the event, but the
+#'   "body" component of it.
+#' @inheritParams validate_lambda_config
+#' @param base64_encoded logical that indicates if the body is encoded as Base64
+#'
+#' @return Either a list or, if the body is Base64 and the configuration demands
+#'   that Base64 values are not decoded, a Base64 value as a character
+#'
+#' @keywords internal
+decode_html_body <- function(body, config, base64_encoded = FALSE) {
+  if (!base64_encoded) {
+    parse_json_or_empty(body)
+  } else if (config$decode_base64) {
+    parse_json_or_empty(from_base64(body))
+  } else {
+    body
+  }
+}

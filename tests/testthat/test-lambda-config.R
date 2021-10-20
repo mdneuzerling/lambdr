@@ -47,6 +47,11 @@ test_that("Lambda config retrieved from environment variable", {
   expect_equal(config$handler, sqrt)
 })
 
+test_that("handler can be set directly without env var", {
+  config <-  basic_lambda_config(direct_handler = sqrt)
+  expect_equal(config$handler, sqrt)
+})
+
 test_that("lambda config can record if Base64 is to be used for decoding", {
   default_config <- basic_lambda_config()
   no_base64_config <- basic_lambda_config(decode_base64 = FALSE)
@@ -120,11 +125,20 @@ test_that("undefined handlers are caught", {
   expect_true(error_received)
 })
 
-test_that("non-function handlers are caught", {
+test_that("non-function handlers provided by env var are caught", {
   error_received <- trigger_initialisation_error(
     expected_error = "mtcars is not a function",
     task_root = "giraffe",
     handler = "mtcars"
+  )
+  expect_true(error_received)
+})
+
+test_that("non-function handlers provided directly are caught", {
+  error_received <- trigger_initialisation_error(
+    expected_error = "The handler function is not a function",
+    task_root = "giraffe",
+    direct_handler = mtcars
   )
   expect_true(error_received)
 })
@@ -154,3 +168,20 @@ test_that("context argument recognised in handler formals", {
   yes_context_config <- basic_lambda_config(handler = "yes_context")
   expect_true(yes_context_config$pass_context_argument)
 })
+
+test_that("non function custom deserialisers are caught", {
+  error_received <- trigger_initialisation_error(
+    expected_error = "custom deserialiser is not a function",
+    deserialiser = mtcars
+  )
+  expect_true(error_received)
+})
+
+test_that("non function custom serialisers are caught", {
+  error_received <- trigger_initialisation_error(
+    expected_error = "custom serialiser is not a function",
+    serialiser = mtcars
+  )
+  expect_true(error_received)
+})
+

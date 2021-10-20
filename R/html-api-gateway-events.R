@@ -29,13 +29,7 @@ parse_event_content.html_api_gateway_event <- function(event, config, ...) {
   # Parse the JSON within the JSON
   body <- parsed_json[["body"]]
   base64_encoded <- parsed_json[["isBase64Encoded"]]
-  body_parameters <- if (!base64_encoded) {
-    parse_json_or_empty(body)
-  } else if (config$decode_base64) {
-    parse_json_or_empty(from_base64(body))
-  } else {
-    body
-  }
+  body_parameters <- decode_html_body(body, config, base64_encoded)
 
   # query parameters always named, should go last
   c(body_parameters, query_parameters)

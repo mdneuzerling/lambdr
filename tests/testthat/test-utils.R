@@ -53,3 +53,36 @@ test_that("we can decode Base64 strings", {
 test_that("from_base64 propagates NULLs", {
   expect_null(from_base64(NULL))
 })
+
+test_that("HTML body decoding accommodates for base64", {
+  # should only decode base_64 when config$decode_base64 and base64_encoded are
+  # both TRUE
+  expect_equal(
+    decode_html_body("eyJudW1iZXIiOjd9",
+                     list(decode_base64 = TRUE),
+                     base64_encoded = TRUE),
+    list(number = 7)
+  )
+
+  expect_equal(
+    decode_html_body("eyJudW1iZXIiOjd9",
+                     list(decode_base64 = FALSE),
+                     base64_encoded = TRUE),
+    "eyJudW1iZXIiOjd9"
+  )
+
+  # everything else gets treated as JSON
+  expect_equal(
+    decode_html_body('{"number": 7}',
+                     list(decode_base64 = TRUE),
+                     base64_encoded = FALSE),
+    list(number = 7)
+  )
+
+  expect_equal(
+    decode_html_body('{"number": 7}',
+                     list(decode_base64 = FALSE),
+                     base64_encoded = FALSE),
+    list(number = 7)
+  )
+})
