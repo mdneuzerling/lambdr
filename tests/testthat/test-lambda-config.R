@@ -1,3 +1,16 @@
+test_that("we can catch invalid lambda configs", {
+  expect_true(validate_lambda_config(basic_lambda_config()))
+
+  expected_error <- paste0(
+    "The Lambda runtime configuration should be provided by the ",
+    "lambda_config function."
+  )
+  expect_error(
+    validate_lambda_config(list()),
+    expected_error
+  )
+})
+
 test_that("Defaults in setup are considered after environment variables ", {
   expect_error(
     get_lambda_environment_variable("doesntexist"),
