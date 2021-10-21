@@ -2,8 +2,7 @@
 #'
 #' @inheritSection is_from_rest_api_gateway Invocations via an API Gateway
 #'
-#' @param event_content the content of the response received from querying the
-#'   text invocation endpoint, as a character
+#' @inheritParams handle_event
 #' @inheritParams validate_lambda_config
 #'
 #' @return A list containing the arguments to be passed to the handler function

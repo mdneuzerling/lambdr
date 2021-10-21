@@ -4,10 +4,13 @@
 \alias{as_stringified_json}
 \title{Convert an R object to stringified JSON matching AWS Lambda conventions}
 \usage{
-as_stringified_json(x)
+as_stringified_json(x, ...)
 }
 \arguments{
 \item{x}{R object to be converted to stringified JSON.}
+
+\item{...}{additional arguments (except \code{auto_unbox} and \code{null}) passed to
+\code{\link[jsonlite]{toJSON}}}
 }
 \value{
 character

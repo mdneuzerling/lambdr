@@ -68,6 +68,7 @@ as_json <- function(x, ...) {
 #' unboxed.
 #'
 #' @param x R object to be converted to stringified JSON.
+#' @inheritParams as_json
 #'
 #' @return character
 #' @export
@@ -75,11 +76,11 @@ as_json <- function(x, ...) {
 #' @examples
 #' as_stringified_json(list(number = 9))
 #' "{\"number\":9}"
-as_stringified_json <- function(x) {
+as_stringified_json <- function(x, ...) {
   if (is.null(x)) {
     return(NULL)
   }
-  as.character(as_json(x))
+  as.character(as_json(x, ...))
 }
 
 default_response_headers <- list(

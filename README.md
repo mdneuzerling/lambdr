@@ -21,7 +21,8 @@ Not all invocation types have been implemented or tested.
  direct | <img src="man/figures/lifecycle-maturing.svg" align="center"/>
  API Gateway (REST) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
  API Gateway (HTML) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
- Scheduled (Cloudwatch) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
+ EventBridge | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
+ SNS | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
 
 ## Installation
 

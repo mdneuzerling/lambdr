@@ -52,8 +52,10 @@ classify_event <- function(event_content) {
     "rest_api_gateway_event"
   } else if (is_from_html_api_gateway(event_content)) {
     "html_api_gateway_event"
-  } else if (is_scheduled_event_content(event_content)) {
-    "scheduled_event"
+  } else if (is_eventbridge_event_content(event_content)) {
+    "eventbridge_event"
+  } else if (is_sns_event_content(event_content)) {
+    "sns_event"
   } else {
     character()
   }

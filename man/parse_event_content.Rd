@@ -7,11 +7,11 @@
 parse_event_content(event, config)
 }
 \arguments{
+\item{event}{the response received from querying the next invocation
+endpoint.}
+
 \item{config}{A list of configuration values as created by the
 \code{lambda_config} function.}
-
-\item{event_content}{the content of the response received from querying the
-text invocation endpoint, as a character}
 }
 \value{
 A list containing the arguments to be passed to the handler function
