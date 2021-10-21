@@ -12,6 +12,6 @@ is_eventbridge_event_content <- function(event_content) {
 }
 
 #' @export
-parse_event_content.scheduled_event <- function(event, ...) {
+parse_event_content.eventbridge_event <- function(event, ...) {
   list()
 }
