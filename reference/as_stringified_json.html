@@ -142,7 +142,7 @@ convention used by Lambda event inputs, and values are automatically
 unboxed.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>as_stringified_json</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>as_stringified_json</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -150,6 +150,11 @@ unboxed.</p>
     <tr>
       <th>x</th>
       <td><p>R object to be converted to stringified JSON.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>additional arguments (except <code>auto_unbox</code> and <code>null</code>) passed to
+<code><a href='https://rdrr.io/pkg/jsonlite/man/fromJSON.html'>toJSON</a></code></p></td>
     </tr>
     </table>
 

@@ -55,13 +55,16 @@
     <loc>https://lambdr.mdneuzerling.com/reference/handle_event_error.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/is_eventbridge_event_content.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/is_from_html_api_gateway.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/is_from_rest_api_gateway.html</loc>
   </url>
   <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/is_scheduled_event_content.html</loc>
+    <loc>https://lambdr.mdneuzerling.com/reference/is_sns_event_content.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/lambda_config.html</loc>
