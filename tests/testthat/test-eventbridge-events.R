@@ -22,7 +22,7 @@ test_that("EventBridge event content is ignored", {
     class = c("scheduled_event", "event")
   )
   expect_equal(
-    parse_event_content.scheduled_event(event),
+    parse_event_content.eventbridge_event(event),
     list()
   )
 })
