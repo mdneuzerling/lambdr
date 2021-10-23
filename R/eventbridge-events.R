@@ -13,5 +13,10 @@ is_eventbridge_event_content <- function(event_content) {
 
 #' @export
 parse_event_content.eventbridge_event <- function(event, ...) {
-  list()
+  detail <- jsonlite::fromJSON(event$event_content)[["detail"]]
+  if (is.null(detail)) {
+    list()
+  } else {
+    detail
+  }
 }
