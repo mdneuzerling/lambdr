@@ -13,6 +13,10 @@ is_sns_event_content <- function(event_content) {
 
 #' @export
 parse_event_content.sns_event <- function(event, ...) {
-  sns <- jsonlite::fromJSON(event$event_content)[["Records"]][[1]][["Sns"]]
-  list(message = jsonlite::fromJSON(sns[["Message"]]))
+  message <- jsonlite::fromJSON(event$event_content)[["Records"]][["Sns"]][["Message"]]
+  if (jsonlite::validate(message)) {
+    jsonlite::fromJSON(message)
+  } else {
+    message
+  }
 }
