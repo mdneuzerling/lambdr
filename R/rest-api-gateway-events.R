@@ -15,7 +15,6 @@ is_from_rest_api_gateway <- function(event_content) {
 
 #' @export
 parse_event_content.rest_api_gateway_event <- function(event, config, ...) {
-  logger::log_debug("Input coming via REST API Gateway")
   parsed_json <- parse_json_or_empty(event$event_content)
 
   query_parameters <- parsed_json[["queryStringParameters"]]

@@ -59,7 +59,9 @@ classify_event <- function(event_content) {
   } else {
     character()
   }
-  c(invocation_type, "event")
+  event_class <- c(invocation_type, "event")
+  logger::log_debug("event class: ", event_class[1])
+  event_class
 }
 
 #' Query the next invocation endpoint to get the next input

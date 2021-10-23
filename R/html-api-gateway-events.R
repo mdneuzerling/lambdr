@@ -12,7 +12,6 @@ is_from_html_api_gateway <- function(event_content) {
 
 #' @export
 parse_event_content.html_api_gateway_event <- function(event, config, ...) {
-  logger::log_debug("Input coming via HTML API Gateway")
   parsed_json <- parse_json_or_empty(event$event_content)
 
   query_string_parameters <- parsed_json[["queryStringParameters"]]
