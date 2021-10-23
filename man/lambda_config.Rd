@@ -29,12 +29,12 @@ This argument is provided for debugging and testing only. The
 "LAMBDA_TASK_ROOT" environment variable, as configured by AWS, will always
 override this value if present.}
 
-\item{deserialiser}{function for deserialising the body of the event.
-By default, will attempt to deserialise the body as JSON, based on whether
-the input is coming from an API Gateway, scheduled Cloudwatch event, or
-direct. To use the body as is, pass the \code{identity} function. If input is
-coming via an API Gateway this will require some complicated parsing (see
-below).}
+\item{deserialiser}{function for deserialising the body of the event. By
+default, will attempt to deserialise the body as JSON, based on whether the
+input is coming from an API Gateway, scheduled Cloudwatch event, or direct.
+To use the body as is, pass the \code{identity} function. To ignore the event
+content, pass \code{function(x) list()}. See the vignettes for details on
+parsing invocations from particular sources.}
 
 \item{serialiser}{function for serialising the result before sending.
 By default, will attempt to serialise the body as JSON, based on the

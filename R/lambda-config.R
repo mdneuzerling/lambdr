@@ -164,12 +164,12 @@ get_handler_function_from_env_var <- function(environ) {
 #'   override this value if present.
 #' @param environ environment in which to search for the function given by the
 #'   "_HANDLER" environment variable. Defaults to the parent frame.
-#' @param deserialiser function for deserialising the body of the event.
-#'   By default, will attempt to deserialise the body as JSON, based on whether
-#'   the input is coming from an API Gateway, scheduled Cloudwatch event, or
-#'   direct. To use the body as is, pass the `identity` function. If input is
-#'   coming via an API Gateway this will require some complicated parsing (see
-#'   below).
+#' @param deserialiser function for deserialising the body of the event. By
+#'   default, will attempt to deserialise the body as JSON, based on whether the
+#'   input is coming from an API Gateway, scheduled Cloudwatch event, or direct.
+#'   To use the body as is, pass the `identity` function. To ignore the event
+#'   content, pass `function(x) list()`. See the vignettes for details on
+#'   parsing invocations from particular sources.
 #' @param serialiser function for serialising the result before sending.
 #'   By default, will attempt to serialise the body as JSON, based on the
 #'   request type. To send the result as is, pass the `identity` function.
