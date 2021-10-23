@@ -106,7 +106,6 @@ wait_for_event <- function(config = lambda_config()) {
       logger::log_debug("Raw event content:", event_content)
 
       event_classification <- classify_event(event_content)
-      logger::log_debug("Event class:", event_classification[1])
     },
     error = function(e) stop_decomposition(e$message, request_id = request_id)
   )
