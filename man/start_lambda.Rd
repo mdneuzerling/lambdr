@@ -30,6 +30,19 @@ See \code{vignette("lambda-runtime-in-container", package = "lambdr")} for an
 example of how to use this function to place an R Lambda Runtime in a
 container.
 }
+\section{Event context}{
+
+Context is metadata associated with each invocation. If the handler function
+accepts a \code{context} argument then it will automatically receive at runtime a
+named list consisting of these values along with the arguments in the body
+(if any). For example, a function such as \code{my_func(x, context)} will receive
+the context argument automatically. The \code{context} argument must be named
+(\code{...} will not work).
+
+Refer to \code{vignette("lambda-runtime-in-container", package = "lambdr")}
+for details.
+}
+
 \section{AWS Lambda variables}{
 
 
@@ -59,29 +72,6 @@ configuration options, although the environment variables will always be
 used if available. While it may be sensible to provide the \code{handler}
 function directly, the other two configuration options are only provided for
 debugging and testing purposes.
-}
-
-\section{Event context}{
-
-The \emph{context} of an event is a list of metadata about the invocation. It is
-derived from the headers of a next event invocation response. By default it
-consists of:
-\itemize{
-\item \code{aws_request_id} - The identifier of the invocation request
-\item \code{invoked_function_arn} – The Amazon Resource Name (ARN) that's used to
-invoke the function. Indicates if the invoker specified a version number or
-alias.
-}
-
-Alternatively, a particular event \emph{class} (determined by invocation method)
-can implement an \code{extract_context} method. In all cases the context should be
-a list.
-
-If the handler function accepts a \code{context} argument then it will
-automatically receive at runtime a named list consisting of these values
-along with the arguments in the body (if any). For example, a function such
-as \code{my_func(x, context)} will receive the context argument automatically.
-The \code{context} argument must be named (\code{...} will not work).
 }
 
 \examples{
