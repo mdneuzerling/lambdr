@@ -12,8 +12,8 @@
 #' @inheritParams validate_lambda_config
 #' @inheritParams start_listening
 #'
-#' @inheritSection lambda_config AWS Lambda variables
 #' @inheritSection extract_context Event context
+#' @inheritSection lambda_config AWS Lambda variables
 #'
 #' @export
 #'

@@ -1,0 +1,45 @@
+---
+title: "Using invocation context"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{context}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Context is metadata associated with each invocation. If the handler function
+accepts a `context` argument then it will automatically receive at runtime a
+named list consisting of these values along with the arguments in the body (if
+any). For example, a function such as `my_func(x, context)` will receive the
+context argument automatically. The `context` argument must be named (`...`
+will not work).
+
+The following context is made available **as a named list**:
+
+* `aws_request_id` - The identifier of the invocation request
+* `invoked_function_arn` – The Amazon Resource Name (ARN) that's used to
+  invoke the function. Indicates if the invoker specified a version number or
+  alias.
+* `function_name`
+* `function_version`
+* `memory_limit_in_mb`
+* `log_group_name`
+* `log_stream_name`
+
+## Event class-specific context
+
+This section concerns future functionality for the `lambdr` package. It is not
+yet implemented.
+
+A particular event _class_ (determined by invocation method) can implement an `extract_context` method. This could be used to say, include details about the
+HTTP request if an invocation is coming via an API Gateway.
+
+In all cases the context should be a named list. The new context is appended to
+the default values listed above.

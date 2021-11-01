@@ -49,24 +49,15 @@ extract_and_augment_context <- function(event, config, ...) {
 #' Extract the context of a Lambda invocation from the headers of an event
 #'
 #' @section Event context:
-#' The _context_ of an event is a list of metadata about the invocation. It is
-#' derived from the headers of a next event invocation response. By default it
-#' consists of:
+#' Context is metadata associated with each invocation. If the handler function
+#' accepts a `context` argument then it will automatically receive at runtime a
+#' named list consisting of these values along with the arguments in the body
+#' (if any). For example, a function such as `my_func(x, context)` will receive
+#' the context argument automatically. The `context` argument must be named
+#' (`...` will not work).
 #'
-#' * `aws_request_id` - The identifier of the invocation request
-#' * `invoked_function_arn` – The Amazon Resource Name (ARN) that's used to
-#'   invoke the function. Indicates if the invoker specified a version number or
-#'   alias.
-#'
-#' Alternatively, a particular event _class_ (determined by invocation method)
-#' can implement an `extract_context` method. In all cases the context should be
-#' a list.
-#'
-#' If the handler function accepts a `context` argument then it will
-#' automatically receive at runtime a named list consisting of these values
-#' along with the arguments in the body (if any). For example, a function such
-#' as `my_func(x, context)` will receive the context argument automatically.
-#' The `context` argument must be named (`...` will not work).
+#' Refer to \code{vignette("lambda-runtime-in-container", package = "lambdr")}
+#' for details.
 #'
 #' @inheritParams handle_event
 #' @inheritParams validate_lambda_config
