@@ -124,6 +124,9 @@
     <loc>https://lambdr.mdneuzerling.com/articles/api-gateway-invocations.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/articles/context.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/articles/lambda-runtime-in-container.html</loc>
   </url>
 </urlset>
