@@ -85,16 +85,6 @@ test_that("event headers extracted, prettified and distilled", {
   )
 
   expect_equal(
-    extract_context(
-      structure(list(event_headers = headers), class = "event")
-    ),
-    list(
-      aws_request_id = request_id,
-      invoked_function_arn = request_arn
-    )
-  )
-
-  expect_equal(
     headers[["lambda-runtime-aws-request-id"]],
     request_id
   )

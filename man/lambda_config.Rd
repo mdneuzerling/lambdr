@@ -125,9 +125,8 @@ alias.
 }
 
 Alternatively, a particular event \emph{class} (determined by invocation method)
-can implement an \code{extract_context} method. This is useful for, say,
-invocations coming via API Gateway, in which the context includes details
-about the HTTP request. In all cases the context should be a list.
+can implement an \code{extract_context} method. In all cases the context should be
+a list.
 
 If the handler function accepts a \code{context} argument then it will
 automatically receive at runtime a named list consisting of these values

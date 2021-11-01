@@ -18,46 +18,6 @@
 # * Cleanup – Release unused resources, send data to other services, or perform
 #   additional tasks before getting the next event.
 
-#' Extract the context of a Lambda invocation from the headers of an event
-#'
-#' @section Event context:
-#' The _context_ of an event is a list of metadata about the invocation. It is
-#' derived from the headers of a next event invocation response. By default it
-#' consists of:
-#'
-#' * `aws_request_id` - The identifier of the invocation request
-#' * `invoked_function_arn` – The Amazon Resource Name (ARN) that's used to
-#'   invoke the function. Indicates if the invoker specified a version number or
-#'   alias.
-#'
-#' Alternatively, a particular event _class_ (determined by invocation method)
-#' can implement an `extract_context` method. This is useful for, say,
-#' invocations coming via API Gateway, in which the context includes details
-#' about the HTTP request. In all cases the context should be a list.
-#'
-#' If the handler function accepts a `context` argument then it will
-#' automatically receive at runtime a named list consisting of these values
-#' along with the arguments in the body (if any). For example, a function such
-#' as `my_func(x, context)` will receive the context argument automatically.
-#' The `context` argument must be named (`...` will not work).
-#'
-#' @inheritParams handle_event
-#'
-#' @return list
-#' @keywords internal
-#' @export
-extract_context <- function(event, ...) {
-  UseMethod("extract_context")
-}
-
-#' @export
-extract_context.default <- function(event, ...) {
-  list(
-    aws_request_id = event$event_headers[["lambda-runtime-aws-request-id"]],
-    invoked_function_arn = event$event_headers[["lambda-runtime-invoked-function-arn"]]
-  )
-}
-
 #' Parse the content of an event and pass it through the handler function
 #'
 #' @inheritParams handle_event
@@ -79,7 +39,7 @@ generate_result <- function(event,
   if (config$pass_context_argument) {
     event_arguments <- c(
       parsed_event_content,
-      list(context = extract_context(event))
+      list(context = extract_and_augment_context(event, config))
     )
   } else {
     event_arguments <- parsed_event_content

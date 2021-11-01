@@ -170,6 +170,7 @@ wait_for_and_handle_event <- function(config) {
 start_listening <- function(config = lambda_config(),
                             timeout_seconds = NULL) {
   validate_lambda_config(config)
+  config$environment_context <- extract_context_from_environment()
 
   if (!is.null(timeout_seconds)) {
     expire_after <- Sys.time() + timeout_seconds
