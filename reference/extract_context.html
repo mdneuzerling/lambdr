@@ -103,6 +103,9 @@
     <li>
       <a href="../articles/lambda-runtime-in-container.html">Placing an R Lambda Runtime in a Container</a>
     </li>
+    <li>
+      <a href="../articles/package-structure.html">package-structure</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -159,23 +162,14 @@ endpoint.</p></td>
 
     
 
-<p>The <em>context</em> of an event is a list of metadata about the invocation. It is
-derived from the headers of a next event invocation response. By default it
-consists of:</p><ul>
-<li><p><code>aws_request_id</code> - The identifier of the invocation request</p></li>
-<li><p><code>invoked_function_arn</code> – The Amazon Resource Name (ARN) that's used to
-invoke the function. Indicates if the invoker specified a version number or
-alias.</p></li>
-</ul>
-
-<p>Alternatively, a particular event <em>class</em> (determined by invocation method)
-can implement an <code>extract_context</code> method. In all cases the context should be
-a list.</p>
-<p>If the handler function accepts a <code>context</code> argument then it will
-automatically receive at runtime a named list consisting of these values
-along with the arguments in the body (if any). For example, a function such
-as <code>my_func(x, context)</code> will receive the context argument automatically.
-The <code>context</code> argument must be named (<code>...</code> will not work).</p>
+<p>Context is metadata associated with each invocation. If the handler function
+accepts a <code>context</code> argument then it will automatically receive at runtime a
+named list consisting of these values along with the arguments in the body
+(if any). For example, a function such as <code>my_func(x, context)</code> will receive
+the context argument automatically. The <code>context</code> argument must be named
+(<code>...</code> will not work).</p>
+<p>Refer to <code><a href='../articles/lambda-runtime-in-container.html'>vignette("lambda-runtime-in-container", package = "lambdr")</a></code>
+for details.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

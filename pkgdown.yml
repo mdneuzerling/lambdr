@@ -5,7 +5,8 @@ articles:
   api-gateway-invocations: api-gateway-invocations.html
   context: context.html
   lambda-runtime-in-container: lambda-runtime-in-container.html
-last_built: 2021-11-01T23:01Z
+  package-structure: package-structure.html
+last_built: 2021-11-01T23:31Z
 urls:
   reference: https://lambdr.mdneuzerling.com/reference
   article: https://lambdr.mdneuzerling.com/articles

@@ -65,6 +65,9 @@
     <li>
       <a href="articles/lambda-runtime-in-container.html">Placing an R Lambda Runtime in a Container</a>
     </li>
+    <li>
+      <a href="articles/package-structure.html">package-structure</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -126,7 +129,11 @@
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
+<p>When the package is made available on CRAN it can be installed with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"dplyr"</span><span class="op">)</span></code></pre></div>
+<p>The development version is available with:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"mdneuzerling/lambdr"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="running" class="section level2">
@@ -135,20 +142,20 @@
 <p>In a <code>runtime.R</code> file, source all functions needed and then run:</p>
 <pre class="{r}"><code><a href="reference/start_lambda.html">lambdr::start_lambda()</a></code></pre>
 <p>This <code>runtime.R</code> file should be executed by the Docker image containing your Lambda code.</p>
-<p>The <code><a href="reference/start_lambda.html">lambdr::start_lambda()</a></code> function relies on environment variables configured by AWS. It will fail if run locally. In particular, the <em>handler</em> as configured by the user through AWS will determine which function handles the Lambda events. For debugging and testing, values can be provided to the function in the absence of environment variables. See <code><a href="reference/start_lambda.html">?lambdr::start_lambda</a></code> for details.</p>
+<p>The <code><a href="reference/start_lambda.html">lambdr::start_lambda()</a></code> function relies on environment variables configured by AWS. It will fail if run locally. In particular, the <em>handler</em> as configured by the user through AWS will determine which function handles the Lambda events. For debugging and testing, values can be provided to the function in the absence of environment variables. See <code><a href="reference/lambda_config.html">?lambdr::lambda_config</a></code> for details.</p>
 </div>
 <div id="example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#example" class="anchor"></a>Example</h2>
 <p>Consider the following <code>runtime.R</code> file:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">parity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>parity <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="st">"even"</span> <span class="kw">else</span> <span class="st">"odd"</span><span class="op">)</span>
 <span class="op">}</span>
 
-<span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="reference/start_lambda.html">start_lambda</a></span><span class="op">(</span>log_threshold <span class="op">=</span> <span class="fu">logger</span><span class="fu">::</span><span class="va"><a href="https://daroczig.github.io/logger/reference/log_levels.html">DEBUG</a></span><span class="op">)</span></code></pre></div>
+<span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="reference/start_lambda.html">start_lambda</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>The <code>parity</code> function accepts a <code>number</code> argument and returns its parity as a named list, for example:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">parity</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>
 <span class="co"># $parity</span>
 <span class="co"># [1] "odd"</span>
@@ -165,115 +172,46 @@
 <li>Generate a simple bootstrap which runs <code>runtime.R</code> with R</li>
 <li>Set the handler as the <code>CMD</code>. The <code>lambdr</code> package interprets the handler as the name of the function to use, in this case, “parity”. The <code>CMD</code> can also be set (or overriden) when setting up the Lambda in AWS.</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">FROM</span> public.ecr.aws/lambda/provided</a>
-<a class="sourceLine" id="cb5-2" title="2"></a>
-<a class="sourceLine" id="cb5-3" title="3"><span class="kw">ENV</span> R_VERSION=4.0.3</a>
-<a class="sourceLine" id="cb5-4" title="4"></a>
-<a class="sourceLine" id="cb5-5" title="5"><span class="kw">RUN</span> yum -y install wget git tar</a>
-<a class="sourceLine" id="cb5-6" title="6"></a>
-<a class="sourceLine" id="cb5-7" title="7"><span class="kw">RUN</span> yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \</a>
-<a class="sourceLine" id="cb5-8" title="8">  &amp;&amp; wget https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \</a>
-<a class="sourceLine" id="cb5-9" title="9">  &amp;&amp; yum -y install R-${R_VERSION}-1-1.x86_64.rpm \</a>
-<a class="sourceLine" id="cb5-10" title="10">  &amp;&amp; rm R-${R_VERSION}-1-1.x86_64.rpm</a>
-<a class="sourceLine" id="cb5-11" title="11"></a>
-<a class="sourceLine" id="cb5-12" title="12"><span class="kw">ENV</span> PATH=<span class="st">"${PATH}:/opt/R/${R_VERSION}/bin/"</span></a>
-<a class="sourceLine" id="cb5-13" title="13"></a>
-<a class="sourceLine" id="cb5-14" title="14"><span class="co"># System requirements for R packages</span></a>
-<a class="sourceLine" id="cb5-15" title="15"><span class="kw">RUN</span> yum -y install openssl-devel</a>
-<a class="sourceLine" id="cb5-16" title="16"></a>
-<a class="sourceLine" id="cb5-17" title="17"><span class="kw">RUN</span> Rscript -e <span class="st">"install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"</span></a>
-<a class="sourceLine" id="cb5-18" title="18"><span class="kw">RUN</span> Rscript -e <span class="st">"remotes::install_github('mdneuzerling/lambdr')"</span></a>
-<a class="sourceLine" id="cb5-19" title="19"></a>
-<a class="sourceLine" id="cb5-20" title="20"><span class="kw">RUN</span> mkdir /lambda</a>
-<a class="sourceLine" id="cb5-21" title="21"><span class="kw">COPY</span> runtime.R /lambda</a>
-<a class="sourceLine" id="cb5-22" title="22"><span class="kw">RUN</span> chmod 755 -R /lambda</a>
-<a class="sourceLine" id="cb5-23" title="23"></a>
-<a class="sourceLine" id="cb5-24" title="24"><span class="kw">RUN</span> printf <span class="st">'#!/bin/sh\ncd /lambda\nRscript runtime.R'</span> &gt; /var/runtime/bootstrap \</a>
-<a class="sourceLine" id="cb5-25" title="25">  &amp;&amp; chmod +x /var/runtime/bootstrap</a>
-<a class="sourceLine" id="cb5-26" title="26"></a>
-<a class="sourceLine" id="cb5-27" title="27"><span class="kw">CMD</span> [<span class="st">"parity"</span>]</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">FROM</span> public.ecr.aws/lambda/provided</a>
+<a class="sourceLine" id="cb6-2" title="2"></a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="kw">ENV</span> R_VERSION=4.0.3</a>
+<a class="sourceLine" id="cb6-4" title="4"></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw">RUN</span> yum -y install wget git tar</a>
+<a class="sourceLine" id="cb6-6" title="6"></a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="kw">RUN</span> yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \</a>
+<a class="sourceLine" id="cb6-8" title="8">  &amp;&amp; wget https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \</a>
+<a class="sourceLine" id="cb6-9" title="9">  &amp;&amp; yum -y install R-${R_VERSION}-1-1.x86_64.rpm \</a>
+<a class="sourceLine" id="cb6-10" title="10">  &amp;&amp; rm R-${R_VERSION}-1-1.x86_64.rpm</a>
+<a class="sourceLine" id="cb6-11" title="11"></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="kw">ENV</span> PATH=<span class="st">"${PATH}:/opt/R/${R_VERSION}/bin/"</span></a>
+<a class="sourceLine" id="cb6-13" title="13"></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co"># System requirements for R packages</span></a>
+<a class="sourceLine" id="cb6-15" title="15"><span class="kw">RUN</span> yum -y install openssl-devel</a>
+<a class="sourceLine" id="cb6-16" title="16"></a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="kw">RUN</span> Rscript -e <span class="st">"install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="kw">RUN</span> Rscript -e <span class="st">"remotes::install_github('mdneuzerling/lambdr')"</span></a>
+<a class="sourceLine" id="cb6-19" title="19"></a>
+<a class="sourceLine" id="cb6-20" title="20"><span class="kw">RUN</span> mkdir /lambda</a>
+<a class="sourceLine" id="cb6-21" title="21"><span class="kw">COPY</span> runtime.R /lambda</a>
+<a class="sourceLine" id="cb6-22" title="22"><span class="kw">RUN</span> chmod 755 -R /lambda</a>
+<a class="sourceLine" id="cb6-23" title="23"></a>
+<a class="sourceLine" id="cb6-24" title="24"><span class="kw">RUN</span> printf <span class="st">'#!/bin/sh\ncd /lambda\nRscript runtime.R'</span> &gt; /var/runtime/bootstrap \</a>
+<a class="sourceLine" id="cb6-25" title="25">  &amp;&amp; chmod +x /var/runtime/bootstrap</a>
+<a class="sourceLine" id="cb6-26" title="26"></a>
+<a class="sourceLine" id="cb6-27" title="27"><span class="kw">CMD</span> [<span class="st">"parity"</span>]</a></code></pre></div>
 <p>The image is built and uploaded to AWS Elastic Container Registry (ECR). First, a repository is created:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb6-1" title="1"><span class="ex">aws</span> ecr create-repository --repository-name parity-lambda --image-scanning-configuration scanOnPush=true</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" title="1"><span class="ex">aws</span> ecr create-repository --repository-name parity-lambda --image-scanning-configuration scanOnPush=true</a></code></pre></div>
 <p>This provides a URI, the resource identifier of the created repository. The image can now be pushed:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" title="1"><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest <span class="dt">{URI}</span>/parity-lambda:latest</a>
-<a class="sourceLine" id="cb7-2" title="2"><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login --username AWS --password-stdin <span class="dt">{URI}</span></a>
-<a class="sourceLine" id="cb7-3" title="3"><span class="ex">docker</span> push <span class="dt">{URI}</span>/parity-lambda:latest</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" title="1"><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest <span class="dt">{URI}</span>/parity-lambda:latest</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login --username AWS --password-stdin <span class="dt">{URI}</span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="ex">docker</span> push <span class="dt">{URI}</span>/parity-lambda:latest</a></code></pre></div>
 <p>In either the AWS console or the command line, a Lambda can be created from this image. Call the Lambda “parity” to match the function name. Tests can be executed within the console. Alternatively the Lambda can be invoked from the CLI:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" title="1"><span class="ex">aws</span> lambda invoke --function-name parity \</a>
-<a class="sourceLine" id="cb8-2" title="2">  --invocation-type RequestResponse --payload <span class="st">'{"number": 8}'</span> \</a>
-<a class="sourceLine" id="cb8-3" title="3">  /tmp/response.json --cli-binary-format raw-in-base64-out</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb9-1" title="1"><span class="ex">aws</span> lambda invoke --function-name parity \</a>
+<a class="sourceLine" id="cb9-2" title="2">  --invocation-type RequestResponse --payload <span class="st">'{"number": 8}'</span> \</a>
+<a class="sourceLine" id="cb9-3" title="3">  /tmp/response.json --cli-binary-format raw-in-base64-out</a></code></pre></div>
 <p>The output is now available in the generated file:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb9-1" title="1"><span class="fu">cat</span> /tmp/response.json            </a></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb10-1" title="1"><span class="dt">{"parity":"even"}</span></a></code></pre></div>
-</div>
-<div id="package-structure-and-operating-method" class="section level2">
-<h2 class="hasAnchor">
-<a href="#package-structure-and-operating-method" class="anchor"></a>Package structure and operating method</h2>
-<div id="runtime-endpoints" class="section level3">
-<h3 class="hasAnchor">
-<a href="#runtime-endpoints" class="anchor"></a>Runtime endpoints</h3>
-<p>The runtime works by querying HTTP endpoints configured by AWS Lambda. These endpoints are determined by on the “AWS_LAMBDA_RUNTIME_API” environment variable set by AWS Lambda during initialisation. They generally won’t be available locally.</p>
-<ul>
-<li>The <strong>next invocation endpoint</strong> is the endpoint which R must query for the next input. R must send a <code>GET</code> request to this endpoint and will wait until either a response is received or the Lambda instance is shut down for inactivity. When AWS Lambda receives an input from, say, an API Gateway, it will respond to R’s request with details of the input. We call the response to this request an <em>invocation</em> in this document, and invocations are interpreted as <em>events</em>.</li>
-<li>The <strong>initialisation error endpoint</strong> is where an error should be sent if the error occurs when setting up the runtime. This is distinct from errors that occur during handling of an event.</li>
-<li>The <strong>response endpoint</strong> is where an event response should be sent. It is unique for each event.</li>
-<li>The <strong>invocation error endpoint</strong> is where errors that occur during event handling should be reported. It is unique for each event.</li>
-</ul>
-<p>The next invocation and initialisation error endpoints are unique in each Lambda instance. The response and invocation error endpoints are determined by the <code>request_id</code> associated with each invocation. The request ID is given in the “lambda-runtime-aws-request-id” header in the response to the query to the next invocation endpoint.</p>
-</div>
-<div id="handler-functions" class="section level3">
-<h3 class="hasAnchor">
-<a href="#handler-functions" class="anchor"></a>Handler functions</h3>
-<p>Every Lambda instance is centred around a single function which handles any inputs. The <em>handler function</em> is determined by an environment variable which can be configured in one of two ways:</p>
-<ul>
-<li>as the <code>CMD</code> to the Dockerfile which contains the runtime, or</li>
-<li>as configured through the Lambda console (this takes precedence)</li>
-</ul>
-<p>The <code>lambda_config</code> function (run as part of <code>start_lambda</code>) picks up on this environment variable and identifies the R function to which it refers. This handler function is used to process all invocations.</p>
-</div>
-<div id="event-classification-according-to-invocation" class="section level3">
-<h3 class="hasAnchor">
-<a href="#event-classification-according-to-invocation" class="anchor"></a>Event classification according to invocation</h3>
-<p>Events need to be handled differently depending upon whether they are invoked directly, by an API Gateway, etc. Events are classified according to their detected invocation method, with their invocation stored as an S3 class. The following functions dispatch on this class:</p>
-<ul>
-<li>
-<code>parse_event_content</code> converts the raw event content into arguments to be passed to the handler function</li>
-<li>
-<code>seralise_result</code> converts the result into the form that will be sent back to Lambda</li>
-<li>
-<code>extract_context</code> extracts metadata about the event as a list. If the handler function accepts a named <code>context</code> argument then it will receive the context as a value to that argument.</li>
-<li>
-<code>handle_event_error</code> deals with errors that occur during event handling. Some invocation types require errors to be formatted or handled in a very specific way.</li>
-</ul>
-</div>
-<div id="event-listening-lifecycle" class="section level3">
-<h3 class="hasAnchor">
-<a href="#event-listening-lifecycle" class="anchor"></a>Event listening lifecycle</h3>
-<p>The main function — <code>start_lambda</code> — runs three functions in sequence:</p>
-<ul>
-<li><code>setup_logging</code></li>
-<li><code>lambda_config</code></li>
-<li><code>start_listening</code></li>
-</ul>
-<p>The <code>start_listening</code> function sets up an infinite loop that listens for <em>invocations</em>, interprets them as <em>events</em>, and processes them with the handler function.</p>
-<p><code>start_listening</code> triggers the listening loop, which consists of <code>wait_for_event</code> and <code>handle_event</code> (combined into <code>wait_for_and_handle_event</code>). Once a response (called an <em>invocation</em>) is sent to the request made in <code>wait_for_event</code>, it is <em>decomposed</em> into an <em>event</em>, and classified according to its (detected) invocation type.</p>
-<p>If an error occurs during this stage it is handled by <code>handle_decomposition_error</code>. Ifpossible the error will be posted to the error invocation endpoint so that Lambda can process it, but otherwise it will simply be logged and then the runtime will move onto the next invocation.</p>
-<p>The event is passed to <code>handle_event</code> which consists of the following steps:</p>
-<ul>
-<li>
-<code>parse_event_content</code> interprets the event content as arguments to be handed to the handler function. The user can also provide a function to the <code>deseraliser</code> argument of <code>start_listening</code> (or <code>start_lambda</code>), which will override the standard parsing logic.</li>
-<li>
-<code>generate_result</code> passes these arguments to the handler function and generates a result.</li>
-<li>
-<code>seralise_result</code> converts the result into the response that will be sent to Lambda. The user can also provide a function to the <code>serialiser</code> argument of <code>start_listening</code> (or <code>start_lambda</code>), which will override the standard serialisation logic.</li>
-<li>
-<code>post_result</code> posts the serialised result to the response endpoint.</li>
-</ul>
-<p>Afterwards, the runtime will return to the <code>wait_for_event</code> function and process the next invocation that arrives. AWS Lambda may shut down the instance if it times out before another event invocation arrives.</p>
-<p>Alternatively, if an error occurs during <code>wait_for_event</code> it will be handled by <code>handle_decomposition_error</code>, or if it occurs during <code>handle_event</code> it will be dispatched to the appropriate <code>handle_event_error</code> method according to the S3 class of the event. In either case this will not stop the R session — an error when processing a single event is a problem for that event alone. The runtime will return to the <code>wait_for_event</code> step.</p>
-<p>All of these functions are diagrammed below, with boxes representing functions which are grouped together according to the primary function that calls each of them in sequence. Errors are shown in red.</p>
-<p><img src="reference/figures/start-listening.drawio.svg" align="center"></p>
-</div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb10-1" title="1"><span class="fu">cat</span> /tmp/response.json            </a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb11-1" title="1"><span class="dt">{"parity":"even"}</span></a></code></pre></div>
 </div>
 </div>
   </div>
