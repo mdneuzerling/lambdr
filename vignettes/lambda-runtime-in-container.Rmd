@@ -22,7 +22,7 @@ parity <- function(number) {
   list(parity = if (as.integer(number) %% 2 == 0) "even" else "odd")
 }
 
-lambdr::start_lambda(log_threshold = logger::DEBUG)
+lambdr::start_lambda()
 ```
 
 The `parity` function accepts a `number` argument and returns its parity as a named list, for example:
