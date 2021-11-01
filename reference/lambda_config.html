@@ -283,9 +283,8 @@ alias.</p></li>
 </ul>
 
 <p>Alternatively, a particular event <em>class</em> (determined by invocation method)
-can implement an <code>extract_context</code> method. This is useful for, say,
-invocations coming via API Gateway, in which the context includes details
-about the HTTP request. In all cases the context should be a list.</p>
+can implement an <code>extract_context</code> method. In all cases the context should be
+a list.</p>
 <p>If the handler function accepts a <code>context</code> argument then it will
 automatically receive at runtime a named list consisting of these values
 along with the arguments in the body (if any). For example, a function such

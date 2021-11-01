@@ -28,7 +28,13 @@
     <loc>https://lambdr.mdneuzerling.com/reference/endpoints.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/extract_and_augment_context.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/extract_context.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/extract_context_from_environment.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/extract_event_headers.html</loc>

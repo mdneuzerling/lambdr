@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Start the Lambda runtime — start_lambda • lambdr</title>
+<title>Combine class-specific context with general context for an event — extract_and_augment_context • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,12 @@
 
 
 
-<meta property="og:title" content="Start the Lambda runtime — start_lambda" />
-<meta property="og:description" content="This is the main function of the package, responsible for starting the
-infinite loop of listening for new invocations. It relies on configuration
-provided to the config argument and produced by the
-lambda_config function." />
+<meta property="og:title" content="Combine class-specific context with general context for an event — extract_and_augment_context" />
+<meta property="og:description" content="The extract_context function dispatches on the class of an
+event to extract context specific to that class. By default, it returns an
+empty list. This function takes that class-specific context and combined it
+with the context that is applicable for all classes, contained in both
+event headers and environment variables." />
 
 
 
@@ -126,76 +127,43 @@ lambda_config function." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Start the Lambda runtime</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/start-lambda.R'><code>R/start-lambda.R</code></a></small>
-    <div class="hidden name"><code>start_lambda.Rd</code></div>
+    <h1>Combine class-specific context with general context for an event</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/extract-context.R'><code>R/extract-context.R</code></a></small>
+    <div class="hidden name"><code>extract_and_augment_context.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This is the main function of the package, responsible for starting the
-infinite loop of listening for new invocations. It relies on configuration
-provided to the <code>config</code> argument and produced by the
-<code><a href='lambda_config.html'>lambda_config</a></code> function.</p>
+    <p>The <code><a href='extract_context.html'>extract_context</a></code> function dispatches on the class of an
+event to extract context specific to that class. By default, it returns an
+empty list. This function takes that class-specific context and combined it
+with the context that is applicable for all classes, contained in both
+event headers and environment variables.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>start_lambda</span><span class='op'>(</span>
-  config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span>environ <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>,
-  timeout_seconds <span class='op'>=</span> <span class='cn'>NULL</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>extract_and_augment_context</span><span class='op'>(</span><span class='va'>event</span>, <span class='va'>config</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>event</th>
+      <td><p>the response received from querying the next invocation
+endpoint.</p></td>
+    </tr>
     <tr>
       <th>config</th>
       <td><p>A list of configuration values as created by the
 <code>lambda_config</code> function.</p></td>
     </tr>
     <tr>
-      <th>timeout_seconds</th>
-      <td><p>If set, the function will stop listening for events
-after this timeout. The timeout is checked between events, so this won't
-interrupt the function while it is waiting for a new event. This argument
-is provided for testing purposes, and shouldn't otherwise need to be set:
-AWS should handle the shutdown of idle Lambda instances.</p></td>
+      <th>...additional</th>
+      <td><p>arguments passed to <code><a href='extract_context.html'>extract_context</a></code></p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>See <code><a href='../articles/lambda-runtime-in-container.html'>vignette("lambda-runtime-in-container", package = "lambdr")</a></code> for an
-example of how to use this function to place an R Lambda Runtime in a
-container.</p>
-    <h2 class="hasAnchor" id="aws-lambda-variables"><a class="anchor" href="#aws-lambda-variables"></a>AWS Lambda variables</h2>
-
-    
-
-
-<p>The <code><a href='lambda_config.html'>lambda_config</a></code> function obtains the configuration values
-for the Lambda runtime configures the R session for Lambda based on
-environment variables made available by Lambda. The following environment
-variables are available:</p><ul>
-<li><p>Lambda Runtime API, available as the "AWS_LAMBDA_RUNTIME_API" environment
-variable, is the host of the various HTTP endpoints through which the
-runtime interacts with Lambda.</p></li>
-<li><p>Lambda Task Root, available as the "LAMBDA_TASK_ROOT" environment variable,
-defines the path to the Lambda function code. It isn't used in container
-environments with a custom runtime, as that runtime is responsible for
-finding and sourcing the function code. Hence, a missing task root is
-ignored by this package.</p></li>
-<li><p>The handler, available as the "_HANDLER" environment variable, is
-interpreted by R as the function that is executed when the Lambda is
-called. This value could be anything, as the interpretation is solely up
-to the runtime, so requiring it to be a function is a standard imposed by
-this package.</p></li>
-</ul>
-
-<p>These <code>handler</code>, <code>runtime_api</code> and <code>task_root</code> arguments to the
-<code><a href='lambda_config.html'>lambda_config</a></code> function can also provide values to these
-configuration options, although the environment variables will always be
-used if available. While it may be sensible to provide the <code>handler</code>
-function directly, the other two configuration options are only provided for
-debugging and testing purposes.</p>
+    <p>list</p>
     <h2 class="hasAnchor" id="event-context"><a class="anchor" href="#event-context"></a>Event context</h2>
 
     
@@ -218,26 +186,6 @@ along with the arguments in the body (if any). For example, a function such
 as <code>my_func(x, context)</code> will receive the context argument automatically.
 The <code>context</code> argument must be named (<code>...</code> will not work).</p>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
-<span class='r-in'><span class='co'># A general usage pattern involves sourcing necessary functions and running</span></span>
-<span class='r-in'><span class='co'># this `start_lambda` in a `runtime.R` file which is then executed to start</span></span>
-<span class='r-in'><span class='co'># the runtime. In the following example, the function handler can be set to</span></span>
-<span class='r-in'><span class='co'># "lambda" either as the container `CMD`, or configured through AWS Lambda.</span></span>
-<span class='r-in'></span>
-<span class='r-in'><span class='va'>parity</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>number</span><span class='op'>)</span> <span class='op'>{</span></span>
-<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>parity <span class='op'>=</span> <span class='kw'>if</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span><span class='op'>(</span><span class='va'>number</span><span class='op'>)</span> <span class='op'><a href='https://rdrr.io/r/base/Arithmetic.html'>%%</a></span> <span class='fl'>2</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>)</span> <span class='st'>"even"</span> <span class='kw'>else</span> <span class='st'>"odd"</span><span class='op'>)</span></span>
-<span class='r-in'><span class='op'>}</span></span>
-<span class='r-in'></span>
-<span class='r-in'><span class='fu'>start_lambda</span><span class='op'>(</span><span class='op'>)</span></span>
-<span class='r-in'></span>
-<span class='r-in'><span class='co'># Alternatively, it can be passed as an argument `handler = parity` to</span></span>
-<span class='r-in'><span class='co'># the lambda configuration. If the handler is configured through other means</span></span>
-<span class='r-in'><span class='co'># then this will be ignored:</span></span>
-<span class='r-in'></span>
-<span class='r-in'><span class='fu'>start_lambda</span><span class='op'>(</span>config <span class='op'>=</span> <span class='fu'><a href='lambda_config.html'>lambda_config</a></span><span class='op'>(</span>handler <span class='op'>=</span> <span class='va'>parity</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-in'><span class='op'>}</span></span>
-</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

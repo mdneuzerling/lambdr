@@ -135,7 +135,7 @@ unboxed." />
 
     <div class="ref-description">
     <p>Stringified JSON is a string which can be parsed as a JSON. While a standard
-JSON interpretation of <code><a href='https://rdrr.io/r/base/list.html'>list(number = 9)</a></code> would be <code>{"number":9}</code>,
+JSON interpretation of <code>list(number = 9)</code> would be <code>{"number":9}</code>,
 a stringified JSON representation would be <code>"{\"number\":9}"</code>.</p>
 <p>This function will convert <code>NULL</code> values to JSON "nulls", to match the
 convention used by Lambda event inputs, and values are automatically
@@ -163,9 +163,11 @@ unboxed.</p>
     <p>character</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>as_stringified_json</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>number <span class='op'>=</span> <span class='fl'>9</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "{\"number\":9}"</div><div class='input'><span class='st'>"{\"number\":9}"</span>
-</div><div class='output co'>#&gt; [1] "{\"number\":9}"</div></pre>
+    <pre class="examples"><span class='r-in'><span class='fu'>as_stringified_json</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>number <span class='op'>=</span> <span class='fl'>9</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "{\"number\":9}"</span>
+<span class='r-in'><span class='st'>"{\"number\":9}"</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "{\"number\":9}"</span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

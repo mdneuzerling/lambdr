@@ -124,7 +124,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Extract the context of a Lambda invocation from the headers of an event</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/handle-event.R'><code>R/handle-event.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/extract-context.R'><code>R/extract-context.R</code></a></small>
     <div class="hidden name"><code>extract_context.Rd</code></div>
     </div>
 
@@ -132,7 +132,7 @@
     <p>Extract the context of a Lambda invocation from the headers of an event</p>
     </div>
 
-    <pre class="usage"><span class='fu'>extract_context</span><span class='op'>(</span><span class='va'>event</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>extract_context</span><span class='op'>(</span><span class='va'>event</span>, <span class='va'>config</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -141,6 +141,11 @@
       <th>event</th>
       <td><p>the response received from querying the next invocation
 endpoint.</p></td>
+    </tr>
+    <tr>
+      <th>config</th>
+      <td><p>A list of configuration values as created by the
+<code>lambda_config</code> function.</p></td>
     </tr>
     </table>
 
@@ -161,9 +166,8 @@ alias.</p></li>
 </ul>
 
 <p>Alternatively, a particular event <em>class</em> (determined by invocation method)
-can implement an <code>extract_context</code> method. This is useful for, say,
-invocations coming via API Gateway, in which the context includes details
-about the HTTP request. In all cases the context should be a list.</p>
+can implement an <code>extract_context</code> method. In all cases the context should be
+a list.</p>
 <p>If the handler function accepts a <code>context</code> argument then it will
 automatically receive at runtime a named list consisting of these values
 along with the arguments in the body (if any). For example, a function such
