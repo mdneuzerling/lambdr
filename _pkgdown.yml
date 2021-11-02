@@ -1,10 +1,9 @@
 url: https://lambdr.mdneuzerling.com
 reference:
-- title: "Set-up a Lambda runtime and start listening for events"
+- title: "Start listening for events"
   desc: >
-    This combines the three individual setup steps: `setup_logging`,
-    `lambda_config`, and `start_listening`. For most applications this is the
-    only necessary function.
+    For most applications this is the only necessary function. It optionally
+    accepts a configuration provided by `lambda_config`.
   contents:
     - start_lambda
 - title: "Lambda configuration"
@@ -22,4 +21,4 @@ reference:
     - as_stringified_json
     - stop_html
     - prettify_list
-    - from_base_64
+    - from_base64
