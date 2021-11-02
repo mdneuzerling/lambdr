@@ -5,6 +5,8 @@
 \alias{lambdr}
 \title{lambdr: Create a Runtime for Serving Containerised R Functions on AWS Lambda}
 \description{
+\if{html}{\figure{lambdr.png}{options: align='right' alt='logo' width='150'}}
+
 This package provides an R runtime for the
 \href{https://aws.amazon.com/lambda/}{\emph{AWS Lambda} serverless compute
 service}. It is intended to be used to create containers that can run on \emph{AWS

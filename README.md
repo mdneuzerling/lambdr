@@ -1,4 +1,4 @@
-# lambdr
+# lambdr <img src="man/figures/lambdr.png" align="right" height="200" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/mdneuzerling/lambdr/workflows/R-CMD-check/badge.svg)](https://github.com/mdneuzerling/lambdr/actions)
@@ -159,3 +159,7 @@ cat /tmp/response.json
 ```bash
 {"parity":"even"}
 ```
+
+---
+
+Hex logo by Phizz Leeder
