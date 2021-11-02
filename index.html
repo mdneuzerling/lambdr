@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -63,10 +63,13 @@
       <a href="articles/context.html">Using invocation context</a>
     </li>
     <li>
+      <a href="articles/eventbridge-and-sns-invocations.html">EventBridge and SNS Invocations</a>
+    </li>
+    <li>
       <a href="articles/lambda-runtime-in-container.html">Placing an R Lambda Runtime in a Container</a>
     </li>
     <li>
-      <a href="articles/package-structure.html">package-structure</a>
+      <a href="articles/package-structure.html">Package Structure</a>
     </li>
   </ul>
 </li>
@@ -95,9 +98,10 @@
 <a href="#lambdr" class="anchor"></a>lambdr</h1></div>
 <!-- badges: start -->
 
-<p>Running R containers on AWS Lambda.</p>
-<p>This package is in active development, and is not yet ready for use.</p>
-<p>Not all invocation types have been implemented or tested.</p>
+<p>This package provides an R runtime for the [<em>AWS Lambda</em> serverless compute service]{<a href="https://aws.amazon.com/lambda/" class="uri">https://aws.amazon.com/lambda/</a>}. It is intended to be used to create containers that can run on <em>AWS Lambda</em>. <code>lambdr</code> provides the necessary functionality for handling the various endpoints required for accepting new input and sending responses.</p>
+<p>This package is <strong>unofficial</strong>. Its creators are not affiliated with <em>Amazon Web Services</em>, nor is its content endorsed by <em>Amazon Web Services</em>. <em>Lambda</em>, <em>API Gateway</em>, <em>EventBridge</em>, <em>CloudWatch</em>, and <em>SNS</em> are services of <em>Amazon Web Services</em>.</p>
+<p>The following invocation types have been implemented to some degree. Refer to the vignettes or the package website for more information.</p>
+<p>Alternatively, custom functions can be provided for parsing event content and serialising results. Refer to <code>lambda_config</code> for more information.</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">invocation type</th>
@@ -106,7 +110,7 @@
 <tbody>
 <tr class="odd">
 <td align="left">direct</td>
-<td align="left"><img src="reference/figures/lifecycle-maturing.svg" align="center"></td>
+<td align="left"><img src="reference/figures/lifecycle-stable.svg" align="center"></td>
 </tr>
 <tr class="even">
 <td align="left">API Gateway (REST)</td>

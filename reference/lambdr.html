@@ -40,12 +40,22 @@
 
 
 <meta property="og:title" content="lambdr: Create a Runtime for Serving Containerised R Functions on AWS Lambda — lambdr" />
-<meta property="og:description" content="Runtime for serving containers that can execute R code on the
+<meta property="og:description" content="This package provides an R runtime for the
 AWS Lambda serverless compute
-service. Provides the necessary functionality for handling the various
-endpoints required for accepting new input and sending responses.
+service. It is intended to be used to create containers that can run on AWS
+Lambda. lambdr provides the necessary functionality for handling the
+various endpoints required for accepting new input and sending responses.
+This package is unofficial. Its creators are not affiliated with Amazon
+Web Services, nor is its content endorsed by Amazon Web Services.
+Lambda, API Gateway, EventBridge, CloudWatch, and SNS are services
+of Amazon Web Services.
 To see an example of how to use this package to create a runtime, refer to
-vignette(&quot;lambda-runtime-in-container&quot;, package = &quot;lambdr&quot;)." />
+vignette(&quot;lambda-runtime-in-container&quot;, package = &quot;lambdr&quot;).
+The following invocation types have been implemented to some degree. Refer to
+the vignettes or the package website for more information.
+Alternatively, custom functions can be provided for parsing event content and
+serialising results. Refer to lambda_config for more
+information." />
 
 
 
@@ -77,7 +87,7 @@ vignette(&quot;lambda-runtime-in-container&quot;, package = &quot;lambdr&quot;).
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -106,10 +116,13 @@ vignette(&quot;lambda-runtime-in-container&quot;, package = &quot;lambdr&quot;).
       <a href="../articles/context.html">Using invocation context</a>
     </li>
     <li>
+      <a href="../articles/eventbridge-and-sns-invocations.html">EventBridge and SNS Invocations</a>
+    </li>
+    <li>
       <a href="../articles/lambda-runtime-in-container.html">Placing an R Lambda Runtime in a Container</a>
     </li>
     <li>
-      <a href="../articles/package-structure.html">package-structure</a>
+      <a href="../articles/package-structure.html">Package Structure</a>
     </li>
   </ul>
 </li>
@@ -140,12 +153,22 @@ vignette(&quot;lambda-runtime-in-container&quot;, package = &quot;lambdr&quot;).
     </div>
 
     <div class="ref-description">
-    <p>Runtime for serving containers that can execute R code on the
+    <p>This package provides an R runtime for the
 <a href='https://aws.amazon.com/lambda/'><em>AWS Lambda</em> serverless compute
-service</a>. Provides the necessary functionality for handling the various
-endpoints required for accepting new input and sending responses.</p>
+service</a>. It is intended to be used to create containers that can run on <em>AWS
+Lambda</em>. <code>lambdr</code> provides the necessary functionality for handling the
+various endpoints required for accepting new input and sending responses.</p>
+<p>This package is <strong>unofficial</strong>. Its creators are not affiliated with <em>Amazon
+Web Services</em>, nor is its content endorsed by <em>Amazon Web Services</em>.
+<em>Lambda</em>, <em>API Gateway</em>, <em>EventBridge</em>, <em>CloudWatch</em>, and <em>SNS</em> are services
+of <em>Amazon Web Services</em>.</p>
 <p>To see an example of how to use this package to create a runtime, refer to
 <code><a href='../articles/lambda-runtime-in-container.html'>vignette("lambda-runtime-in-container", package = "lambdr")</a></code>.</p>
+<p>The following invocation types have been implemented to some degree. Refer to
+the vignettes or the package website for more information.</p>
+<p>Alternatively, custom functions can be provided for parsing event content and
+serialising results. Refer to <code><a href='lambda_config.html'>lambda_config</a></code> for more
+information.</p>
     </div>
 
 
@@ -154,17 +177,31 @@ endpoints required for accepting new input and sending responses.</p>
 
     
 
-<p><a href='https://lifecycle.r-lib.org/articles/stages.html#maturing'><img src='figures/lifecycle-maturing.svg' alt='[Maturing]' /></a></p>
-    <h2 class="hasAnchor" id="api-gateway-invocations"><a class="anchor" href="#api-gateway-invocations"></a>API Gateway invocations</h2>
+<p><a href='https://lifecycle.r-lib.org/articles/stages.html#stable'><img src='figures/lifecycle-stable.svg' alt='[Stable]' /></a></p>
+    <h2 class="hasAnchor" id="rest-api-gateway-invocations"><a class="anchor" href="#rest-api-gateway-invocations"></a>REST API Gateway invocations</h2>
 
     
 
-<p><a href='https://lifecycle.r-lib.org/articles/stages.html#experimental'><img src='figures/lifecycle-experimental.svg' alt='[Experimental]' /></a></p>
-    <h2 class="hasAnchor" id="cloudwatch-scheduled-event-invocations"><a class="anchor" href="#cloudwatch-scheduled-event-invocations"></a>Cloudwatch scheduled event invocations</h2>
+<p><a href='https://lifecycle.r-lib.org/articles/stages.html#experimental'><img src='figures/lifecycle-experimental.svg' alt='[Experimental]' /></a>
+<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code></p>
+    <h2 class="hasAnchor" id="html-api-gateway-invocations"><a class="anchor" href="#html-api-gateway-invocations"></a>HTML API Gateway invocations</h2>
 
     
 
-<p><a href='https://lifecycle.r-lib.org/articles/stages.html#experimental'><img src='figures/lifecycle-experimental.svg' alt='[Experimental]' /></a></p>
+<p><a href='https://lifecycle.r-lib.org/articles/stages.html#experimental'><img src='figures/lifecycle-experimental.svg' alt='[Experimental]' /></a>
+<code><a href='../articles/api-gateway-invocations.html'>vignette("api-gateway-invocations", package = "lambdr")</a></code></p>
+    <h2 class="hasAnchor" id="eventbridge-invocations"><a class="anchor" href="#eventbridge-invocations"></a>EventBridge invocations</h2>
+
+    
+
+<p><a href='https://lifecycle.r-lib.org/articles/stages.html#experimental'><img src='figures/lifecycle-experimental.svg' alt='[Experimental]' /></a>
+<code><a href='../articles/eventbridge-and-sns-invocations.html'>vignette("eventbridge-and-sns-invocations", package = "lambdr")</a></code></p>
+    <h2 class="hasAnchor" id="sns-invocations"><a class="anchor" href="#sns-invocations"></a>SNS invocations</h2>
+
+    
+
+<p><a href='https://lifecycle.r-lib.org/articles/stages.html#experimental'><img src='figures/lifecycle-experimental.svg' alt='[Experimental]' /></a>
+<code><a href='../articles/eventbridge-and-sns-invocations.html'>vignette("eventbridge-and-sns-invocations", package = "lambdr")</a></code></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
