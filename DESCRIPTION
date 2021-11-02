@@ -1,6 +1,6 @@
 Package: lambdr
-Title: Create a Runtime for Serving Containerised R Functions on AWS Lambda
-Version: 0.0.0.9000
+Title: Create a Runtime for Serving Containerised R Functions on 'AWS Lambda'
+Version: 1.0.0
 Authors@R: 
     person(given = "David",
            family = "Neuzerling",
@@ -17,15 +17,16 @@ RoxygenNote: 7.1.1
 Imports: 
     httr,
     jsonlite,
-    lifecycle,
     logger
 Suggests: 
     withr,
     testthat (>= 3.0.0),
     webmockr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    lifecycle
 Config/testthat/edition: 3
-URL: https://github.com/mdneuzerling/lambdr
+URL: https://lambdr.mdneuzerling.com/,
+    https://github.com/mdneuzerling/lambdr
 BugReports: https://github.com/mdneuzerling/lambdr/issues
 VignetteBuilder: knitr
