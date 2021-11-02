@@ -2,10 +2,14 @@ Package: lambdr
 Title: Create a Runtime for Serving Containerised R Functions on 'AWS Lambda'
 Version: 1.0.0
 Authors@R: 
-    person(given = "David",
-           family = "Neuzerling",
-           role = c("aut", "cre"),
-           email = "david@neuzerling.com")
+    c(person(given = "David",
+             family = "Neuzerling",
+             role = c("aut", "cre"),
+             email = "david@neuzerling.com"),
+      person(given = "James",
+             family = "Goldie",
+             role = c("ctb"),
+             email = "me@jamesgoldie.dev"))
 Description: Runtime for serving containers that can execute R code on the 
     'AWS Lambda' serverless compute service <\https://aws.amazon.com/lambda/>.
     Provides the necessary functionality for handling the various endpoints
