@@ -1,0 +1,134 @@
+---
+title: "EventBridge and SNS Invocations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{eventbridge-and-sns-events}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Invocations via _AWS EventBridge_ and _AWS SNS_ are untested and should be considered 
+experimental. If the content of the events is not relevant to the handler
+function, consider passing `function(x) list()` to the `deserialiser` argument
+of `lambda_config` to ignore the event content.
+
+Otherwise, it's highly recommended to allow the handler function to accept `...` 
+arguments, so that superfluous arguments can be ignored.
+
+## EventBridge events
+
+The `lambdr` package, by default, will extract the "detail" from invocations via _EventBridge_. If the invocation is via a scheduled event the detail will likely
+be empty, and so no arguments will be passed to the handler function.
+
+An example _EventBridge_ event content (as a JSON) containing the "detail" is
+below:
+
+```json
+{
+  "version": "0",
+  "account": "1234567890",
+  "region": "ap-southeast-2",
+  "detail": {
+    "EventCategories": [
+        "backup"
+    ],
+    "SourceType": "DB_INSTANCE",
+    "SourceArn": "arn:aws:rds:ap-southeast-2:1234567890:db:abcdefghijklmn",
+    "Date": "2021-10-24T08:56:37.156Z",
+    "Message": "Finished DB Instance backup",
+    "SourceIdentifier": "abcdefghijklmn"
+  },
+  "detail-type": "Scheduled Event",
+  "source": "aws.events",
+  "time": "2021-10-24T08:47:23Z",
+  "id": "2007b97d-449b-41b7-9257-7fbbd5974ff6",
+  "resources": [
+    "arn:aws:events:ap-southeast-2:1234567890:rule/scheduled"
+  ]
+}
+```
+
+For more information on Event Bridge events, refer to 
+[the official documentation](https://docs.aws.amazon.com/lambda/latest/dg/services-cloudwatchevents.html).
+
+## SNS Events
+
+The `lambdr` package, by default, will extract the "message" from the "record"
+of invocations via _SNS_. If the message is a valid JSON it will be parsed into
+a list. Otherwise it will be passed to the handler function as a single string.
+
+An example SNS event body (as a JSON), of which the message is a part, is below.
+This example is the result of a _CloudWatch_ alarm being triggered and passed to
+SNS:
+
+```json
+{
+      "Records": [
+          {
+              "EventSource": "aws:sns",
+              "EventVersion": "1.0",
+              "EventSubscriptionArn": "arn:aws:sns:ap-southeast-2:1234567890:lambda-parity-test:123456abcdef",
+              "Sns": {
+                  "Type": "Notification",
+                  "MessageId": "123456abcdef",
+                  "TopicArn": "arn:aws:sns:ap-southeast-2:1234567890:lambda-parity-test",
+                  "Subject": "INSUFFICIENT_DATA: \\"test-lambda-parity\\" in Asia Pacific (Sydney)",
+                  "Message": "{\\"AlarmName\\":\\"test-lambda-parity\\",\\"AlarmDescription\\":null,\\"AWSAccountId\\":\\"1234567890\\",\\"NewStateValue\\":\\"INSUFFICIENT_DATA\\",\\"NewStateReason\\":\\"Insufficient Data: 1 datapoint was unknown.\\",\\"StateChangeTime\\":\\"2021-10-21T10:20:50.932+0000\\",\\"Region\\":\\"Asia Pacific (Sydney)\\",\\"AlarmArn\\":\\"arn:aws:cloudwatch:ap-southeast-2:1234567890:alarm:test-lambda-parity\\",\\"OldStateValue\\":\\"ALARM\\",\\"Trigger\\":{\\"MetricName\\":\\"NumberOfObjects\\",\\"Namespace\\":\\"AWS/S3\\",\\"StatisticType\\":\\"Statistic\\",\\"Statistic\\":\\"MAXIMUM\\",\\"Unit\\":null,\\"Dimensions\\":[{\\"value\\":\\"random-data\\",\\"name\\":\\"BucketName\\"},{\\"value\\":\\"AllStorageTypes\\",\\"name\\":\\"StorageType\\"}],\\"Period\\":60,\\"EvaluationPeriods\\":1,\\"ComparisonOperator\\":\\"GreaterThanOrEqualToThreshold\\",\\"Threshold\\":0.0,\\"TreatMissingData\\":\\"- TreatMissingData:                    missing\\",\\"EvaluateLowSampleCountPercentile\\":\\"\\"}}",
+                  "Timestamp": "2021-10-21T10:20:50.973Z",
+                  "SignatureVersion": "1",
+                  "Signature": "abcdefghijklmnopqrstubwxyz",
+                  "SigningCertUrl": "https://sns.ap-southeast-2.amazonaws.com/SimpleNotificationService-123456abcdef.pem",
+                  "UnsubscribeUrl": "https://sns.ap-southeast-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:ap-southeast-2:1234567890:lambda-parity-test:123456abcdef",
+                  "MessageAttributes": {}
+              }
+          }
+      ]
+  }
+```
+
+Note that the message is stringified within the JSON. Its JSON representation
+is:
+
+```json
+{
+  "AlarmName": "test-lambda-parity",
+  "AlarmDescription": null,
+  "AWSAccountId": "1234567890",     
+  "NewStateValue": "INSUFFICIENT_DATA",
+  "NewStateReason": "Insufficient Data: 1 datapoint was unknown.",
+  "StateChangeTime": "2021-10-21T10:20:50.932+0000",
+  "Region": "Asia Pacific (Sydney)",
+  "AlarmArn": "arn:aws:cloudwatch:ap-southeast-2:1234567890:alarm:test-lambda-parity",
+  "OldStateValue": "ALARM",
+  "Trigger": {
+    "MetricName": "NumberOfObjects",
+    "Namespace": "AWS/S3",
+    "StatisticType": "Statistic",
+    "Statistic": "MAXIMUM",
+    "Unit": null,
+    "Dimensions": [
+      {
+        "value": "a-bucket",
+        "name": "BucketName"
+      },
+      {
+        "value": "AllStorageTypes",
+        "name": "StorageType"
+      }
+    ],
+  "Period": 60,
+  "EvaluationPeriods": 1,
+  "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+  "Threshold": 0.0,
+  "TreatMissingData": "- TreatMissingData:                    missing",
+  "EvaluateLowSampleCountPercentile": ""
+  }
+}
+```

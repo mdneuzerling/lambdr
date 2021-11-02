@@ -1,5 +1,5 @@
 ---
-title: "package-structure"
+title: "Package Structure"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{package-structure}

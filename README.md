@@ -9,16 +9,26 @@
 [![license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://choosealicense.com/licenses/mit/)
 <!-- badges: end -->
 
-Running R containers on AWS Lambda.
+This package provides an R runtime for the ![_AWS Lambda_ serverless compute
+service]{https://aws.amazon.com/lambda/}. It is intended to be used to create
+containers that can run on _AWS Lambda_. `lambdr` provides the necessary
+functionality for handling the various endpoints required for accepting new
+input and sending responses.
 
-This package is in active development, and is not yet ready for use.
+This package is **unofficial**. Its creators are not affiliated with
+_Amazon Web Services_, nor is its content endorsed by _Amazon Web Services_.
+_Lambda_, _API Gateway_, _EventBridge_, _CloudWatch_, and _SNS_ are services of
+_Amazon Web Services_.
 
-Not all invocation types have been implemented or tested.
+The following invocation types have been implemented to some degree. Refer to
+the vignettes or the package website for more information.
 
+Alternatively, custom functions can be provided for parsing event content and
+serialising results. Refer to `lambda_config` for more information.
 
  invocation type | implementation stage
 |:---------------|:---------------------|
- direct | <img src="man/figures/lifecycle-maturing.svg" align="center"/>
+ direct | <img src="man/figures/lifecycle-stable.svg" align="center"/>
  API Gateway (REST) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
  API Gateway (HTML) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
  EventBridge | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
