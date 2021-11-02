@@ -9,8 +9,8 @@
 [![license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://choosealicense.com/licenses/mit/)
 <!-- badges: end -->
 
-This package provides an R runtime for the ![_AWS Lambda_ serverless compute
-service]{https://aws.amazon.com/lambda/}. It is intended to be used to create
+This package provides an R runtime for the [_AWS Lambda_ serverless compute
+service](https://aws.amazon.com/lambda/). It is intended to be used to create
 containers that can run on _AWS Lambda_. `lambdr` provides the necessary
 functionality for handling the various endpoints required for accepting new
 input and sending responses.
