@@ -11,7 +11,7 @@ Authors@R:
              role = c("ctb"),
              email = "me@jamesgoldie.dev"))
 Description: Runtime for serving containers that can execute R code on the 
-    'AWS Lambda' serverless compute service <\https://aws.amazon.com/lambda/>.
+    'AWS Lambda' serverless compute service <https://aws.amazon.com/lambda/>.
     Provides the necessary functionality for handling the various endpoints
     required for accepting new input and sending responses.
 License: MIT + file LICENSE
