@@ -101,8 +101,9 @@
 
 <p>This package provides an R runtime for the <a href="https://aws.amazon.com/lambda/"><em>AWS Lambda</em> serverless compute service</a>. It is intended to be used to create containers that can run on <em>AWS Lambda</em>. <code>lambdr</code> provides the necessary functionality for handling the various endpoints required for accepting new input and sending responses.</p>
 <p>This package is <strong>unofficial</strong>. Its creators are not affiliated with <em>Amazon Web Services</em>, nor is its content endorsed by <em>Amazon Web Services</em>. <em>Lambda</em>, <em>API Gateway</em>, <em>EventBridge</em>, <em>CloudWatch</em>, and <em>SNS</em> are services of <em>Amazon Web Services</em>.</p>
-<p>The following invocation types have been implemented to some degree. Refer to the vignettes or the package website for more information.</p>
-<p>Alternatively, custom functions can be provided for parsing event content and serialising results. Refer to <code>lambda_config</code> for more information.</p>
+<p>The default behaviour is to convert the body of the received event from JSON into an R list using the <code>jsonlite</code> package. This works for direct invocations, as well as situations where the user wishes to implement their own behaviour.</p>
+<p>Some invocation types have their own logic for converting the event body into an R object. This is useful for say, using an R function in a Lambda behind an API Gateway, so that the R function does not need to deal with the HTML elements of the invocation. The below invocation types have custom logic implemented. Refer to the vignettes or the package website for more information.</p>
+<p>Alternatively, user-defined functions can be provided for parsing event content and serialising results. The user can also use the <code>identity</code> function as a deserialiser to pass the raw event content — as a string — to the handler function. Refer to <code><a href="reference/lambda_config.html">?lambda_config</a></code> for more information.</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">invocation type</th>

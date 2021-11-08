@@ -52,10 +52,19 @@ Lambda, API Gateway, EventBridge, CloudWatch, and SNS are services
 of Amazon Web Services.
 To see an example of how to use this package to create a runtime, refer to
 vignette(&quot;lambda-runtime-in-container&quot;, package = &quot;lambdr&quot;).
-The following invocation types have been implemented to some degree. Refer to
-the vignettes or the package website for more information.
-Alternatively, custom functions can be provided for parsing event content and
-serialising results. Refer to lambda_config for more
+The default behaviour is to convert the body of the received event from JSON
+into an R list using the jsonlite package. This works for direct invocations,
+as well as situations where the user wishes to implement their own behaviour.
+Some invocation types have their own logic for converting the event body into
+an R object. This is useful for say, using an R function in a Lambda behind
+an API Gateway, so that the R function does not need to deal with the HTML
+elements of the invocation. The below invocation types have custom logic
+implemented. Refer to the vignettes or the package website for more
+information.
+Alternatively, user-defined functions can be provided for parsing event
+content and serialising results. The user can also use the identity
+function as a deserialiser to pass the raw event content --- as a string ---
+to the handler function. Refer to lambda_config for more
 information." />
 
 
@@ -166,10 +175,19 @@ Web Services</em>, nor is its content endorsed by <em>Amazon Web Services</em>.
 of <em>Amazon Web Services</em>.</p>
 <p>To see an example of how to use this package to create a runtime, refer to
 <code><a href='../articles/lambda-runtime-in-container.html'>vignette("lambda-runtime-in-container", package = "lambdr")</a></code>.</p>
-<p>The following invocation types have been implemented to some degree. Refer to
-the vignettes or the package website for more information.</p>
-<p>Alternatively, custom functions can be provided for parsing event content and
-serialising results. Refer to <code><a href='lambda_config.html'>lambda_config</a></code> for more
+<p>The default behaviour is to convert the body of the received event from JSON
+into an R list using the <code>jsonlite</code> package. This works for direct invocations,
+as well as situations where the user wishes to implement their own behaviour.</p>
+<p>Some invocation types have their own logic for converting the event body into
+an R object. This is useful for say, using an R function in a Lambda behind
+an API Gateway, so that the R function does not need to deal with the HTML
+elements of the invocation. The below invocation types have custom logic
+implemented. Refer to the vignettes or the package website for more
+information.</p>
+<p>Alternatively, user-defined functions can be provided for parsing event
+content and serialising results. The user can also use the <code>identity</code>
+function as a deserialiser to pass the raw event content --- as a string ---
+to the handler function. Refer to <code><a href='lambda_config.html'>lambda_config</a></code> for more
 information.</p>
     </div>
 
