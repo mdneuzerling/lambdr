@@ -17,11 +17,21 @@
 #' To see an example of how to use this package to create a runtime, refer to
 #' \code{vignette("lambda-runtime-in-container", package = "lambdr")}.
 #'
-#' The following invocation types have been implemented to some degree. Refer to
-#' the vignettes or the package website for more information.
+#' The default behaviour is to convert the body of the received event from JSON
+#' into an R list using the `jsonlite` package. This works for direct invocations,
+#' as well as situations where the user wishes to implement their own behaviour.
 #'
-#' Alternatively, custom functions can be provided for parsing event content and
-#' serialising results. Refer to \code{\link{lambda_config}} for more
+#' Some invocation types have their own logic for converting the event body into
+#' an R object. This is useful for say, using an R function in a Lambda behind
+#' an API Gateway, so that the R function does not need to deal with the HTML
+#' elements of the invocation. The below invocation types have custom logic
+#' implemented. Refer to the vignettes or the package website for more
+#' information.
+#'
+#' Alternatively, user-defined functions can be provided for parsing event
+#' content and serialising results. The user can also use the `identity`
+#' function as a deserialiser to pass the raw event content --- as a string ---
+#' to the handler function. Refer to \code{\link{lambda_config}} for more
 #' information.
 #'
 #' @section Direct invocations:
