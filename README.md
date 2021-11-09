@@ -22,7 +22,8 @@ _Amazon Web Services_.
 
 The default behaviour is to convert the body of the received event from JSON
 into an R list using the `jsonlite` package. This works for direct invocations,
-as well as situations where the user wishes to implement their own behaviour.
+as well as situations where the user wishes to implement behaviour specific to
+a trigger.
 
 Some invocation types have their own logic for converting the event body into
 an R object. This is useful for say, using an R function in a Lambda behind
