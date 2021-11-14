@@ -5,7 +5,7 @@
 [![CRAN status](https://www.r-pkg.org/badges/version/lambdr)](https://cran.r-project.org/package=lambdr)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/lambdr)](https://cran.r-project.org/package=lambdr)
 [![Last commit](https://img.shields.io/github/last-commit/mdneuzerling/lambdr/main.svg)](https://github.com/mdneuzerling/lambdr/tree/main)
-[![Codecov test coverage](https://codecov.io/gh/mdneuzerling/lambdr/branch/main/graph/badge.svg)](https://codecov.io/gh/mdneuzerling/lambdr?branch=main)
+[![Codecov test coverage](https://codecov.io/gh/mdneuzerling/lambdr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mdneuzerling/lambdr?branch=main)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://choosealicense.com/licenses/mit/)
 <!-- badges: end -->
 
@@ -21,9 +21,11 @@ _Lambda_, _API Gateway_, _EventBridge_, _CloudWatch_, and _SNS_ are services of
 _Amazon Web Services_.
 
 The default behaviour is to convert the body of the received event from JSON
-into an R list using the `jsonlite` package. This works for direct invocations,
-as well as situations where the user wishes to implement behaviour specific to
-a trigger.
+into arguments for the handler function using the `jsonlite` package. For
+example, a raw event body of `{"number": 9}` will be converted to `list(number =
+9)`. The handler body will then receive the arguments directly after unlisting,
+eg. `number = 9`. This works for direct invocations, as well as situations where
+the user wishes to implement behaviour specific to a trigger.
 
 Some invocation types have their own logic for converting the event body into
 an R object. This is useful for say, using an R function in a Lambda behind
