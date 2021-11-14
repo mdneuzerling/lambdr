@@ -9,6 +9,10 @@
 #' example of how to use this function to place an R Lambda Runtime in a
 #' container.
 #'
+#' This package uses the \code{\link[logger]{logger}} package for logging.
+#' Debug log entries can be enabled with `logger::log_threshold(logger::DEBUG)`.
+#' This will log additional information such as raw event bodies.
+#'
 #' @inheritParams validate_lambda_config
 #' @inheritParams start_listening
 #'

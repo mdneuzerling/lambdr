@@ -29,6 +29,10 @@ provided to the \code{config} argument and produced by the
 See \code{vignette("lambda-runtime-in-container", package = "lambdr")} for an
 example of how to use this function to place an R Lambda Runtime in a
 container.
+
+This package uses the \code{\link[logger]{logger}} package for logging.
+Debug log entries can be enabled with \code{logger::log_threshold(logger::DEBUG)}.
+This will log additional information such as raw event bodies.
 }
 \section{Event context}{
 

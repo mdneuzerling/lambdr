@@ -17,8 +17,7 @@ reference:
     - lambda_config
 - title: "Helper functions"
   contents:
-    - setup_logging
-    - as_stringified_json
     - stop_html
+    - as_stringified_json
     - prettify_list
     - from_base64
