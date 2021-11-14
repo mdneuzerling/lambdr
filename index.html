@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
       </span>
     </div>
 
@@ -73,6 +73,9 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="news/index.html">Changelog</a>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -101,7 +104,7 @@
 
 <p>This package provides an R runtime for the <a href="https://aws.amazon.com/lambda/"><em>AWS Lambda</em> serverless compute service</a>. It is intended to be used to create containers that can run on <em>AWS Lambda</em>. <code>lambdr</code> provides the necessary functionality for handling the various endpoints required for accepting new input and sending responses.</p>
 <p>This package is <strong>unofficial</strong>. Its creators are not affiliated with <em>Amazon Web Services</em>, nor is its content endorsed by <em>Amazon Web Services</em>. <em>Lambda</em>, <em>API Gateway</em>, <em>EventBridge</em>, <em>CloudWatch</em>, and <em>SNS</em> are services of <em>Amazon Web Services</em>.</p>
-<p>The default behaviour is to convert the body of the received event from JSON into an R list using the <code>jsonlite</code> package. This works for direct invocations, as well as situations where the user wishes to implement behaviour specific to a trigger.</p>
+<p>The default behaviour is to convert the body of the received event from JSON into arguments for the handler function using the <code>jsonlite</code> package. For example, a raw event body of <code>{"number": 9}</code> will be converted to <code>list(number = 9)</code>. The handler function will then receive the arguments directly after unlisting, eg. <code>number = 9</code>. This works for direct invocations, as well as situations where the user wishes to implement behaviour specific to a trigger.</p>
 <p>Some invocation types have their own logic for converting the event body into an R object. This is useful for say, using an R function in a Lambda behind an API Gateway, so that the R function does not need to deal with the HTML elements of the invocation. The below invocation types have custom logic implemented. Refer to the vignettes or the package website for more information.</p>
 <p>Alternatively, user-defined functions can be provided for parsing event content and serialising results. The user can also use the <code>identity</code> function as a deserialiser to pass the raw event content — as a string — to the handler function. Refer to <code><a href="reference/lambda_config.html">?lambda_config</a></code> for more information.</p>
 <table class="table">
@@ -256,7 +259,7 @@
 <li><a href="https://cran.r-project.org/package=lambdr"><img src="https://www.r-pkg.org/badges/version/lambdr" alt="CRAN status"></a></li>
 <li><a href="https://cran.r-project.org/package=lambdr"><img src="https://cranlogs.r-pkg.org/badges/lambdr" alt="CRAN downloads"></a></li>
 <li><a href="https://github.com/mdneuzerling/lambdr/tree/main"><img src="https://img.shields.io/github/last-commit/mdneuzerling/lambdr/main.svg" alt="Last commit"></a></li>
-<li><a href="https://codecov.io/gh/mdneuzerling/lambdr?branch=main"><img src="https://codecov.io/gh/mdneuzerling/lambdr/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://app.codecov.io/gh/mdneuzerling/lambdr?branch=main"><img src="https://codecov.io/gh/mdneuzerling/lambdr/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://choosealicense.com/licenses/mit/"><img src="https://img.shields.io/badge/license-MIT-lightgrey.svg" alt="license"></a></li>
 </ul>
 </div>

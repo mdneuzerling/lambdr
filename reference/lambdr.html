@@ -53,7 +53,10 @@ of Amazon Web Services.
 To see an example of how to use this package to create a runtime, refer to
 vignette(&quot;lambda-runtime-in-container&quot;, package = &quot;lambdr&quot;).
 The default behaviour is to convert the body of the received event from JSON
-into an R list using the jsonlite package. This works for direct
+into arguments for the handler function using the jsonlite package. For
+example, a raw event body of {&quot;number&quot;: 9} will be converted to
+list(number = 9). The handler function will then receive the arguments
+directly after unlisting, eg. number = 9. This works for direct
 invocations, as well as situations where the user wishes to implement
 behaviour specific to a trigger.
 Some invocation types have their own logic for converting the event body into
@@ -98,7 +101,7 @@ information." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
       </span>
     </div>
 
@@ -136,6 +139,9 @@ information." />
       <a href="../articles/package-structure.html">Package Structure</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -177,7 +183,10 @@ of <em>Amazon Web Services</em>.</p>
 <p>To see an example of how to use this package to create a runtime, refer to
 <code><a href='../articles/lambda-runtime-in-container.html'>vignette("lambda-runtime-in-container", package = "lambdr")</a></code>.</p>
 <p>The default behaviour is to convert the body of the received event from JSON
-into an R list using the <code>jsonlite</code> package. This works for direct
+into arguments for the handler function using the <code>jsonlite</code> package. For
+example, a raw event body of <code>{"number": 9}</code> will be converted to
+<code>list(number = 9)</code>. The handler function will then receive the arguments
+directly after unlisting, eg. <code>number = 9</code>. This works for direct
 invocations, as well as situations where the user wishes to implement
 behaviour specific to a trigger.</p>
 <p>Some invocation types have their own logic for converting the event body into
