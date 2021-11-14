@@ -1,6 +1,6 @@
 Package: lambdr
 Title: Create a Runtime for Serving Containerised R Functions on 'AWS Lambda'
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: 
     c(person(given = "David",
              family = "Neuzerling",
