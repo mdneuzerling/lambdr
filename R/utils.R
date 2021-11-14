@@ -5,10 +5,10 @@
 #' @return character
 #' @export
 #'
-#' @examples \dontrun{
+#' @examples
 #' prettify_list(list(a = 1, b = 2, c = 3))
 #' # "a=1, b=2, c=3"
-#' }
+#'
 #' @keywords internal
 prettify_list <- function(x) {
   paste(
