@@ -18,7 +18,10 @@
 #' \code{vignette("lambda-runtime-in-container", package = "lambdr")}.
 #'
 #' The default behaviour is to convert the body of the received event from JSON
-#' into an R list using the `jsonlite` package. This works for direct
+#' into arguments for the handler function using the `jsonlite` package. For
+#' example, a raw event body of `{"number": 9}` will be converted to
+#' `list(number = 9)`. The handler function will then receive the arguments
+#' directly after unlisting, eg. `number = 9`. This works for direct
 #' invocations, as well as situations where the user wishes to implement
 #' behaviour specific to a trigger.
 #'
