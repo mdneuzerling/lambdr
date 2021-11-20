@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AWS Lambda endpoints — endpoints • lambdr</title>
+<title>Give a value the "already_serialised = TRUE" attribute — mark_as_already_serialised • lambdr</title>
 
 
 <!-- jquery -->
@@ -39,33 +39,8 @@
 
 
 
-<meta property="og:title" content="AWS Lambda endpoints — endpoints" />
-<meta property="og:description" content="These endpoints are configured based on the &quot;AWS_LAMBDA_RUNTIME_API&quot;
-environment variable set by AWS Lambda during initialisation. They generally
-won't be available locally. The &quot;AWS_LAMBDA_RUNTIME_API&quot; environment variable
-(accessed through lambda_config) is used in the following
-functions:
-get_next_invocation_endpoint returns the endpoint which R must query for
-the next input. R must send a GET request to this endpoint and will wait
-until either a response is received or the Lambda instance is shut down for
-inactivity. When Lambda receives an input from, say, an API Gateway, it will
-respond to the pending request with details of the input.
-get_initialisation_error_endpoint returns the endpoint to which an error
-should be sent if the error occurs when setting up the runtime. This is
-distinct from errors that occur during handling of an event.
-get_response_endpoint returns the endpoint to which an event response
-should be sent. It is unique for each event.
-get_invocation_error_endpoint returns the endpoint to which errors that
-occur during event handling should be sent. It is unique for each event.
-
-
-The values returned by get_next_invocation_endpoint and
-get_initialisation_error_endpoint are unique in each Lambda instance. That
-is, the runtime only needs to retrieve their values once. The values returned
-by get_response_endpoint and get_invocation_error_endpoint are determined
-by the request_id argument that these functions require, and so need to be
-recalculated for each event. The request ID is given in the
-&quot;lambda-runtime-aws-request-id&quot; header in the event." />
+<meta property="og:title" content="Give a value the "already_serialised = TRUE" attribute — mark_as_already_serialised" />
+<meta property="og:description" content="Give a value the &quot;already_serialised = TRUE&quot; attribute" />
 
 
 
@@ -160,70 +135,29 @@ recalculated for each event. The request ID is given in the
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>AWS Lambda endpoints</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/endpoints.R'><code>R/endpoints.R</code></a></small>
-    <div class="hidden name"><code>endpoints.Rd</code></div>
+    <h1>Give a value the "already_serialised = TRUE" attribute</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mdneuzerling/lambdr/blob/master/R/utils.R'><code>R/utils.R</code></a></small>
+    <div class="hidden name"><code>mark_as_already_serialised.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>These endpoints are configured based on the "AWS_LAMBDA_RUNTIME_API"
-environment variable set by AWS Lambda during initialisation. They generally
-won't be available locally. The "AWS_LAMBDA_RUNTIME_API" environment variable
-(accessed through <code><a href='lambda_config.html'>lambda_config</a></code>) is used in the following
-functions:</p><ul>
-<li><p><code>get_next_invocation_endpoint</code> returns the endpoint which R must query for
-the next input. R must send a <code>GET</code> request to this endpoint and will wait
-until either a response is received or the Lambda instance is shut down for
-inactivity. When Lambda receives an input from, say, an API Gateway, it will
-respond to the pending request with details of the input.</p></li>
-<li><p><code>get_initialisation_error_endpoint</code> returns the endpoint to which an error
-should be sent if the error occurs when setting up the runtime. This is
-distinct from errors that occur during handling of an event.</p></li>
-<li><p><code>get_response_endpoint</code> returns the endpoint to which an event response
-should be sent. It is unique for each event.</p></li>
-<li><p><code>get_invocation_error_endpoint</code> returns the endpoint to which errors that
-occur during event handling should be sent. It is unique for each event.</p></li>
-</ul>
-
-<p>The values returned by <code>get_next_invocation_endpoint</code> and
-<code>get_initialisation_error_endpoint</code> are unique in each Lambda instance. That
-is, the runtime only needs to retrieve their values once. The values returned
-by <code>get_response_endpoint</code> and <code>get_invocation_error_endpoint</code> are determined
-by the <code>request_id</code> argument that these functions require, and so need to be
-recalculated for each event. The request ID is given in the
-"lambda-runtime-aws-request-id" header in the event.</p>
+    <p>Give a value the "already_serialised = TRUE" attribute</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_next_invocation_endpoint</span><span class='op'>(</span><span class='va'>config</span>, <span class='va'>runtime_api</span><span class='op'>)</span>
-
-<span class='fu'>get_initialisation_error_endpoint</span><span class='op'>(</span><span class='va'>config</span>, <span class='va'>runtime_api</span><span class='op'>)</span>
-
-<span class='fu'>get_response_endpoint</span><span class='op'>(</span><span class='va'>config</span>, <span class='va'>request_id</span><span class='op'>)</span>
-
-<span class='fu'>get_invocation_error_endpoint</span><span class='op'>(</span><span class='va'>config</span>, <span class='va'>request_id</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>mark_as_already_serialised</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>config</th>
-      <td><p>A list of configuration values as created by the
-<code><a href='lambda_config.html'>lambda_config</a></code> function. Alternatively, a runtime API host can
-be provided directly. This would be the case if there's not enough
-information available to build a full configuration object due to an error.</p></td>
-    </tr>
-    <tr>
-      <th>request_id</th>
-      <td><p>For <code>get_response_endpoint</code> and
-<code>get_invocation_error_endpoint</code>, the ID of the particular event/request.
-This is provided in the "lambda-runtime-aws-request-id" header of the
-event.</p></td>
+      <th>x</th>
+      <td><p>any R object</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>character</p>
+    <p>x with "already_serialised" attribute TRUE</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

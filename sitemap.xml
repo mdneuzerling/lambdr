@@ -61,6 +61,9 @@
     <loc>https://lambdr.mdneuzerling.com/reference/handle_event_error.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/html_response.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/is_eventbridge_event_content.html</loc>
   </url>
   <url>
@@ -77,6 +80,9 @@
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/lambdr.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/mark_as_already_serialised.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/parse_event_content.html</loc>

@@ -87,7 +87,7 @@ on the event class as returned by classify_event.tryCatch(
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -167,7 +167,7 @@ error endpoint. Importantly it does not stop the kernel --- the intention is
 that the runtime moves onto the next event.</p>
 <p>This function may need to be implemented differently depending on the source
 of an event. As such, <code>handle_event_error</code> is an S3 generic that can dispatch
-on the event class as returned by <code><a href='classify_event.html'>classify_event</a></code>.<div class="r"></p><pre><span class='kw'><a href='https://rdrr.io/r/base/conditions.html'>tryCatch</a></span><span class='op'>(</span>
+on the event class as returned by <code><a href='classify_event.html'>classify_event</a></code>.<div class="sourceCode r"></p><pre><span class='kw'><a href='https://rdrr.io/r/base/conditions.html'>tryCatch</a></span><span class='op'>(</span>
     <span class='fu'><a href='handle_event.html'>handle_event</a></span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>,
     error <span class='op'>=</span> <span class='fu'>handle_invocation_error</span><span class='op'>(</span><span class='va'>event</span><span class='op'>)</span> <span class='co'># returns a function(e)</span>
  <span class='op'>)</span>
