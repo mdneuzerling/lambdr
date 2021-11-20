@@ -19,6 +19,14 @@ serialise_result <- function(event, config) {
   if (!is.null(config$serialiser)) {
     return(config$serialiser(event$result))
   }
+
+  # See `html_result` for an example of this usage, where a response has already
+  # been prepared and serialised and doesn't need any further treatment.
+  is_already_serialised <- attr(event$result, "already_serialised")
+  if (!is.null(is_already_serialised) && is_already_serialised) {
+    return(event)
+  }
+
   UseMethod("serialise_result")
 }
 

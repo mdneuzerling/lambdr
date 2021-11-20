@@ -17,6 +17,7 @@ reference:
     - lambda_config
 - title: "Helper functions"
   contents:
+    - html_response
     - stop_html
     - as_stringified_json
     - prettify_list

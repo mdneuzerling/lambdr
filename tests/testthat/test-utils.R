@@ -86,3 +86,61 @@ test_that("HTML body decoding accommodates for base64", {
     list(number = 7)
   )
 })
+
+test_that("we can mark results as having already been serialised", {
+  expect_true(
+    attr(mark_as_already_serialised(3), "already_serialised")
+  )
+})
+
+test_that("we can produce custom HTML results", {
+  expect_equal(
+    html_response("abc"),
+    mark_as_already_serialised(
+      "{\"body\":\"abc\",\"isBase64Encoded\":false,\"statusCode\":200}"
+    )
+  )
+
+  expect_equal(
+    html_response("abc", is_base64 = TRUE),
+    mark_as_already_serialised(
+      "{\"body\":\"abc\",\"isBase64Encoded\":true,\"statusCode\":200}"
+    )
+  )
+
+  expect_equal(
+    html_response("abc", headers = list(x = "a")),
+    mark_as_already_serialised(
+      paste0(
+        "{\"body\":\"abc\",\"isBase64Encoded\":false,\"statusCode\":200,",
+        "\"headers\":{\"x\":\"a\"}}"
+      )
+    )
+  )
+})
+
+test_that("we can add content types to custom HTML responses", {
+  expect_equal(
+    html_response("abc", content_type = "text/html"),
+    mark_as_already_serialised(
+      paste0(
+        "{\"body\":\"abc\",\"isBase64Encoded\":false,\"statusCode\":200,",
+        "\"headers\":{\"Content-Type\":\"text/html\"}}"
+      )
+    )
+  )
+
+  expect_equal(
+    html_response(
+      "abc",
+      headers = list(`Content-Type` = "application/pdf"),
+      content_type = "text/html" # Expect this to be overridden by the above
+    ),
+    mark_as_already_serialised(
+      paste0(
+        "{\"body\":\"abc\",\"isBase64Encoded\":false,\"statusCode\":200,",
+        "\"headers\":{\"Content-Type\":\"application/pdf\"}}"
+      )
+    )
+  )
+})

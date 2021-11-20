@@ -1,3 +1,7 @@
+# lambdr 1.2.0
+
+* Added `html_response` for sending bespoke responses to API Gateways.
+
 # lambdr 1.1.0
 
 * Removed `setup_logging`. Logging thresholds can be changed directly with

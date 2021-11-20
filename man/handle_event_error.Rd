@@ -24,7 +24,7 @@ that the runtime moves onto the next event.
 
 This function may need to be implemented differently depending on the source
 of an event. As such, \code{handle_event_error} is an S3 generic that can dispatch
-on the event class as returned by \code{\link{classify_event}}.\if{html}{\out{<div class="r">}}\preformatted{tryCatch(
+on the event class as returned by \code{\link{classify_event}}.\if{html}{\out{<div class="sourceCode r">}}\preformatted{tryCatch(
     handle_event(...),
     error = handle_invocation_error(event) # returns a function(e)
  )
