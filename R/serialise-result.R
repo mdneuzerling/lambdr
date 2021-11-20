@@ -24,7 +24,7 @@ serialise_result <- function(event, config) {
   # been prepared and serialised and doesn't need any further treatment.
   is_already_serialised <- attr(event$result, "already_serialised")
   if (!is.null(is_already_serialised) && is_already_serialised) {
-    return(event)
+    return(event$result)
   }
 
   UseMethod("serialise_result")
