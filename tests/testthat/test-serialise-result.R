@@ -40,8 +40,9 @@ test_that("already_serialised results are not serialised twice", {
   )
   test_config <- structure(list(serialiser = NULL), class = "lambda_config")
 
+  # serialise_result should return the event$result unaltered
   expect_equal(
-    already_serialised,
+    already_serialised$result,
     serialise_result(already_serialised, test_config)
   )
 })
