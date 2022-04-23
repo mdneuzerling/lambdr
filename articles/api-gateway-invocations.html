@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,23 +33,17 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -76,7 +72,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/mdneuzerling/lambdr/">
+  <a href="https://github.com/mdneuzerling/lambdr/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -97,7 +93,7 @@
       <h1 data-toc-skip>API Gateway Invocations</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mdneuzerling/lambdr/blob/master/vignettes/api-gateway-invocations.Rmd"><code>vignettes/api-gateway-invocations.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mdneuzerling/lambdr/blob/HEAD/vignettes/api-gateway-invocations.Rmd" class="external-link"><code>vignettes/api-gateway-invocations.Rmd</code></a></small>
       <div class="hidden name"><code>api-gateway-invocations.Rmd</code></div>
 
     </div>
@@ -105,15 +101,15 @@
     
     
 <p>Invocations via an API Gateway require extra care when parsing the input event, and when formatting results. For the most part, <code>lambdr</code> will handle this automatically. But for highly custom serialisation/deserialisation or edge cases it may be helpful to understand how content via API Gateways is structured and responded to.</p>
-<div id="events-via-api-gateways" class="section level2">
-<h2 class="hasAnchor">
-<a href="#events-via-api-gateways" class="anchor"></a>Events via API Gateways</h2>
+<div class="section level2">
+<h2 id="events-via-api-gateways">Events via API Gateways<a class="anchor" aria-label="anchor" href="#events-via-api-gateways"></a>
+</h2>
 <p>When a Lambda runtime, like that implemented by <code>lambdr</code>, starts listening for inputs it queries the “next invocation” HTTP endpoint. The response to this is what’s called here an <em>event</em>. The content of this event contains the arguments (if any) to the function. After the result has been calculate, the runtime must format the result and submit it to the “result” HTTP endpoint.</p>
 <p>With direct invocation the content of the event contains a string which — when interpreted as JSON — gives the arguments for the handler function. When a Lambda is invoked via an API Gateway then the content of the event contains significantly more detail and requires careful parsing.</p>
 <p>There are two types of API Gateways to consider: REST and HTML.</p>
-<div id="rest-api-gateway-events" class="section level3">
-<h3 class="hasAnchor">
-<a href="#rest-api-gateway-events" class="anchor"></a>REST API Gateway events</h3>
+<div class="section level3">
+<h3 id="rest-api-gateway-events">REST API Gateway events<a class="anchor" aria-label="anchor" href="#rest-api-gateway-events"></a>
+</h3>
 <p>An example of REST API Gateway event content is given at the bottom of this section but the two most important sections are <code>body</code> and <code>queryStringParameters</code>.</p>
 <p>The <code>queryStringParameters</code> contain standard JSON. So if the request contains a parameter <code>?number=9</code> in the query then the event will contain <code>"queryStringParameters": {"number": "9"}</code> (note the string).</p>
 <p>The <code>body</code> of the event contains the data passed during a <code>POST</code> operation. It contains <em>stringified</em> JSON. That is, instead of <code>"body": {"number": 9}</code> we would see <code>"body": "{\"number\":9}"</code>.</p>
@@ -125,7 +121,7 @@
 
 <span class="co">## Formatting a result for an invocation via an API Gateway</span>
 <span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
     isBase64Encoded <span class="op">=</span> <span class="cn">FALSE</span>,
     statusCode <span class="op">=</span> <span class="fl">200L</span>,
     body <span class="op">=</span> <span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>
@@ -206,9 +202,9 @@
 <a class="sourceLine" id="cb2-72" title="72"><span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">false</span></a>
 <a class="sourceLine" id="cb2-73" title="73"><span class="fu">}</span></a></code></pre></div>
 </div>
-<div id="html-api-gateway-events" class="section level3">
-<h3 class="hasAnchor">
-<a href="#html-api-gateway-events" class="anchor"></a>HTML API Gateway events</h3>
+<div class="section level3">
+<h3 id="html-api-gateway-events">HTML API Gateway events<a class="anchor" aria-label="anchor" href="#html-api-gateway-events"></a>
+</h3>
 <p>HTML API Gateway events are similar to REST API Gateway events, except that the body is more likely to be Base64 encoded, and the query parameters are presented as string values. That is, we might expect to see a <code>rawQueryString</code> of “parameter1=value1&amp;parameter1=value2&amp;parameter2=value”. In this case however the <code>queryStringParameters</code> (if present) will be easier to work with:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><a class="sourceLine" id="cb3-1" title="1"><span class="er">"queryStringParameters":</span> <span class="fu">{</span></a>
 <a class="sourceLine" id="cb3-2" title="2">    <span class="dt">"parameter1"</span><span class="fu">:</span> <span class="st">"value1,value2"</span><span class="fu">,</span></a>
@@ -271,11 +267,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by David Neuzerling.</p>
+  <p></p>
+<p>Developed by David Neuzerling.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
@@ -283,6 +281,8 @@
 
   
 
+
+  
 
   </body>
 </html>

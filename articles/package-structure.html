@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,23 +33,17 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -76,7 +72,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/mdneuzerling/lambdr/">
+  <a href="https://github.com/mdneuzerling/lambdr/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -97,20 +93,20 @@
       <h1 data-toc-skip>Package Structure</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mdneuzerling/lambdr/blob/master/vignettes/package-structure.Rmd"><code>vignettes/package-structure.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mdneuzerling/lambdr/blob/HEAD/vignettes/package-structure.Rmd" class="external-link"><code>vignettes/package-structure.Rmd</code></a></small>
       <div class="hidden name"><code>package-structure.Rmd</code></div>
 
     </div>
 
     
     
-<div id="package-structure-and-operating-method" class="section level2">
-<h2 class="hasAnchor">
-<a href="#package-structure-and-operating-method" class="anchor"></a>Package structure and operating method</h2>
+<div class="section level2">
+<h2 id="package-structure-and-operating-method">Package structure and operating method<a class="anchor" aria-label="anchor" href="#package-structure-and-operating-method"></a>
+</h2>
 <p>This vignette provides an overview of how the package is structures and how the functions are used. It is intended for package developers and contributors.</p>
-<div id="runtime-endpoints" class="section level3">
-<h3 class="hasAnchor">
-<a href="#runtime-endpoints" class="anchor"></a>Runtime endpoints</h3>
+<div class="section level3">
+<h3 id="runtime-endpoints">Runtime endpoints<a class="anchor" aria-label="anchor" href="#runtime-endpoints"></a>
+</h3>
 <p>The runtime works by querying HTTP endpoints configured by AWS Lambda. These endpoints are determined by on the “AWS_LAMBDA_RUNTIME_API” environment variable set by AWS Lambda during initialisation. They generally won’t be available locally.</p>
 <ul>
 <li>The <strong>next invocation endpoint</strong> is the endpoint which R must query for the next input. R must send a <code>GET</code> request to this endpoint and will wait until either a response is received or the Lambda instance is shut down for inactivity. When AWS Lambda receives an input from, say, an API Gateway, it will respond to R’s request with details of the input. We call the response to this request an <em>invocation</em> in this document, and invocations are interpreted as <em>events</em>.</li>
@@ -120,9 +116,9 @@
 </ul>
 <p>The next invocation and initialisation error endpoints are unique in each Lambda instance. The response and invocation error endpoints are determined by the <code>request_id</code> associated with each invocation. The request ID is given in the “lambda-runtime-aws-request-id” header in the response to the query to the next invocation endpoint.</p>
 </div>
-<div id="handler-functions" class="section level3">
-<h3 class="hasAnchor">
-<a href="#handler-functions" class="anchor"></a>Handler functions</h3>
+<div class="section level3">
+<h3 id="handler-functions">Handler functions<a class="anchor" aria-label="anchor" href="#handler-functions"></a>
+</h3>
 <p>Every Lambda instance is centred around a single function which handles any inputs. The <em>handler function</em> is determined by an environment variable which can be configured in one of two ways:</p>
 <ul>
 <li>as the <code>CMD</code> to the Dockerfile which contains the runtime, or</li>
@@ -130,9 +126,9 @@
 </ul>
 <p>The <code>lambda_config</code> function (run as part of <code>start_lambda</code>) picks up on this environment variable and identifies the R function to which it refers. This handler function is used to process all invocations.</p>
 </div>
-<div id="event-classification-according-to-invocation" class="section level3">
-<h3 class="hasAnchor">
-<a href="#event-classification-according-to-invocation" class="anchor"></a>Event classification according to invocation</h3>
+<div class="section level3">
+<h3 id="event-classification-according-to-invocation">Event classification according to invocation<a class="anchor" aria-label="anchor" href="#event-classification-according-to-invocation"></a>
+</h3>
 <p>Events need to be handled differently depending upon whether they are invoked directly, by an API Gateway, etc. Events are classified according to their detected invocation method, with their invocation stored as an S3 class. The following functions dispatch on this class:</p>
 <ul>
 <li>
@@ -145,9 +141,9 @@
 <code>handle_event_error</code> deals with errors that occur during event handling. Some invocation types require errors to be formatted or handled in a very specific way.</li>
 </ul>
 </div>
-<div id="event-listening-lifecycle" class="section level3">
-<h3 class="hasAnchor">
-<a href="#event-listening-lifecycle" class="anchor"></a>Event listening lifecycle</h3>
+<div class="section level3">
+<h3 id="event-listening-lifecycle">Event listening lifecycle<a class="anchor" aria-label="anchor" href="#event-listening-lifecycle"></a>
+</h3>
 <p>The main function — <code>start_lambda</code> — accepts an optional configuration provided by <code>lambda_config</code>. The default configuration should suffice if the handler is configured in either the Dockerfile or the <em>AWS Lambda</em> console. It will then run the internal <code>start_listening</code> function.</p>
 <p>The <code>start_listening</code> function will augment the configuration with context extracted from the environment (using the <code>extract_context_from_environment</code> function). It will then set up an infinite loop that listens for <em>invocations</em>, interprets them as <em>events</em>, and processes them with the handler function.</p>
 <p>Specifically, <code>start_listening</code> triggers the listening loop, which consists of <code>wait_for_event</code> and <code>handle_event</code> (combined into <code>wait_for_and_handle_event</code>). Once a response (called an <em>invocation</em>) is sent to the request made in <code>wait_for_event</code>, it is <em>decomposed</em> into an <em>event</em>, and classified according to its (detected) invocation type.</p>
@@ -182,11 +178,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by David Neuzerling.</p>
+  <p></p>
+<p>Developed by David Neuzerling.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
@@ -194,6 +192,8 @@
 
   
 
+
+  
 
   </body>
 </html>

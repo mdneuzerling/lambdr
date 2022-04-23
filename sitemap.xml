@@ -1,7 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://lambdr.mdneuzerling.com/404.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/LICENSE-text.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/LICENSE.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/articles/api-gateway-invocations.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/articles/context.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/articles/eventbridge-and-sns-invocations.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/articles/lambda-runtime-in-container.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/articles/package-structure.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/authors.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/index.html</loc>
+  </url>
+  <url>
+    <loc>https://lambdr.mdneuzerling.com/news/index.html</loc>
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/as_json.html</loc>
@@ -64,6 +97,9 @@
     <loc>https://lambdr.mdneuzerling.com/reference/html_response.html</loc>
   </url>
   <url>
+    <loc>https://lambdr.mdneuzerling.com/reference/index.html</loc>
+  </url>
+  <url>
     <loc>https://lambdr.mdneuzerling.com/reference/is_eventbridge_event_content.html</loc>
   </url>
   <url>
@@ -122,20 +158,5 @@
   </url>
   <url>
     <loc>https://lambdr.mdneuzerling.com/reference/wait_for_event.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/api-gateway-invocations.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/context.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/eventbridge-and-sns-invocations.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/lambda-runtime-in-container.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/package-structure.html</loc>
   </url>
 </urlset>
