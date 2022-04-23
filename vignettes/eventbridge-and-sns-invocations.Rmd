@@ -2,7 +2,7 @@
 title: "EventBridge and SNS Invocations"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{eventbridge-and-sns-events}
+  %\VignetteIndexEntry{EventBridge and SNS Invocations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

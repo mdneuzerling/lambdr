@@ -6,6 +6,9 @@ reference:
     accepts a configuration provided by `lambda_config`.
   contents:
     - start_lambda
+- title: "About lambdr"
+  contents:
+    - lambdr
 - title: "Lambda configuration"
   desc: >
     The `start_lambda` function accepts a configuration object provided by

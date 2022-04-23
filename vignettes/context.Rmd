@@ -2,7 +2,7 @@
 title: "Using invocation context"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{context}
+  %\VignetteIndexEntry{Using invocation context}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

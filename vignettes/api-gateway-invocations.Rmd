@@ -2,7 +2,7 @@
 title: "API Gateway Invocations"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{api-gateway-invocations}
+  %\VignetteIndexEntry{API Gateway Invocations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

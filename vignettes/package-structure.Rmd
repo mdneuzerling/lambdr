@@ -2,7 +2,7 @@
 title: "Package Structure"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{package-structure}
+  %\VignetteIndexEntry{Package Structure}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

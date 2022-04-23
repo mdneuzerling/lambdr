@@ -2,7 +2,7 @@
 title: "Placing an R Lambda Runtime in a Container"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{lambda-runtime-in-container}
+  %\VignetteIndexEntry{Placing an R Lambda Runtime in a Container}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
