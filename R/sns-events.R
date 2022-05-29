@@ -8,7 +8,7 @@
 #' @return logical
 #' @keywords internal
 is_sns_event_content <- function(event_content) {
-  grepl('"EventSource":"aws:sns"', event_content)
+  grepl('"EventSource": "aws:sns"', event_content)
 }
 
 #' @export

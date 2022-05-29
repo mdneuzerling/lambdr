@@ -1,3 +1,8 @@
+# lambdr 1.2.1
+
+* Fixed a bug that was preventing `lambdr` from identifying events coming from
+  AWS SNS.
+
 # lambdr 1.2.0
 
 * Added `html_response` for sending bespoke responses to API Gateways.

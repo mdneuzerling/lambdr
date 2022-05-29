@@ -11,7 +11,7 @@ test_that("SNS events are detected", {
     is_sns_event_content(
       as_stringified_json(
         list(EventSource = "aws:sns"),
-        pretty = FALSE
+        pretty = TRUE
       )
     )
   )
