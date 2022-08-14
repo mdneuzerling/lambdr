@@ -41,7 +41,9 @@ A stringified JSON response for an API Gateway, with the
 }
 \description{
 Lambdas behind API Gateways need to send specially formatted responses that
-look like this:\if{html}{\out{<div class="sourceCode json">}}\preformatted{\{
+look like this:
+
+\if{html}{\out{<div class="sourceCode json">}}\preformatted{\{
   "statusCode": 200,
   "headers": \{
     "Content-Type": "application/json"
