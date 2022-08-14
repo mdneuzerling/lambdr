@@ -1,3 +1,7 @@
+# lambdr 1.2.2
+
+* Removed all `center` attributes in `<img>` tags, in line with new CRAN policy.
+
 # lambdr 1.2.1
 
 * Fixed a bug that was preventing `lambdr` from identifying events coming from

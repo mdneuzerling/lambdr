@@ -1,7 +1,7 @@
 #' lambdr: Create a Runtime for Serving Containerised R Functions on AWS Lambda
 #'
 #' @description
-#' \if{html}{\figure{lambdr.png}{options: align='right' alt='logo' width='150'}}
+#' \if{html}{\figure{lambdr.png}{options: alt='logo' width='150'}}
 #'
 #' This package provides an R runtime for the
 #' \href{https://aws.amazon.com/lambda/}{_AWS Lambda_ serverless compute

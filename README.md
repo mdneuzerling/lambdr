@@ -1,4 +1,4 @@
-# lambdr <img src="man/figures/lambdr.png" align="right" height="200" />
+# lambdr <img src="man/figures/lambdr.png" height="200" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/mdneuzerling/lambdr/workflows/R-CMD-check/badge.svg)](https://github.com/mdneuzerling/lambdr/actions)
@@ -41,11 +41,11 @@ to the handler function. Refer to `?lambda_config` for more information.
 
  invocation type | implementation stage
 |:---------------|:---------------------|
- direct | <img src="man/figures/lifecycle-stable.svg" align="center"/>
- API Gateway (REST) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
- API Gateway (HTML) | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
- EventBridge | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
- SNS | <img src="man/figures/lifecycle-experimental.svg" align="center"/>
+ direct | <img src="man/figures/lifecycle-stable.svg"/>
+ API Gateway (REST) | <img src="man/figures/lifecycle-experimental.svg"/>
+ API Gateway (HTML) | <img src="man/figures/lifecycle-experimental.svg"/>
+ EventBridge | <img src="man/figures/lifecycle-experimental.svg"/>
+ SNS | <img src="man/figures/lifecycle-experimental.svg"/>
 
 ## Installation
 
