@@ -16,7 +16,9 @@ According to the
 \href{https://docs.aws.amazon.com/lambda/latest/dg/lambda-dg.pdf}{AWS Lambda
 Developer Guide} an error posted to the initialisation or invocation error
 endpoints must be of content type \code{application/vnd.aws.lambda.error+json}
-and of the format:\if{html}{\out{<div class="sourceCode json">}}\preformatted{\{
+and of the format:
+
+\if{html}{\out{<div class="sourceCode json">}}\preformatted{\{
   "errorMessage": "...",
   "errorType": "...",
   "stackTrace": [],

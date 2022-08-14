@@ -2,6 +2,8 @@
 
 * Fixed a bug that was preventing `lambdr` from identifying events coming from
   AWS SNS.
+* Default to the `formatter_paste` log formatter instead of `formatter_glue`, 
+  which can cause issues when logging JSON objects.
 
 # lambdr 1.2.0
 

@@ -41,6 +41,13 @@
 #' }
 start_lambda <- function(config = lambda_config(environ = parent.frame()),
                          timeout_seconds = NULL) {
+
+  # We're logging JSONs, which means lots of braces. The glue formatter won't
+  # work here.
+  if (identical(logger::log_formatter(), parse(text = "formatter_glue")[[1]])) {
+    logger::log_formatter(logger::formatter_paste)
+  }
+
   start_listening(
     config = config,
     timeout_seconds = timeout_seconds
