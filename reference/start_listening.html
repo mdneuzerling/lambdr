@@ -75,7 +75,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">start_listening</span><span class="op">(</span>config <span class="op">=</span> <span class="fu"><a href="lambda_config.html">lambda_config</a></span><span class="op">(</span><span class="op">)</span>, timeout_seconds <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">start_listening</span><span class="op">(</span>config <span class="op">=</span> <span class="fu"><a href="lambda_config.html">lambda_config</a></span><span class="op">(</span><span class="op">)</span>, timeout_seconds <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -83,12 +83,15 @@
     <dl><dt>config</dt>
 <dd><p>A list of configuration values as created by the
 <code>lambda_config</code> function.</p></dd>
+
+
 <dt>timeout_seconds</dt>
 <dd><p>If set, the function will stop listening for events
 after this timeout. The timeout is checked between events, so this won't
 interrupt the function while it is waiting for a new event. This argument
 is provided for testing purposes, and shouldn't otherwise need to be set:
 AWS should handle the shutdown of idle Lambda instances.</p></dd>
+
 </dl></div>
 
   </div>
@@ -103,7 +106,7 @@ AWS should handle the shutdown of idle Lambda instances.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

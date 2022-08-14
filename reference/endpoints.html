@@ -122,13 +122,13 @@ recalculated for each event. The request ID is given in the
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_next_invocation_endpoint</span><span class="op">(</span><span class="va">config</span>, <span class="va">runtime_api</span><span class="op">)</span>
-
-<span class="fu">get_initialisation_error_endpoint</span><span class="op">(</span><span class="va">config</span>, <span class="va">runtime_api</span><span class="op">)</span>
-
-<span class="fu">get_response_endpoint</span><span class="op">(</span><span class="va">config</span>, <span class="va">request_id</span><span class="op">)</span>
-
-<span class="fu">get_invocation_error_endpoint</span><span class="op">(</span><span class="va">config</span>, <span class="va">request_id</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_next_invocation_endpoint</span><span class="op">(</span><span class="va">config</span>, <span class="va">runtime_api</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">get_initialisation_error_endpoint</span><span class="op">(</span><span class="va">config</span>, <span class="va">runtime_api</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">get_response_endpoint</span><span class="op">(</span><span class="va">config</span>, <span class="va">request_id</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">get_invocation_error_endpoint</span><span class="op">(</span><span class="va">config</span>, <span class="va">request_id</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -138,15 +138,20 @@ recalculated for each event. The request ID is given in the
 <code><a href="lambda_config.html">lambda_config</a></code> function. Alternatively, a runtime API host can
 be provided directly. This would be the case if there's not enough
 information available to build a full configuration object due to an error.</p></dd>
+
+
 <dt>request_id</dt>
 <dd><p>For <code>get_response_endpoint</code> and
 <code>get_invocation_error_endpoint</code>, the ID of the particular event/request.
 This is provided in the "lambda-runtime-aws-request-id" header of the
 event.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>character</p>
+    
+
+<p>character</p>
     </div>
 
   </div>
@@ -161,7 +166,7 @@ event.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

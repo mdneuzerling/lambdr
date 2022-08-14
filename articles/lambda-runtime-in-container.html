@@ -102,21 +102,21 @@
     
 <p>Consider the following <code>runtime.R</code> file:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">parity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>parity <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="st">"even"</span> <span class="kw">else</span> <span class="st">"odd"</span><span class="op">)</span>
-<span class="op">}</span>
-
-<span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="../reference/start_lambda.html">start_lambda</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">parity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>parity <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="st">"even"</span> <span class="kw">else</span> <span class="st">"odd"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="../reference/start_lambda.html">start_lambda</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>parity</code> function accepts a <code>number</code> argument and returns its parity as a named list, for example:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">parity</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>
-<span class="co"># $parity</span>
-<span class="co"># [1] "odd"</span>
-
-
-<span class="fu">parity</span><span class="op">(</span><span class="fl">8</span><span class="op">)</span>
-<span class="co"># $parity</span>
-<span class="co"># [1] "even"</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">parity</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co"># $parity</span></span>
+<span><span class="co"># [1] "odd"</span></span>
+<span></span>
+<span></span>
+<span><span class="fu">parity</span><span class="op">(</span><span class="fl">8</span><span class="op">)</span></span>
+<span><span class="co"># $parity</span></span>
+<span><span class="co"># [1] "even"</span></span></code></pre></div>
 <p>This function can then be placed into a Docker image. An <strong>example</strong> is provided below, but the key components are:</p>
 <ul>
 <li>Start from the <code>public.ecr.aws/lambda/provided</code> parent image, which provides the basic components necessary to serve a Lambda</li>
@@ -182,7 +182,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

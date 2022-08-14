@@ -81,10 +81,10 @@ provided to the <code>config</code> argument and produced by the
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">start_lambda</span><span class="op">(</span>
-  config <span class="op">=</span> <span class="fu"><a href="lambda_config.html">lambda_config</a></span><span class="op">(</span>environ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,
-  timeout_seconds <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">start_lambda</span><span class="op">(</span></span>
+<span>  config <span class="op">=</span> <span class="fu"><a href="lambda_config.html">lambda_config</a></span><span class="op">(</span>environ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  timeout_seconds <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -92,12 +92,15 @@ provided to the <code>config</code> argument and produced by the
     <dl><dt>config</dt>
 <dd><p>A list of configuration values as created by the
 <code>lambda_config</code> function.</p></dd>
+
+
 <dt>timeout_seconds</dt>
 <dd><p>If set, the function will stop listening for events
 after this timeout. The timeout is checked between events, so this won't
 interrupt the function while it is waiting for a new event. This argument
 is provided for testing purposes, and shouldn't otherwise need to be set:
 AWS should handle the shutdown of idle Lambda instances.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -152,24 +155,24 @@ debugging and testing purposes.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># A general usage pattern involves sourcing necessary functions and running</span></span>
-<span class="r-in"><span class="co"># this `start_lambda` in a `runtime.R` file which is then executed to start</span></span>
-<span class="r-in"><span class="co"># the runtime. In the following example, the function handler can be set to</span></span>
-<span class="r-in"><span class="co"># "lambda" either as the container `CMD`, or configured through AWS Lambda.</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">parity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>parity <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="st">"even"</span> <span class="kw">else</span> <span class="st">"odd"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">start_lambda</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Alternatively, it can be passed as an argument `handler = parity` to</span></span>
-<span class="r-in"><span class="co"># the lambda configuration. If the handler is configured through other means</span></span>
-<span class="r-in"><span class="co"># then this will be ignored:</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">start_lambda</span><span class="op">(</span>config <span class="op">=</span> <span class="fu"><a href="lambda_config.html">lambda_config</a></span><span class="op">(</span>handler <span class="op">=</span> <span class="va">parity</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># A general usage pattern involves sourcing necessary functions and running</span></span></span>
+<span class="r-in"><span><span class="co"># this `start_lambda` in a `runtime.R` file which is then executed to start</span></span></span>
+<span class="r-in"><span><span class="co"># the runtime. In the following example, the function handler can be set to</span></span></span>
+<span class="r-in"><span><span class="co"># "lambda" either as the container `CMD`, or configured through AWS Lambda.</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">parity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>parity <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="st">"even"</span> <span class="kw">else</span> <span class="st">"odd"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">start_lambda</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Alternatively, it can be passed as an argument `handler = parity` to</span></span></span>
+<span class="r-in"><span><span class="co"># the lambda configuration. If the handler is configured through other means</span></span></span>
+<span class="r-in"><span><span class="co"># then this will be ignored:</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">start_lambda</span><span class="op">(</span>config <span class="op">=</span> <span class="fu"><a href="lambda_config.html">lambda_config</a></span><span class="op">(</span>handler <span class="op">=</span> <span class="va">parity</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -184,7 +187,7 @@ debugging and testing purposes.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

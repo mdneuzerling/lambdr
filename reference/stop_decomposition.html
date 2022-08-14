@@ -99,9 +99,9 @@ as a value to the <code>tryCatch</code> <code>error</code> argument.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">stop_decomposition</span><span class="op">(</span><span class="va">...</span>, request_id <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
-
-<span class="fu">handle_decomposition_error</span><span class="op">(</span><span class="va">config</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">stop_decomposition</span><span class="op">(</span><span class="va">...</span>, request_id <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">handle_decomposition_error</span><span class="op">(</span><span class="va">config</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -109,10 +109,13 @@ as a value to the <code>tryCatch</code> <code>error</code> argument.</p>
     <dl><dt>...</dt>
 <dd><p>zero or more objects which can be coerced to character (and which
 are pasted together with no separator). This forms the error message.</p></dd>
+
+
 <dt>request_id</dt>
 <dd><p>character. Used in error handling during event
 decomposition, when it's possible that a request ID might be known but the
 event hasn't been fully examined yet.</p></dd>
+
 </dl></div>
 
   </div>
@@ -127,7 +130,7 @@ event hasn't been fully examined yet.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

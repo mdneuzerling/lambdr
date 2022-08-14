@@ -116,17 +116,17 @@
 <p>Stringified JSON can be produced with the <code>as_stringified_json</code> helper function which wraps <code>jsonlite</code>’s  function. There is a slight difference in behaviour, as this function also automatically unboxes singleton values and also represents <code>NULL</code>s as JSON <code>nulls</code> — a convention that is used by the event body provided by AWS Lambda.</p>
 <p>When the result is calculated and ready to be sent back to the AWS Lambda response endpoint it must be formatted in a very specific way in order to be compatible with the API Gateway. The correct format is as below, with the <code>body</code> containing the <em>stringified</em> JSON representation of the result. This is given as an R list which is then converted to stringified JSON. Compare this to the representation of the result for a direct invocation:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Formatting a result for a direct invocation</span>
-<span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>
-
-<span class="co">## Formatting a result for an invocation via an API Gateway</span>
-<span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    isBase64Encoded <span class="op">=</span> <span class="cn">FALSE</span>,
-    statusCode <span class="op">=</span> <span class="fl">200L</span>,
-    body <span class="op">=</span> <span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co">## Formatting a result for a direct invocation</span></span>
+<span><span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Formatting a result for an invocation via an API Gateway</span></span>
+<span><span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    isBase64Encoded <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    statusCode <span class="op">=</span> <span class="fl">200L</span>,</span>
+<span>    body <span class="op">=</span> <span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Here is an example event content from an invocation that is coming via an API Gateway. The invocation is a call to a <code>parity</code> function with an argument <code>number = 9</code>. Some information has been censored.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><a class="sourceLine" id="cb2-1" title="1"><span class="fu">{</span></a>
 <a class="sourceLine" id="cb2-2" title="2"><span class="dt">"resource"</span><span class="fu">:</span> <span class="st">"/parity"</span><span class="fu">,</span></a>
@@ -273,7 +273,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

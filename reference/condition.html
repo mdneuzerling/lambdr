@@ -79,7 +79,7 @@ conditions."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">condition</span><span class="op">(</span><span class="va">subclass</span>, <span class="va">...</span>, code <span class="op">=</span> <span class="fl">500L</span>, request_id <span class="op">=</span> <span class="cn">NULL</span>, call <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">sys.call</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">condition</span><span class="op">(</span><span class="va">subclass</span>, <span class="va">...</span>, code <span class="op">=</span> <span class="fl">500L</span>, request_id <span class="op">=</span> <span class="cn">NULL</span>, call <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">sys.call</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -87,19 +87,28 @@ conditions."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
     <dl><dt>subclass</dt>
 <dd><p>conditions returned by this function will be of the class
 <code>c(subclass, "simpleError", "error", "condition")</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>zero or more objects which can be coerced to character (and which
 are pasted together with no separator). This forms the error message.</p></dd>
+
+
 <dt>code</dt>
 <dd><p>HTTP status code to return (if applicable). Defaults to <code>500</code>,
 which is a generic "Internal Server Error". This is used when errors are to
 be returned to an API Gateway.</p></dd>
+
+
 <dt>request_id</dt>
 <dd><p>character. Used in error handling during event
 decomposition, when it's possible that a request ID might be known but the
 event hasn't been fully examined yet.</p></dd>
+
+
 <dt>call</dt>
 <dd><p>call expression</p></dd>
+
 </dl></div>
 
   </div>
@@ -114,7 +123,7 @@ event hasn't been fully examined yet.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

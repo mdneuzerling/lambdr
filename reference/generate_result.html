@@ -75,7 +75,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">generate_result</span><span class="op">(</span><span class="va">event</span>, config <span class="op">=</span> <span class="fu"><a href="lambda_config.html">lambda_config</a></span><span class="op">(</span><span class="op">)</span>, deserialiser <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_result</span><span class="op">(</span><span class="va">event</span>, config <span class="op">=</span> <span class="fu"><a href="lambda_config.html">lambda_config</a></span><span class="op">(</span><span class="op">)</span>, deserialiser <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -83,13 +83,18 @@
     <dl><dt>event</dt>
 <dd><p>the response received from querying the next invocation
 endpoint.</p></dd>
+
+
 <dt>config</dt>
 <dd><p>A list of configuration values as created by the
 <code>lambda_config</code> function.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class the same as <code>event</code>. The object contains a
+    
+
+<p>An object of class the same as <code>event</code>. The object contains a
 <code>result</code> value, and the <code>result_calculated</code> attribute is set to <code>TRUE</code>.</p>
     </div>
 
@@ -105,7 +110,7 @@ endpoint.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
