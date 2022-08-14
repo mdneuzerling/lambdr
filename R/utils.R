@@ -184,7 +184,7 @@ mark_as_already_serialised <- function(x) {
 #'   \code{\link{as_stringified_json}} function.
 #' @param is_base64 logical which indicates if `body` is Base64 encoded.
 #'   Defaults to False.
-#' @param status_code intger status code of the response. Defaults to `200L`
+#' @param status_code integer status code of the response. Defaults to `200L`
 #'   (OK).
 #' @param content_type MIME type for the content. This will be appended to the
 #'   headers (as "Content-Type"), unless such a value is already provided to

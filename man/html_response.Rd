@@ -21,7 +21,7 @@ stringified, that is, it should be a string of a JSON. Consider using the
 \item{is_base64}{logical which indicates if \code{body} is Base64 encoded.
 Defaults to False.}
 
-\item{status_code}{intger status code of the response. Defaults to \code{200L}
+\item{status_code}{integer status code of the response. Defaults to \code{200L}
 (OK).}
 
 \item{content_type}{MIME type for the content. This will be appended to the
