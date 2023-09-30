@@ -28,7 +28,7 @@ extract_context_from_environment <- function() {
 #'
 #' @inheritParams handle_event
 #' @inheritParams validate_lambda_config
-#' @param ...additional arguments passed to \code{\link{extract_context}}
+#' @param ... additional arguments passed to \code{\link{extract_context}}
 #'
 #' @inheritSection extract_context Event context
 #'
