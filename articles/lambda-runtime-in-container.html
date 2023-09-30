@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.3</span>
       </span>
     </div>
 
@@ -87,7 +87,7 @@
 
       
 
-      </header><div class="row">
+      </header><script src="lambda-runtime-in-container_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Placing an R Lambda Runtime in a Container</h1>
@@ -125,46 +125,46 @@
 <li>Generate a simple bootstrap which runs <code>runtime.R</code> with R</li>
 <li>Set the handler as the <code>CMD</code>. The <code>lambdr</code> package interprets the handler as the name of the function to use, in this case, “parity”. The <code>CMD</code> can also be set (or overriden) when setting up the Lambda in AWS.</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">FROM</span> public.ecr.aws/lambda/provided</a>
-<a class="sourceLine" id="cb3-2" title="2"></a>
-<a class="sourceLine" id="cb3-3" title="3"><span class="kw">ENV</span> R_VERSION=4.0.3</a>
-<a class="sourceLine" id="cb3-4" title="4"></a>
-<a class="sourceLine" id="cb3-5" title="5"><span class="kw">RUN</span> yum -y install wget git tar</a>
-<a class="sourceLine" id="cb3-6" title="6"></a>
-<a class="sourceLine" id="cb3-7" title="7"><span class="kw">RUN</span> yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \</a>
-<a class="sourceLine" id="cb3-8" title="8">  &amp;&amp; wget https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \</a>
-<a class="sourceLine" id="cb3-9" title="9">  &amp;&amp; yum -y install R-${R_VERSION}-1-1.x86_64.rpm \</a>
-<a class="sourceLine" id="cb3-10" title="10">  &amp;&amp; rm R-${R_VERSION}-1-1.x86_64.rpm</a>
-<a class="sourceLine" id="cb3-11" title="11"></a>
-<a class="sourceLine" id="cb3-12" title="12"><span class="kw">ENV</span> PATH=<span class="st">"${PATH}:/opt/R/${R_VERSION}/bin/"</span></a>
-<a class="sourceLine" id="cb3-13" title="13"></a>
-<a class="sourceLine" id="cb3-14" title="14"><span class="co"># System requirements for R packages</span></a>
-<a class="sourceLine" id="cb3-15" title="15"><span class="kw">RUN</span> yum -y install openssl-devel</a>
-<a class="sourceLine" id="cb3-16" title="16"></a>
-<a class="sourceLine" id="cb3-17" title="17"><span class="kw">RUN</span> Rscript -e <span class="st">"install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"</span></a>
-<a class="sourceLine" id="cb3-18" title="18"><span class="kw">RUN</span> Rscript -e <span class="st">"remotes::install_github('mdneuzerling/lambdr')"</span></a>
-<a class="sourceLine" id="cb3-19" title="19"></a>
-<a class="sourceLine" id="cb3-20" title="20"><span class="kw">RUN</span> mkdir /lambda</a>
-<a class="sourceLine" id="cb3-21" title="21"><span class="kw">COPY</span> runtime.R /lambda</a>
-<a class="sourceLine" id="cb3-22" title="22"><span class="kw">RUN</span> chmod 755 -R /lambda</a>
-<a class="sourceLine" id="cb3-23" title="23"></a>
-<a class="sourceLine" id="cb3-24" title="24"><span class="kw">RUN</span> printf <span class="st">'#!/bin/sh\ncd /lambda\nRscript runtime.R'</span> &gt; /var/runtime/bootstrap \</a>
-<a class="sourceLine" id="cb3-25" title="25">  &amp;&amp; chmod +x /var/runtime/bootstrap</a>
-<a class="sourceLine" id="cb3-26" title="26"></a>
-<a class="sourceLine" id="cb3-27" title="27"><span class="kw">CMD</span> [<span class="st">"parity"</span>]</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">FROM</span> public.ecr.aws/lambda/provided</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a><span class="kw">ENV</span> R_VERSION=4.0.3</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a><span class="kw">RUN</span> yum -y install wget git tar</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a><span class="kw">RUN</span> yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a>  &amp;&amp; wget https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a>  &amp;&amp; yum -y install R-${R_VERSION}-1-1.x86_64.rpm \</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a>  &amp;&amp; rm R-${R_VERSION}-1-1.x86_64.rpm</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a><span class="kw">ENV</span> PATH=<span class="st">"${PATH}:/opt/R/${R_VERSION}/bin/"</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true"></a><span class="co"># System requirements for R packages</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true"></a><span class="kw">RUN</span> yum -y install openssl-devel</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true"></a><span class="kw">RUN</span> Rscript -e <span class="st">"install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true"></a><span class="kw">RUN</span> Rscript -e <span class="st">"remotes::install_github('mdneuzerling/lambdr')"</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true"></a><span class="kw">RUN</span> mkdir /lambda</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true"></a><span class="kw">COPY</span> runtime.R /lambda</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true"></a><span class="kw">RUN</span> chmod 755 -R /lambda</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true"></a><span class="kw">RUN</span> printf <span class="st">'#!/bin/sh\ncd /lambda\nRscript runtime.R'</span> &gt; /var/runtime/bootstrap \</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true"></a>  &amp;&amp; chmod +x /var/runtime/bootstrap</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true"></a><span class="kw">CMD</span> [<span class="st">"parity"</span>]</span></code></pre></div>
 <p>The image is built and uploaded to AWS Elastic Container Registry (ECR). First, a repository is created:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb4-1" title="1"><span class="ex">aws</span> ecr create-repository --repository-name parity-lambda --image-scanning-configuration scanOnPush=true</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="ex">aws</span> ecr create-repository --repository-name parity-lambda --image-scanning-configuration scanOnPush=true</span></code></pre></div>
 <p>This provides a URI, the resource identifier of the created repository. The image can now be pushed:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb5-1" title="1"><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest <span class="dt">{URI}</span>/parity-lambda:latest</a>
-<a class="sourceLine" id="cb5-2" title="2"><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login --username AWS --password-stdin <span class="dt">{URI}</span></a>
-<a class="sourceLine" id="cb5-3" title="3"><span class="ex">docker</span> push <span class="dt">{URI}</span>/parity-lambda:latest</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest <span class="dt">{URI}</span>/parity-lambda:latest</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login --username AWS --password-stdin <span class="dt">{URI}</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a><span class="ex">docker</span> push <span class="dt">{URI}</span>/parity-lambda:latest</span></code></pre></div>
 <p>In either the AWS console or the command line, a Lambda can be created from this image. Call the Lambda “parity” to match the function name. Tests can be executed within the console. Alternatively the Lambda can be invoked from the CLI:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb6-1" title="1"><span class="ex">aws</span> lambda invoke --function-name parity \</a>
-<a class="sourceLine" id="cb6-2" title="2">  --invocation-type RequestResponse --payload <span class="st">'{"number": 8}'</span> \</a>
-<a class="sourceLine" id="cb6-3" title="3">  /tmp/response.json --cli-binary-format raw-in-base64-out</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="ex">aws</span> lambda invoke --function-name parity <span class="kw">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>  <span class="ex">--invocation-type</span> RequestResponse --payload <span class="st">'{"number": 8}'</span> <span class="kw">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>  <span class="ex">/tmp/response.json</span> --cli-binary-format raw-in-base64-out</span></code></pre></div>
 <p>The output is now available in the generated file:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" title="1"><span class="fu">cat</span> /tmp/response.json            </a></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" title="1"><span class="dt">{"parity":"even"}</span></a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="fu">cat</span> /tmp/response.json            </span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="dt">{"parity":"even"}</span></span></code></pre></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -182,7 +182,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

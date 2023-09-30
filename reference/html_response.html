@@ -39,7 +39,7 @@ be returned to the API Gateway without further serialisation.'><!-- mathjax --><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">lambdr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.3</span>
       </span>
     </div>
 
@@ -88,21 +88,21 @@ be returned to the API Gateway without further serialisation.'><!-- mathjax --><
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Prepare a HTML response for a Lambda behind an API Gateway</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mdneuzerling/lambdr/blob/HEAD/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mdneuzerling/lambdr/blob/HEAD/R/utils-html.R" class="external-link"><code>R/utils-html.R</code></a></small>
     <div class="hidden name"><code>html_response.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>Lambdas behind API Gateways need to send specially formatted responses that
 look like this:</p>
-<p></p><div class="sourceCode json"><pre><code><a class="sourceLine" id="cb1-1" title="1"><span class="fu">{</span></a>
-<a class="sourceLine" id="cb1-2" title="2">  <span class="dt">"statusCode"</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span></a>
-<a class="sourceLine" id="cb1-3" title="3">  <span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></a>
-<a class="sourceLine" id="cb1-4" title="4">    <span class="dt">"Content-Type"</span><span class="fu">:</span> <span class="st">"application/json"</span></a>
-<a class="sourceLine" id="cb1-5" title="5">  <span class="fu">},</span></a>
-<a class="sourceLine" id="cb1-6" title="6">  <span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></a>
-<a class="sourceLine" id="cb1-7" title="7">  <span class="dt">"body"</span><span class="fu">:</span> <span class="st">"{</span><span class="ch">\"</span><span class="st">best_animal</span><span class="ch">\"</span><span class="st">: </span><span class="ch">\"</span><span class="st">corgi</span><span class="ch">\"</span><span class="st">}"</span></a>
-<a class="sourceLine" id="cb1-8" title="8"><span class="fu">}</span></a></code></pre><p></p></div>
+<p></p><div class="sourceCode json"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a>  <span class="dt">"statusCode"</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>  <span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>    <span class="dt">"Content-Type"</span><span class="fu">:</span> <span class="st">"application/json"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  <span class="fu">},</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  <span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>  <span class="dt">"body"</span><span class="fu">:</span> <span class="st">"{</span><span class="ch">\"</span><span class="st">best_animal</span><span class="ch">\"</span><span class="st">: </span><span class="ch">\"</span><span class="st">corgi</span><span class="ch">\"</span><span class="st">}"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a><span class="fu">}</span></span></code></pre><p></p></div>
 <p>For basic applications where the handler function is returning a simple
 result, <code>lambdr</code> will do its best to automatically return a result compatible
 with API Gateways. It will do this whenever an event is detected as having
@@ -142,7 +142,7 @@ Defaults to False.</p></dd>
 
 
 <dt>status_code</dt>
-<dd><p>intger status code of the response. Defaults to <code>200L</code>
+<dd><p>integer status code of the response. Defaults to <code>200L</code>
 (OK).</p></dd>
 
 
@@ -204,7 +204,7 @@ ignored.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
