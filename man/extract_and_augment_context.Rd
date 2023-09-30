@@ -13,7 +13,7 @@ endpoint.}
 \item{config}{A list of configuration values as created by the
 \code{lambda_config} function.}
 
-\item{...additional}{arguments passed to \code{\link{extract_context}}}
+\item{...}{additional arguments passed to \code{\link{extract_context}}}
 }
 \value{
 list

@@ -1,3 +1,7 @@
+# lambdr 1.2.4
+
+* Fixed incorrect argument name in internal documentation.
+
 # lambdr 1.2.3
 
 * Removed all verbatim chunks (marked by three backticks) in help docs, to meet
