@@ -1,4 +1,4 @@
-# lambdr <img src="man/figures/lambdr.png" height="200" />
+# lambdr <img src="man/figures/lambdr.png" style="height:200px;" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/mdneuzerling/lambdr/workflows/R-CMD-check/badge.svg)](https://github.com/mdneuzerling/lambdr/actions)

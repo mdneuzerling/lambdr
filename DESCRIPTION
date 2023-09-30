@@ -1,6 +1,6 @@
 Package: lambdr
 Title: Create a Runtime for Serving Containerised R Functions on 'AWS Lambda'
-Version: 1.2.2
+Version: 1.2.3
 Authors@R: 
     c(person(given = "David",
              family = "Neuzerling",
@@ -17,7 +17,7 @@ Description: Runtime for serving containers that can execute R code on the
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Imports: 
     httr,
     jsonlite,

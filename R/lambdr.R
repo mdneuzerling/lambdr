@@ -57,6 +57,4 @@
 #' `r lifecycle::badge('experimental')`
 #' \code{vignette("eventbridge-and-sns-invocations", package = "lambdr")}
 #'
-#' @docType package
-#' @name lambdr
-NULL
+"_PACKAGE"

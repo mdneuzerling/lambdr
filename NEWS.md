@@ -1,3 +1,9 @@
+# lambdr 1.2.3
+
+* Removed all verbatim chunks (marked by three backticks) in help docs, to meet
+  new CRAN requirements.
+* Documented package with "_PACKAGE" sentinel to meet new CRAN requirements.
+
 # lambdr 1.2.2
 
 * Removed all `center` attributes in `<img>` tags, in line with new CRAN policy.
