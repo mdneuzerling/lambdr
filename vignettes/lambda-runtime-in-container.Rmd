@@ -40,14 +40,14 @@ parity(8)
 
 This function can then be placed into a Docker image. An **example** is provided below, but the key components are:
 
-* Start from the `public.ecr.aws/lambda/provided` parent image, which provides the basic components necessary to serve a Lambda
+* Start from the `public.ecr.aws/lambda/provided:al2` parent image, which provides the basic components necessary to serve a Lambda
 * Install R and dependencies, both system dependencies and R packages, including the `lambdr` package
 * Copy across `runtime.R` and any other necessary files
 * Generate a simple bootstrap which runs `runtime.R` with R
 * Set the handler as the `CMD`. The `lambdr` package interprets the handler as the name of the function to use, in this case, "parity". The `CMD` can also be set (or overriden) when setting up the Lambda in AWS.
 
 ```dockerfile
-FROM public.ecr.aws/lambda/provided
+FROM public.ecr.aws/lambda/provided:al2
 
 ENV R_VERSION=4.0.3
 
