@@ -119,13 +119,13 @@
 <span><span class="co"># [1] "even"</span></span></code></pre></div>
 <p>This function can then be placed into a Docker image. An <strong>example</strong> is provided below, but the key components are:</p>
 <ul>
-<li>Start from the <code>public.ecr.aws/lambda/provided</code> parent image, which provides the basic components necessary to serve a Lambda</li>
+<li>Start from the <code>public.ecr.aws/lambda/provided:al2</code> parent image, which provides the basic components necessary to serve a Lambda</li>
 <li>Install R and dependencies, both system dependencies and R packages, including the <code>lambdr</code> package</li>
 <li>Copy across <code>runtime.R</code> and any other necessary files</li>
 <li>Generate a simple bootstrap which runs <code>runtime.R</code> with R</li>
 <li>Set the handler as the <code>CMD</code>. The <code>lambdr</code> package interprets the handler as the name of the function to use, in this case, “parity”. The <code>CMD</code> can also be set (or overriden) when setting up the Lambda in AWS.</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">FROM</span> public.ecr.aws/lambda/provided</span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">FROM</span> public.ecr.aws/lambda/provided:al2</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a><span class="kw">ENV</span> R_VERSION=4.0.3</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a></span>
