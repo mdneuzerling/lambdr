@@ -1,3 +1,7 @@
+# lambdr 1.2.5
+
+* Update docs to include information on Docker tags.
+
 # lambdr 1.2.4
 
 * Fixed incorrect argument name in internal documentation.
