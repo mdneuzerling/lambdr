@@ -175,7 +175,7 @@
 <li>Generate a simple bootstrap which runs <code>runtime.R</code> with R</li>
 <li>Set the handler as the <code>CMD</code>. The <code>lambdr</code> package interprets the handler as the name of the function to use, in this case, “parity”. The <code>CMD</code> can also be set (or overriden) when setting up the Lambda in AWS.</li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">FROM</span> public.ecr.aws/lambda/provided:al2</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">FROM</span> public.ecr.aws/lambda/provided:al2-x86_64</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a><span class="kw">ENV</span> R_VERSION=4.0.3</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a></span>
@@ -206,9 +206,10 @@
 <p>The image is built and uploaded to AWS Elastic Container Registry (ECR). First, a repository is created:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="ex">aws</span> ecr create-repository --repository-name parity-lambda --image-scanning-configuration scanOnPush=true</span></code></pre></div>
 <p>This provides a URI, the resource identifier of the created repository. The image can now be pushed:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest <span class="dt">{URI}</span>/parity-lambda:latest</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login --username AWS --password-stdin <span class="dt">{URI}</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a><span class="ex">docker</span> push <span class="dt">{URI}</span>/parity-lambda:latest</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="ex">docker</span> build -f dockerfile -t r-on-lambda .   </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest <span class="dt">{URI}</span>/parity-lambda:latest</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login --username AWS --password-stdin <span class="dt">{URI}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a><span class="ex">docker</span> push <span class="dt">{URI}</span>/parity-lambda:latest</span></code></pre></div>
 <p>In either the AWS console or the command line, a Lambda can be created from this image. Call the Lambda “parity” to match the function name. Tests can be executed within the console. Alternatively the Lambda can be invoked from the CLI:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="ex">aws</span> lambda invoke --function-name parity <span class="kw">\</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>  <span class="ex">--invocation-type</span> RequestResponse --payload <span class="st">'{"number": 8}'</span> <span class="kw">\</span></span>
