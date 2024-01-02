@@ -152,7 +152,7 @@ aws ecr create-repository --repository-name parity-lambda --image-scanning-confi
 This provides a URI, the resource identifier of the created repository. The image can now be pushed:
 
 ```bash
-docker build -f dockerfile -t mdneuzerling/r-on-lambda .   
+docker build -f dockerfile -t r-on-lambda .   
 docker tag mdneuzerling/r-on-lambda:latest {URI}/parity-lambda:latest
 aws ecr get-login-password | docker login --username AWS --password-stdin {URI}
 docker push {URI}/parity-lambda:latest
