@@ -112,7 +112,7 @@ This function can then be placed into a Docker image. An **example** is provided
 * Set the handler as the `CMD`. The `lambdr` package interprets the handler as the name of the function to use, in this case, "parity". The `CMD` can also be set (or overriden) when setting up the Lambda in AWS.
 
 ```dockerfile
-FROM public.ecr.aws/lambda/provided:al2
+FROM public.ecr.aws/lambda/provided:al2-x86_64
 
 ENV R_VERSION=4.0.3
 
@@ -152,6 +152,7 @@ aws ecr create-repository --repository-name parity-lambda --image-scanning-confi
 This provides a URI, the resource identifier of the created repository. The image can now be pushed:
 
 ```bash
+docker build -f dockerfile -t mdneuzerling/r-on-lambda .   
 docker tag mdneuzerling/r-on-lambda:latest {URI}/parity-lambda:latest
 aws ecr get-login-password | docker login --username AWS --password-stdin {URI}
 docker push {URI}/parity-lambda:latest
