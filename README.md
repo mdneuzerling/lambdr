@@ -9,23 +9,34 @@
 [![license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://choosealicense.com/licenses/mit/)
 <!-- badges: end -->
 
-This package provides an R runtime for the [_AWS Lambda_ serverless compute
-service](https://aws.amazon.com/lambda/). It is intended to be used to create
-containers that can run on _AWS Lambda_. `lambdr` provides the necessary
-functionality for handling the various endpoints required for accepting new
-input and sending responses.
+This package provides an R runtime interface client for the [_AWS Lambda_
+serverless compute service](https://aws.amazon.com/lambda/). It makes it
+possible to deploy code written in R as _Lambda functions_ when using container
+images.
 
 This package is **unofficial**. Its creators are not affiliated with
 _Amazon Web Services_, nor is its content endorsed by _Amazon Web Services_.
 _Lambda_, _API Gateway_, _EventBridge_, _CloudWatch_, and _SNS_ are services of
 _Amazon Web Services_.
 
+## The runtime
+
+Any programming language can be used to create a container-based Lambda
+function. All that's required is a language-specific runtime. AWS provides such
+runtimes for a handful of languages, e.g. Python, Go, and Ruby - but not for R.
+
+As a runtime for R, `lambdr`'s job is to cordinate the translation and transfer
+of inputs/responses between the outside world and an invoked Lambda's `handler`
+function.
+
 The default behaviour is to convert the body of the received event from JSON
-into arguments for the handler function using the `jsonlite` package. For
-example, a raw event body of `{"number": 9}` will be converted to `list(number =
-9)`. The handler function will then receive the arguments directly after
-unlisting, eg. `number = 9`. This works for direct invocations, as well as
-situations where the user wishes to implement behaviour specific to a trigger.
+into arguments for the Lambda's `handler` function using the `jsonlite` package.
+
+For example, a raw event body of `{"number": 9}` will be converted to
+`list(number = 9)`. The handler function will then receive the arguments
+directly after unlisting, eg. `number = 9`. This works for direct invocations,
+as well as situations where the user wishes to implement behaviour specific to
+a trigger.
 
 Some invocation types have their own logic for converting the event body into
 an R object. This is useful for say, using an R function in a Lambda behind
@@ -49,7 +60,7 @@ to the handler function. Refer to `?lambda_config` for more information.
 
 ## Installation
 
-When the package is made available on CRAN it can be installed with:
+The package can be installed from CRAN with:
 
 ```r
 install.packages("lambdr")
