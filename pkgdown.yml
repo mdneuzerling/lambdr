@@ -1,5 +1,5 @@
 pandoc: 2.9.2.1
-pkgdown: 2.0.7
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   api-gateway-invocations: api-gateway-invocations.html
@@ -7,8 +7,7 @@ articles:
   eventbridge-and-sns-invocations: eventbridge-and-sns-invocations.html
   lambda-runtime-in-container: lambda-runtime-in-container.html
   package-structure: package-structure.html
-last_built: 2024-01-02T06:58Z
+last_built: 2024-07-28T10:14Z
 urls:
   reference: https://lambdr.mdneuzerling.com/reference
   article: https://lambdr.mdneuzerling.com/articles
-

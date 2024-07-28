@@ -1,162 +1,56 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/404.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/api-gateway-invocations.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/context.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/eventbridge-and-sns-invocations.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/lambda-runtime-in-container.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/articles/package-structure.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/index.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/as_json.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/as_stringified_json.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/assert_status_code_is_good.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/classify_event.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/condition.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/config_or_runtime_api.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/decode_html_body.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/endpoints.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/extract_and_augment_context.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/extract_context.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/extract_context_from_environment.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/extract_event_headers.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/from_base64.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/function_accepts_context.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/generate_result.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/get_handler_function_from_env_var.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/get_lambda_environment_variable.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/handle_event.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/handle_event_error.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/html_response.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/is_eventbridge_event_content.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/is_from_html_api_gateway.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/is_from_rest_api_gateway.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/is_sns_event_content.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/lambda_config.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/lambdr-package.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/mark_as_already_serialised.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/parse_event_content.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/parse_json_or_empty.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/post_lambda_error.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/post_result.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/prettify_list.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/serialise_result.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/start_lambda.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/start_listening.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/stop_decomposition.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/stop_html.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/validate_lambda_config.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/wait_for_and_handle_event.html</loc>
-  </url>
-  <url>
-    <loc>https://lambdr.mdneuzerling.com/reference/wait_for_event.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://lambdr.mdneuzerling.com/404.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/LICENSE-text.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/LICENSE.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/articles/api-gateway-invocations.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/articles/context.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/articles/eventbridge-and-sns-invocations.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/articles/index.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/articles/lambda-runtime-in-container.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/articles/package-structure.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/authors.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/index.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/news/index.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/as_json.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/as_stringified_json.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/assert_status_code_is_good.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/classify_event.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/condition.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/config_or_runtime_api.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/decode_html_body.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/endpoints.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/extract_and_augment_context.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/extract_context.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/extract_context_from_environment.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/extract_event_headers.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/from_base64.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/function_accepts_context.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/generate_result.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/get_handler_function_from_env_var.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/get_lambda_environment_variable.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/handle_event.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/handle_event_error.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/html_response.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/index.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/is_eventbridge_event_content.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/is_from_html_api_gateway.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/is_from_rest_api_gateway.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/is_sns_event_content.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/lambda_config.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/lambdr-package.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/mark_as_already_serialised.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/parse_event_content.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/parse_json_or_empty.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/post_lambda_error.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/post_result.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/prettify_list.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/serialise_result.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/start_lambda.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/start_listening.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/stop_decomposition.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/stop_html.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/validate_lambda_config.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/wait_for_and_handle_event.html</loc></url>
+<url><loc>https://lambdr.mdneuzerling.com/reference/wait_for_event.html</loc></url>
 </urlset>
+
