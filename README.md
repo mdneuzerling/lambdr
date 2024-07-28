@@ -25,7 +25,7 @@ Any programming language can be used to create a container-based Lambda
 function. All that's required is a language-specific runtime. AWS provides such
 runtimes for a handful of languages, e.g. Python, Go, and Ruby - but not for R.
 
-As a runtime for R, `lambdr`'s job is to cordinate the translation and transfer
+As a runtime for R, `lambdr`'s job is to coordinate the translation and transfer
 of inputs/responses between the outside world and an invoked Lambda's `handler`
 function.
 
