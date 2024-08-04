@@ -93,6 +93,7 @@
 <div class="page-header"><h1 id="lambdr-">lambdr <img src="reference/figures/lambdr.png" style="height:200px;"><a class="anchor" aria-label="anchor" href="#lambdr-"></a>
 </h1></div>
 <!-- badges: start -->
+
 <p>This package provides an R runtime interface client for the <a href="https://aws.amazon.com/lambda/" class="external-link"><em>AWS Lambda</em> serverless compute service</a>. It makes it possible to deploy code written in R as <em>Lambda functions</em> when using container images.</p>
 <p>This package is <strong>unofficial</strong>. Its creators are not affiliated with <em>Amazon Web Services</em>, nor is its content endorsed by <em>Amazon Web Services</em>. <em>Lambda</em>, <em>API Gateway</em>, <em>EventBridge</em>, <em>CloudWatch</em>, and <em>SNS</em> are services of <em>Amazon Web Services</em>.</p>
 <div class="section level2">
@@ -105,6 +106,10 @@
 <p>Some invocation types have their own logic for converting the event body into an R object. This is useful for say, using an R function in a Lambda behind an API Gateway, so that the R function does not need to deal with the HTML elements of the invocation. The below invocation types have custom logic implemented. Refer to the vignettes or the package website for more information.</p>
 <p>Alternatively, user-defined functions can be provided for parsing event content and serialising results. The user can also use the <code>identity</code> function as a deserialiser to pass the raw event content — as a string — to the handler function. Refer to <code><a href="reference/lambda_config.html">?lambda_config</a></code> for more information.</p>
 <table class="table">
+<colgroup>
+<col width="42%">
+<col width="57%">
+</colgroup>
 <thead><tr class="header">
 <th align="left">invocation type</th>
 <th align="left">implementation stage</th>
@@ -141,13 +146,13 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lambdr"</span><span class="op">)</span></span></code></pre></div>
 <p>The development version is available with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"mdneuzerling/lambdr"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mdneuzerling/lambdr"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="running">Running<a class="anchor" aria-label="anchor" href="#running"></a>
 </h2>
 <p>In a <code>runtime.R</code> file, source all functions needed and then run:</p>
-<pre class="{r}"><code><span><span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="reference/start_lambda.html">start_lambda</a></span><span class="op">(</span><span class="op">)</span></span></code></pre>
+<p><code>{r} lambdr::start_lambda()</code></p>
 <p>This <code>runtime.R</code> file should be executed by the Docker image containing your Lambda code.</p>
 <p>The <code><a href="reference/start_lambda.html">lambdr::start_lambda()</a></code> function relies on environment variables configured by AWS. It will fail if run locally. In particular, the <em>handler</em> as configured by the user through AWS will determine which function handles the Lambda events. For debugging and testing, values can be provided to the function in the absence of environment variables. See <code><a href="reference/lambda_config.html">?lambdr::lambda_config</a></code> for details.</p>
 </div>
@@ -155,14 +160,14 @@
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>Consider the following <code>runtime.R</code> file:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">parity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>parity <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="st">"even"</span> <span class="kw">else</span> <span class="st">"odd"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="reference/start_lambda.html">start_lambda</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>parity</code> function accepts a <code>number</code> argument and returns its parity as a named list, for example:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">parity</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co"># $parity</span></span>
 <span><span class="co"># [1] "odd"</span></span>
@@ -179,48 +184,48 @@
 <li>Generate a simple bootstrap which runs <code>runtime.R</code> with R</li>
 <li>Set the handler as the <code>CMD</code>. The <code>lambdr</code> package interprets the handler as the name of the function to use, in this case, “parity”. The <code>CMD</code> can also be set (or overriden) when setting up the Lambda in AWS.</li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">FROM</span> public.ecr.aws/lambda/provided:al2-x86_64</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a><span class="kw">ENV</span> R_VERSION=4.0.3</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a><span class="kw">RUN</span> yum -y install wget git tar</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true"></a><span class="kw">RUN</span> yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true"></a>  &amp;&amp; wget https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true"></a>  &amp;&amp; yum -y install R-${R_VERSION}-1-1.x86_64.rpm \</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true"></a>  &amp;&amp; rm R-${R_VERSION}-1-1.x86_64.rpm</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true"></a></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true"></a><span class="kw">ENV</span> PATH=<span class="st">"${PATH}:/opt/R/${R_VERSION}/bin/"</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true"></a></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true"></a><span class="co"># System requirements for R packages</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true"></a><span class="kw">RUN</span> yum -y install openssl-devel</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true"></a></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true"></a><span class="kw">RUN</span> Rscript -e <span class="st">"install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true"></a><span class="kw">RUN</span> Rscript -e <span class="st">"remotes::install_github('mdneuzerling/lambdr')"</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true"></a></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true"></a><span class="kw">RUN</span> mkdir /lambda</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true"></a><span class="kw">COPY</span> runtime.R /lambda</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true"></a><span class="kw">RUN</span> chmod 755 -R /lambda</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true"></a></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true"></a><span class="kw">RUN</span> printf <span class="st">'#!/bin/sh\ncd /lambda\nRscript runtime.R'</span> &gt; /var/runtime/bootstrap \</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true"></a>  &amp;&amp; chmod +x /var/runtime/bootstrap</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true"></a></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true"></a><span class="kw">CMD</span> [<span class="st">"parity"</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="kw">FROM</span> public.ecr.aws/lambda/provided:al2-x86_64</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="kw">ENV</span> R_VERSION=4.0.3</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">yum</span> <span class="at">-y</span> install wget git tar</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">yum</span> <span class="at">-y</span> install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm <span class="dt">\</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="fu">wget</span> https://cdn.rstudio.com/r/centos-7/pkgs/R-<span class="va">${R_VERSION}</span>-1-1.x86_64.rpm <span class="dt">\</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="ex">yum</span> <span class="at">-y</span> install R-<span class="va">${R_VERSION}</span>-1-1.x86_64.rpm <span class="dt">\</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> R-<span class="va">${R_VERSION}</span>-1-1.x86_64.rpm</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="kw">ENV</span> PATH=<span class="st">"${PATH}:/opt/R/${R_VERSION}/bin/"</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co"># System requirements for R packages</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">yum</span> <span class="at">-y</span> install openssl-devel</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"remotes::install_github('mdneuzerling/lambdr')"</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">mkdir</span> /lambda</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="kw">COPY</span> runtime.R /lambda</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">chmod</span> 755 <span class="at">-R</span> /lambda</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="kw">RUN</span> <span class="bu">printf</span> <span class="st">'#!/bin/sh\ncd /lambda\nRscript runtime.R'</span> <span class="op">&gt;</span> /var/runtime/bootstrap <span class="dt">\</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="fu">chmod</span> +x /var/runtime/bootstrap</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"parity"</span>]</span></code></pre></div>
 <p>For production uses it’s recommended to replace the “al2” tag above with a specific tag for the image.</p>
 <p>The image is built and uploaded to AWS Elastic Container Registry (ECR). First, a repository is created:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="ex">aws</span> ecr create-repository --repository-name parity-lambda --image-scanning-configuration scanOnPush=true</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="ex">aws</span> ecr create-repository <span class="at">--repository-name</span> parity-lambda <span class="at">--image-scanning-configuration</span> scanOnPush=true</span></code></pre></div>
 <p>This provides a URI, the resource identifier of the created repository. The image can now be pushed:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="ex">docker</span> build -f dockerfile -t r-on-lambda .   </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest <span class="dt">{URI}</span>/parity-lambda:latest</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login --username AWS --password-stdin <span class="dt">{URI}</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a><span class="ex">docker</span> push <span class="dt">{URI}</span>/parity-lambda:latest</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-f</span> dockerfile <span class="at">-t</span> r-on-lambda .   </span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest {URI}/parity-lambda:latest</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login <span class="at">--username</span> AWS <span class="at">--password-stdin</span> {URI}</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="ex">docker</span> push {URI}/parity-lambda:latest</span></code></pre></div>
 <p>In either the AWS console or the command line, a Lambda can be created from this image. Call the Lambda “parity” to match the function name. Tests can be executed within the console. Alternatively the Lambda can be invoked from the CLI:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="ex">aws</span> lambda invoke --function-name parity <span class="kw">\</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>  <span class="ex">--invocation-type</span> RequestResponse --payload <span class="st">'{"number": 8}'</span> <span class="kw">\</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a>  <span class="ex">/tmp/response.json</span> --cli-binary-format raw-in-base64-out</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">aws</span> lambda invoke <span class="at">--function-name</span> parity <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">--invocation-type</span> RequestResponse <span class="at">--payload</span> <span class="st">'{"number": 8}'</span> <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  /tmp/response.json <span class="at">--cli-binary-format</span> raw-in-base64-out</span></code></pre></div>
 <p>The output is now available in the generated file:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="fu">cat</span> /tmp/response.json            </span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="dt">{"parity":"even"}</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">cat</span> /tmp/response.json            </span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="ex">{</span><span class="st">"parity"</span><span class="ex">:</span><span class="st">"even"</span><span class="ex">}</span></span></code></pre></div>
 <hr>
 <p>Hex logo by Phizz Leeder</p>
 </div>

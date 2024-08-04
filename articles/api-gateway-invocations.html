@@ -86,7 +86,7 @@
 
 
 
-      </header><script src="api-gateway-invocations_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>API Gateway Invocations</h1>
@@ -99,21 +99,55 @@
 
     
     
-<p>Invocations via an API Gateway require extra care when parsing the input event, and when formatting results. For the most part, <code>lambdr</code> will handle this automatically. But for highly custom serialisation/deserialisation or edge cases it may be helpful to understand how content via API Gateways is structured and responded to.</p>
+<p>Invocations via an API Gateway require extra care when parsing the
+input event, and when formatting results. For the most part,
+<code>lambdr</code> will handle this automatically. But for highly
+custom serialisation/deserialisation or edge cases it may be helpful to
+understand how content via API Gateways is structured and responded
+to.</p>
 <div class="section level2">
 <h2 id="events-via-api-gateways">Events via API Gateways<a class="anchor" aria-label="anchor" href="#events-via-api-gateways"></a>
 </h2>
-<p>When a Lambda runtime, like that implemented by <code>lambdr</code>, starts listening for inputs it queries the “next invocation” HTTP endpoint. The response to this is what’s called here an <em>event</em>. The content of this event contains the arguments (if any) to the function. After the result has been calculate, the runtime must format the result and submit it to the “result” HTTP endpoint.</p>
-<p>With direct invocation the content of the event contains a string which — when interpreted as JSON — gives the arguments for the handler function. When a Lambda is invoked via an API Gateway then the content of the event contains significantly more detail and requires careful parsing.</p>
+<p>When a Lambda runtime, like that implemented by <code>lambdr</code>,
+starts listening for inputs it queries the “next invocation” HTTP
+endpoint. The response to this is what’s called here an <em>event</em>.
+The content of this event contains the arguments (if any) to the
+function. After the result has been calculate, the runtime must format
+the result and submit it to the “result” HTTP endpoint.</p>
+<p>With direct invocation the content of the event contains a string
+which — when interpreted as JSON — gives the arguments for the handler
+function. When a Lambda is invoked via an API Gateway then the content
+of the event contains significantly more detail and requires careful
+parsing.</p>
 <p>There are two types of API Gateways to consider: REST and HTML.</p>
 <div class="section level3">
 <h3 id="rest-api-gateway-events">REST API Gateway events<a class="anchor" aria-label="anchor" href="#rest-api-gateway-events"></a>
 </h3>
-<p>An example of REST API Gateway event content is given at the bottom of this section but the two most important sections are <code>body</code> and <code>queryStringParameters</code>.</p>
-<p>The <code>queryStringParameters</code> contain standard JSON. So if the request contains a parameter <code>?number=9</code> in the query then the event will contain <code>"queryStringParameters": {"number": "9"}</code> (note the string).</p>
-<p>The <code>body</code> of the event contains the data passed during a <code>POST</code> operation. It contains <em>stringified</em> JSON. That is, instead of <code>"body": {"number": 9}</code> we would see <code>"body": "{\"number\":9}"</code>.</p>
-<p>Stringified JSON can be produced with the <code>as_stringified_json</code> helper function which wraps <code>jsonlite</code>’s  function. There is a slight difference in behaviour, as this function also automatically unboxes singleton values and also represents <code>NULL</code>s as JSON <code>nulls</code> — a convention that is used by the event body provided by AWS Lambda.</p>
-<p>When the result is calculated and ready to be sent back to the AWS Lambda response endpoint it must be formatted in a very specific way in order to be compatible with the API Gateway. The correct format is as below, with the <code>body</code> containing the <em>stringified</em> JSON representation of the result. This is given as an R list which is then converted to stringified JSON. Compare this to the representation of the result for a direct invocation:</p>
+<p>An example of REST API Gateway event content is given at the bottom
+of this section but the two most important sections are
+<code>body</code> and <code>queryStringParameters</code>.</p>
+<p>The <code>queryStringParameters</code> contain standard JSON. So if
+the request contains a parameter <code>?number=9</code> in the query
+then the event will contain
+<code>"queryStringParameters": {"number": "9"}</code> (note the
+string).</p>
+<p>The <code>body</code> of the event contains the data passed during a
+<code>POST</code> operation. It contains <em>stringified</em> JSON. That
+is, instead of <code>"body": {"number": 9}</code> we would see
+<code>"body": "{\"number\":9}"</code>.</p>
+<p>Stringified JSON can be produced with the
+<code>as_stringified_json</code> helper function which wraps
+<code>jsonlite</code>’s function. There is a slight difference in
+behaviour, as this function also automatically unboxes singleton values
+and also represents <code>NULL</code>s as JSON <code>nulls</code> — a
+convention that is used by the event body provided by AWS Lambda.</p>
+<p>When the result is calculated and ready to be sent back to the AWS
+Lambda response endpoint it must be formatted in a very specific way in
+order to be compatible with the API Gateway. The correct format is as
+below, with the <code>body</code> containing the <em>stringified</em>
+JSON representation of the result. This is given as an R list which is
+then converted to stringified JSON. Compare this to the representation
+of the result for a direct invocation:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Formatting a result for a direct invocation</span></span>
 <span><span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
@@ -126,131 +160,142 @@
 <span>    body <span class="op">=</span> <span class="fu"><a href="../reference/as_stringified_json.html">as_stringified_json</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Here is an example event content from an invocation that is coming via an API Gateway. The invocation is a call to a <code>parity</code> function with an argument <code>number = 9</code>. Some information has been censored.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="fu">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="dt">"resource"</span><span class="fu">:</span> <span class="st">"/parity"</span><span class="fu">,</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="dt">"path"</span><span class="fu">:</span> <span class="st">"/parity"</span><span class="fu">,</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a><span class="dt">"httpMethod"</span><span class="fu">:</span> <span class="st">"POST"</span><span class="fu">,</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a><span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a>  <span class="dt">"accept"</span><span class="fu">:</span> <span class="st">"*/*"</span><span class="fu">,</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a>  <span class="dt">"Host"</span><span class="fu">:</span> <span class="st">"abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a>  <span class="dt">"User-Agent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span><span class="fu">,</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a>  <span class="dt">"X-Amzn-Trace-Id"</span><span class="fu">:</span> <span class="st">"Root=1-615e4711-5f239aad2b046b5609e43b1c"</span><span class="fu">,</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a>  <span class="dt">"X-Forwarded-For"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a>  <span class="dt">"X-Forwarded-Port"</span><span class="fu">:</span> <span class="st">"443"</span><span class="fu">,</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a>  <span class="dt">"X-Forwarded-Proto"</span><span class="fu">:</span> <span class="st">"https"</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true"></a><span class="fu">},</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true"></a><span class="dt">"multiValueHeaders"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true"></a>  <span class="dt">"accept"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true"></a>    <span class="st">"*/*"</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true"></a>  <span class="dt">"Host"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true"></a>    <span class="st">"abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true"></a>  <span class="dt">"User-Agent"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true"></a>    <span class="st">"curl/7.64.1"</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true"></a>  <span class="dt">"X-Amzn-Trace-Id"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true"></a>    <span class="st">"Root=1-615e4711-5f239aad2b046b5609e43b1c"</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true"></a>  <span class="dt">"X-Forwarded-For"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true"></a>    <span class="st">"192.168.1.1"</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true"></a>  <span class="dt">"X-Forwarded-Port"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true"></a>    <span class="st">"443"</span></span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true"></a>  <span class="dt">"X-Forwarded-Proto"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true"></a>    <span class="st">"https"</span></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true"></a>  <span class="ot">]</span></span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true"></a><span class="fu">},</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true"></a><span class="dt">"queryStringParameters"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true"></a><span class="dt">"multiValueQueryStringParameters"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true"></a><span class="dt">"pathParameters"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true"></a><span class="dt">"stageVariables"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true"></a><span class="dt">"requestContext"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true"></a>  <span class="dt">"resourceId"</span><span class="fu">:</span> <span class="st">"abcdef"</span><span class="fu">,</span></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true"></a>  <span class="dt">"resourcePath"</span><span class="fu">:</span> <span class="st">"/parity"</span><span class="fu">,</span></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true"></a>  <span class="dt">"httpMethod"</span><span class="fu">:</span> <span class="st">"POST"</span><span class="fu">,</span></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true"></a>  <span class="dt">"extendedRequestId"</span><span class="fu">:</span> <span class="st">"G0AKsFXISwMFsGA="</span><span class="fu">,</span></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true"></a>  <span class="dt">"requestTime"</span><span class="fu">:</span> <span class="st">"07/Oct/2021:01:02:09 +0000"</span><span class="fu">,</span></span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true"></a>  <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"/test/parity"</span><span class="fu">,</span></span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true"></a>  <span class="dt">"accountId"</span><span class="fu">:</span> <span class="st">"1234567890"</span><span class="fu">,</span></span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true"></a>  <span class="dt">"protocol"</span><span class="fu">:</span> <span class="st">"HTTP/1.1"</span><span class="fu">,</span></span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true"></a>  <span class="dt">"stage"</span><span class="fu">:</span> <span class="st">"test"</span><span class="fu">,</span></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true"></a>  <span class="dt">"domainPrefix"</span><span class="fu">:</span> <span class="st">"abcdefghijk"</span><span class="fu">,</span></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true"></a>  <span class="dt">"requestTimeEpoch"</span><span class="fu">:</span> <span class="dv">1633568529038</span><span class="fu">,</span></span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true"></a>  <span class="dt">"requestId"</span><span class="fu">:</span> <span class="st">"59bbb4c9-9d24-4cbb-941b-60dd4969e9c5"</span><span class="fu">,</span></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true"></a>  <span class="dt">"identity"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true"></a>    <span class="dt">"cognitoIdentityPoolId"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true"></a>    <span class="dt">"accountId"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true"></a>    <span class="dt">"cognitoIdentityId"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true"></a>    <span class="dt">"caller"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true"></a>    <span class="dt">"sourceIp"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true"></a>    <span class="dt">"principalOrgId"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true"></a>    <span class="dt">"accessKey"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true"></a>    <span class="dt">"cognitoAuthenticationType"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true"></a>    <span class="dt">"cognitoAuthenticationProvider"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true"></a>    <span class="dt">"userArn"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true"></a>    <span class="dt">"userAgent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span><span class="fu">,</span></span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true"></a>    <span class="dt">"user"</span><span class="fu">:</span> <span class="kw">null</span></span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true"></a>  <span class="fu">},</span></span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true"></a>  <span class="dt">"domainName"</span><span class="fu">:</span> <span class="st">"abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true"></a>  <span class="dt">"apiId"</span><span class="fu">:</span> <span class="st">"abcdefghijk"</span></span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true"></a><span class="fu">},</span></span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true"></a><span class="dt">"body"</span><span class="fu">:</span> <span class="st">"{</span><span class="ch">\"</span><span class="st">number</span><span class="ch">\"</span><span class="st">:9}"</span><span class="fu">,</span></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true"></a><span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">false</span></span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true"></a><span class="fu">}</span></span></code></pre></div>
+<p>Here is an example event content from an invocation that is coming
+via an API Gateway. The invocation is a call to a <code>parity</code>
+function with an argument <code>number = 9</code>. Some information has
+been censored.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="dt">"resource"</span><span class="fu">:</span> <span class="st">"/parity"</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="dt">"path"</span><span class="fu">:</span> <span class="st">"/parity"</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="dt">"httpMethod"</span><span class="fu">:</span> <span class="st">"POST"</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="dt">"accept"</span><span class="fu">:</span> <span class="st">"*/*"</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="dt">"Host"</span><span class="fu">:</span> <span class="st">"abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="dt">"User-Agent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span><span class="fu">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="dt">"X-Amzn-Trace-Id"</span><span class="fu">:</span> <span class="st">"Root=1-615e4711-5f239aad2b046b5609e43b1c"</span><span class="fu">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="dt">"X-Forwarded-For"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="dt">"X-Forwarded-Port"</span><span class="fu">:</span> <span class="st">"443"</span><span class="fu">,</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  <span class="dt">"X-Forwarded-Proto"</span><span class="fu">:</span> <span class="st">"https"</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="fu">},</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="dt">"multiValueHeaders"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>  <span class="dt">"accept"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>    <span class="st">"*/*"</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>  <span class="dt">"Host"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>    <span class="st">"abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  <span class="dt">"User-Agent"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>    <span class="st">"curl/7.64.1"</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  <span class="dt">"X-Amzn-Trace-Id"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>    <span class="st">"Root=1-615e4711-5f239aad2b046b5609e43b1c"</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>  <span class="dt">"X-Forwarded-For"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>    <span class="st">"192.168.1.1"</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>  <span class="dt">"X-Forwarded-Port"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a>    <span class="st">"443"</span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a>  <span class="dt">"X-Forwarded-Proto"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a>    <span class="st">"https"</span></span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="fu">},</span></span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="dt">"queryStringParameters"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a><span class="dt">"multiValueQueryStringParameters"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="dt">"pathParameters"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a><span class="dt">"stageVariables"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a><span class="dt">"requestContext"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a>  <span class="dt">"resourceId"</span><span class="fu">:</span> <span class="st">"abcdef"</span><span class="fu">,</span></span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a>  <span class="dt">"resourcePath"</span><span class="fu">:</span> <span class="st">"/parity"</span><span class="fu">,</span></span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a>  <span class="dt">"httpMethod"</span><span class="fu">:</span> <span class="st">"POST"</span><span class="fu">,</span></span>
+<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a>  <span class="dt">"extendedRequestId"</span><span class="fu">:</span> <span class="st">"G0AKsFXISwMFsGA="</span><span class="fu">,</span></span>
+<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a>  <span class="dt">"requestTime"</span><span class="fu">:</span> <span class="st">"07/Oct/2021:01:02:09 +0000"</span><span class="fu">,</span></span>
+<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a>  <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"/test/parity"</span><span class="fu">,</span></span>
+<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a>  <span class="dt">"accountId"</span><span class="fu">:</span> <span class="st">"1234567890"</span><span class="fu">,</span></span>
+<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a>  <span class="dt">"protocol"</span><span class="fu">:</span> <span class="st">"HTTP/1.1"</span><span class="fu">,</span></span>
+<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a>  <span class="dt">"stage"</span><span class="fu">:</span> <span class="st">"test"</span><span class="fu">,</span></span>
+<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a>  <span class="dt">"domainPrefix"</span><span class="fu">:</span> <span class="st">"abcdefghijk"</span><span class="fu">,</span></span>
+<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a>  <span class="dt">"requestTimeEpoch"</span><span class="fu">:</span> <span class="dv">1633568529038</span><span class="fu">,</span></span>
+<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a>  <span class="dt">"requestId"</span><span class="fu">:</span> <span class="st">"59bbb4c9-9d24-4cbb-941b-60dd4969e9c5"</span><span class="fu">,</span></span>
+<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a>  <span class="dt">"identity"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a>    <span class="dt">"cognitoIdentityPoolId"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a>    <span class="dt">"accountId"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a>    <span class="dt">"cognitoIdentityId"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a>    <span class="dt">"caller"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a>    <span class="dt">"sourceIp"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></span>
+<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a>    <span class="dt">"principalOrgId"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a>    <span class="dt">"accessKey"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a>    <span class="dt">"cognitoAuthenticationType"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a>    <span class="dt">"cognitoAuthenticationProvider"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-64"><a href="#cb2-64" tabindex="-1"></a>    <span class="dt">"userArn"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb2-65"><a href="#cb2-65" tabindex="-1"></a>    <span class="dt">"userAgent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span><span class="fu">,</span></span>
+<span id="cb2-66"><a href="#cb2-66" tabindex="-1"></a>    <span class="dt">"user"</span><span class="fu">:</span> <span class="kw">null</span></span>
+<span id="cb2-67"><a href="#cb2-67" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb2-68"><a href="#cb2-68" tabindex="-1"></a>  <span class="dt">"domainName"</span><span class="fu">:</span> <span class="st">"abcdefghijk.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></span>
+<span id="cb2-69"><a href="#cb2-69" tabindex="-1"></a>  <span class="dt">"apiId"</span><span class="fu">:</span> <span class="st">"abcdefghijk"</span></span>
+<span id="cb2-70"><a href="#cb2-70" tabindex="-1"></a><span class="fu">},</span></span>
+<span id="cb2-71"><a href="#cb2-71" tabindex="-1"></a><span class="dt">"body"</span><span class="fu">:</span> <span class="st">"{</span><span class="ch">\"</span><span class="st">number</span><span class="ch">\"</span><span class="st">:9}"</span><span class="fu">,</span></span>
+<span id="cb2-72"><a href="#cb2-72" tabindex="-1"></a><span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb2-73"><a href="#cb2-73" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="html-api-gateway-events">HTML API Gateway events<a class="anchor" aria-label="anchor" href="#html-api-gateway-events"></a>
 </h3>
-<p>HTML API Gateway events are similar to REST API Gateway events, except that the body is more likely to be Base64 encoded, and the query parameters are presented as string values. That is, we might expect to see a <code>rawQueryString</code> of “parameter1=value1&amp;parameter1=value2&amp;parameter2=value”. In this case however the <code>queryStringParameters</code> (if present) will be easier to work with:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="er">"queryStringParameters":</span> <span class="fu">{</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>    <span class="dt">"parameter1"</span><span class="fu">:</span> <span class="st">"value1,value2"</span><span class="fu">,</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>    <span class="dt">"parameter2"</span><span class="fu">:</span> <span class="st">"value"</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>  <span class="fu">}</span></span></code></pre></div>
-<p>A full example of an event body is shown below. Note that the <code>queryStringParameters</code> will not appear if <code>rawQueryString</code> is an empty string.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="fu">{</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>    <span class="dt">"version"</span><span class="fu">:</span> <span class="st">"2.0"</span><span class="fu">,</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a>    <span class="dt">"routeKey"</span><span class="fu">:</span> <span class="st">"ANY /parity"</span><span class="fu">,</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true"></a>    <span class="dt">"rawPath"</span><span class="fu">:</span> <span class="st">"/default/parity"</span><span class="fu">,</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true"></a>    <span class="dt">"rawQueryString"</span><span class="fu">:</span> <span class="st">"parameter1=value1&amp;parameter1=value2&amp;parameter2=value"</span><span class="fu">,</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true"></a>    <span class="dt">"queryStringParameters"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true"></a>      <span class="dt">"parameter1"</span><span class="fu">:</span> <span class="st">"value1,value2"</span><span class="fu">,</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true"></a>      <span class="dt">"parameter2"</span><span class="fu">:</span> <span class="st">"value"</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true"></a>    <span class="fu">},</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true"></a>    <span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true"></a>        <span class="dt">"accept"</span><span class="fu">:</span> <span class="st">"*/*"</span><span class="fu">,</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true"></a>        <span class="dt">"content-length"</span><span class="fu">:</span> <span class="st">"12"</span><span class="fu">,</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true"></a>        <span class="dt">"content-type"</span><span class="fu">:</span> <span class="st">"application/x-www-form-urlencoded"</span><span class="fu">,</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true"></a>        <span class="dt">"host"</span><span class="fu">:</span> <span class="st">"abcdefghi.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true"></a>        <span class="dt">"user-agent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span><span class="fu">,</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true"></a>        <span class="dt">"x-amzn-trace-id"</span><span class="fu">:</span> <span class="st">"Root=1-6167f9fb-1ada874811eaf2bc1464c679"</span><span class="fu">,</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true"></a>        <span class="dt">"x-forwarded-for"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true"></a>        <span class="dt">"x-forwarded-port"</span><span class="fu">:</span> <span class="st">"443"</span><span class="fu">,</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true"></a>        <span class="dt">"x-forwarded-proto"</span><span class="fu">:</span> <span class="st">"https"</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true"></a>    <span class="fu">},</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true"></a>    <span class="dt">"requestContext"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true"></a>        <span class="dt">"accountId"</span><span class="fu">:</span> <span class="st">"123456789"</span><span class="fu">,</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true"></a>        <span class="dt">"apiId"</span><span class="fu">:</span> <span class="st">"abcdefghi"</span><span class="fu">,</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true"></a>        <span class="dt">"domainName"</span><span class="fu">:</span> <span class="st">"abcdefghi.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true"></a>        <span class="dt">"domainPrefix"</span><span class="fu">:</span> <span class="st">"abcdefghi"</span><span class="fu">,</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true"></a>        <span class="dt">"http"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true"></a>            <span class="dt">"method"</span><span class="fu">:</span> <span class="st">"POST"</span><span class="fu">,</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true"></a>            <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"/default/parity"</span><span class="fu">,</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true"></a>            <span class="dt">"protocol"</span><span class="fu">:</span> <span class="st">"HTTP/1.1"</span><span class="fu">,</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true"></a>            <span class="dt">"sourceIp"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true"></a>            <span class="dt">"userAgent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true"></a>        <span class="fu">},</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true"></a>        <span class="dt">"requestId"</span><span class="fu">:</span> <span class="st">"HMP_QiusywMEPEg="</span><span class="fu">,</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true"></a>        <span class="dt">"routeKey"</span><span class="fu">:</span> <span class="st">"ANY /parity"</span><span class="fu">,</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true"></a>        <span class="dt">"stage"</span><span class="fu">:</span> <span class="st">"default"</span><span class="fu">,</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true"></a>        <span class="dt">"time"</span><span class="fu">:</span> <span class="st">"14/Oct/2021:09:35:55 +0000"</span><span class="fu">,</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true"></a>        <span class="dt">"timeEpoch"</span><span class="fu">:</span> <span class="dv">1634204155055</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true"></a>    <span class="fu">},</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true"></a>    <span class="dt">"body"</span><span class="fu">:</span> <span class="st">"eyJudW1iZXIiOjd9"</span><span class="fu">,</span></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true"></a>    <span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">true</span></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true"></a><span class="fu">}</span></span></code></pre></div>
+<p>HTML API Gateway events are similar to REST API Gateway events,
+except that the body is more likely to be Base64 encoded, and the query
+parameters are presented as string values. That is, we might expect to
+see a <code>rawQueryString</code> of
+“parameter1=value1&amp;parameter1=value2&amp;parameter2=value”. In this
+case however the <code>queryStringParameters</code> (if present) will be
+easier to work with:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="er">"queryStringParameters":</span> <span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>    <span class="dt">"parameter1"</span><span class="fu">:</span> <span class="st">"value1,value2"</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>    <span class="dt">"parameter2"</span><span class="fu">:</span> <span class="st">"value"</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">}</span></span></code></pre></div>
+<p>A full example of an event body is shown below. Note that the
+<code>queryStringParameters</code> will not appear if
+<code>rawQueryString</code> is an empty string.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="dt">"version"</span><span class="fu">:</span> <span class="st">"2.0"</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="dt">"routeKey"</span><span class="fu">:</span> <span class="st">"ANY /parity"</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="dt">"rawPath"</span><span class="fu">:</span> <span class="st">"/default/parity"</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="dt">"rawQueryString"</span><span class="fu">:</span> <span class="st">"parameter1=value1&amp;parameter1=value2&amp;parameter2=value"</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="dt">"queryStringParameters"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>      <span class="dt">"parameter1"</span><span class="fu">:</span> <span class="st">"value1,value2"</span><span class="fu">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>      <span class="dt">"parameter2"</span><span class="fu">:</span> <span class="st">"value"</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>    <span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>        <span class="dt">"accept"</span><span class="fu">:</span> <span class="st">"*/*"</span><span class="fu">,</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>        <span class="dt">"content-length"</span><span class="fu">:</span> <span class="st">"12"</span><span class="fu">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>        <span class="dt">"content-type"</span><span class="fu">:</span> <span class="st">"application/x-www-form-urlencoded"</span><span class="fu">,</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>        <span class="dt">"host"</span><span class="fu">:</span> <span class="st">"abcdefghi.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>        <span class="dt">"user-agent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span><span class="fu">,</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>        <span class="dt">"x-amzn-trace-id"</span><span class="fu">:</span> <span class="st">"Root=1-6167f9fb-1ada874811eaf2bc1464c679"</span><span class="fu">,</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>        <span class="dt">"x-forwarded-for"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>        <span class="dt">"x-forwarded-port"</span><span class="fu">:</span> <span class="st">"443"</span><span class="fu">,</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>        <span class="dt">"x-forwarded-proto"</span><span class="fu">:</span> <span class="st">"https"</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>    <span class="dt">"requestContext"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>        <span class="dt">"accountId"</span><span class="fu">:</span> <span class="st">"123456789"</span><span class="fu">,</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>        <span class="dt">"apiId"</span><span class="fu">:</span> <span class="st">"abcdefghi"</span><span class="fu">,</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>        <span class="dt">"domainName"</span><span class="fu">:</span> <span class="st">"abcdefghi.execute-api.ap-southeast-2.amazonaws.com"</span><span class="fu">,</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>        <span class="dt">"domainPrefix"</span><span class="fu">:</span> <span class="st">"abcdefghi"</span><span class="fu">,</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>        <span class="dt">"http"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>            <span class="dt">"method"</span><span class="fu">:</span> <span class="st">"POST"</span><span class="fu">,</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>            <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"/default/parity"</span><span class="fu">,</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>            <span class="dt">"protocol"</span><span class="fu">:</span> <span class="st">"HTTP/1.1"</span><span class="fu">,</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>            <span class="dt">"sourceIp"</span><span class="fu">:</span> <span class="st">"192.168.1.1"</span><span class="fu">,</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>            <span class="dt">"userAgent"</span><span class="fu">:</span> <span class="st">"curl/7.64.1"</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>        <span class="dt">"requestId"</span><span class="fu">:</span> <span class="st">"HMP_QiusywMEPEg="</span><span class="fu">,</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>        <span class="dt">"routeKey"</span><span class="fu">:</span> <span class="st">"ANY /parity"</span><span class="fu">,</span></span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>        <span class="dt">"stage"</span><span class="fu">:</span> <span class="st">"default"</span><span class="fu">,</span></span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>        <span class="dt">"time"</span><span class="fu">:</span> <span class="st">"14/Oct/2021:09:35:55 +0000"</span><span class="fu">,</span></span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>        <span class="dt">"timeEpoch"</span><span class="fu">:</span> <span class="dv">1634204155055</span></span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a>    <span class="dt">"body"</span><span class="fu">:</span> <span class="st">"eyJudW1iZXIiOjd9"</span><span class="fu">,</span></span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a>    <span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 </div>
 </div>
   </div>

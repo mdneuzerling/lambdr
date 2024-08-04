@@ -86,7 +86,7 @@
 
 
 
-      </header><script src="context_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using invocation context</h1>
@@ -99,13 +99,23 @@
 
     
     
-<p>Context is metadata associated with each invocation. If the handler function accepts a <code>context</code> argument then it will automatically receive at runtime a named list consisting of these values along with the arguments in the body (if any). For example, a function such as <code>my_func(x, context)</code> will receive the context argument automatically. The <code>context</code> argument must be named (<code>...</code> will not work).</p>
-<p>The following context is made available <strong>as a named list</strong>:</p>
+<p>Context is metadata associated with each invocation. If the handler
+function accepts a <code>context</code> argument then it will
+automatically receive at runtime a named list consisting of these values
+along with the arguments in the body (if any). For example, a function
+such as <code>my_func(x, context)</code> will receive the context
+argument automatically. The <code>context</code> argument must be named
+(<code>...</code> will not work).</p>
+<p>The following context is made available <strong>as a named
+list</strong>:</p>
 <ul>
 <li>
-<code>aws_request_id</code> - The identifier of the invocation request</li>
+<code>aws_request_id</code> - The identifier of the invocation
+request</li>
 <li>
-<code>invoked_function_arn</code> – The Amazon Resource Name (ARN) that’s used to invoke the function. Indicates if the invoker specified a version number or alias.</li>
+<code>invoked_function_arn</code> – The Amazon Resource Name (ARN)
+that’s used to invoke the function. Indicates if the invoker specified a
+version number or alias.</li>
 <li><code>function_name</code></li>
 <li><code>function_version</code></li>
 <li><code>memory_limit_in_mb</code></li>
@@ -115,9 +125,14 @@
 <div class="section level2">
 <h2 id="event-class-specific-context">Event class-specific context<a class="anchor" aria-label="anchor" href="#event-class-specific-context"></a>
 </h2>
-<p>This section concerns future functionality for the <code>lambdr</code> package. It is not yet implemented.</p>
-<p>A particular event <em>class</em> (determined by invocation method) can implement an <code>extract_context</code> method. This could be used to say, include details about the HTTP request if an invocation is coming via an API Gateway.</p>
-<p>In all cases the context should be a named list. The new context is appended to the default values listed above.</p>
+<p>This section concerns future functionality for the
+<code>lambdr</code> package. It is not yet implemented.</p>
+<p>A particular event <em>class</em> (determined by invocation method)
+can implement an <code>extract_context</code> method. This could be used
+to say, include details about the HTTP request if an invocation is
+coming via an API Gateway.</p>
+<p>In all cases the context should be a named list. The new context is
+appended to the default values listed above.</p>
 </div>
   </div>
 

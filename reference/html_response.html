@@ -95,14 +95,14 @@ be returned to the API Gateway without further serialisation.'><!-- mathjax --><
     <div class="ref-description">
     <p>Lambdas behind API Gateways need to send specially formatted responses that
 look like this:</p>
-<p></p><div class="sourceCode json"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="fu">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a>  <span class="dt">"statusCode"</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>  <span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>    <span class="dt">"Content-Type"</span><span class="fu">:</span> <span class="st">"application/json"</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>  <span class="fu">},</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>  <span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>  <span class="dt">"body"</span><span class="fu">:</span> <span class="st">"{</span><span class="ch">\"</span><span class="st">best_animal</span><span class="ch">\"</span><span class="st">: </span><span class="ch">\"</span><span class="st">corgi</span><span class="ch">\"</span><span class="st">}"</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a><span class="fu">}</span></span></code></pre><p></p></div>
+<p></p><div class="sourceCode json"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="dt">"statusCode"</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="dt">"headers"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="dt">"Content-Type"</span><span class="fu">:</span> <span class="st">"application/json"</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="dt">"isBase64Encoded"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="dt">"body"</span><span class="fu">:</span> <span class="st">"{</span><span class="ch">\"</span><span class="st">best_animal</span><span class="ch">\"</span><span class="st">: </span><span class="ch">\"</span><span class="st">corgi</span><span class="ch">\"</span><span class="st">}"</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">}</span></span></code></pre><p></p></div>
 <p>For basic applications where the handler function is returning a simple
 result, <code>lambdr</code> will do its best to automatically return a result compatible
 with API Gateways. It will do this whenever an event is detected as having
