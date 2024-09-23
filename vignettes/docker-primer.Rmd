@@ -31,6 +31,8 @@ An **image** is a bit like a simple, switched-off virtual computer. Or, as Docke
 "a standardized package that includes all of the files, binaries, libraries, and
 configurations to run a container."
 
+![](docker-image.svg)
+
 And what's a **container**?
 [Well](https://docs.docker.com/guides/docker-concepts/the-basics/what-is-a-container/),
 "A container is simply an isolated process with all of the files it needs to
@@ -40,22 +42,23 @@ on and can run your R code. It's independent of your own computing environment,
 but you can give it access to things like directories, so that there's a live
 link between the file system in the container and your local code.
 
+![](docker-container.svg)
+
 The image doesn't come from nowhere. It's created from a **Dockerfile**,
 [which is](https://docs.docker.com/guides/docker-concepts/building-images/writing-a-dockerfile/)
 "a text-based document" that "provides instructions to the image builder on the
-commands to run, files to copy, startup command, and more." You'll commonly see
-Dockerfiles referred to as analogous to a recipe for baking. 
+commands to run, files to copy, startup command, and more." 
 
-So it goes like this, in order:
-
-- Dockerfile
-- Image
-- Container
+![](docker-dockerfile.svg)
 
 It's also very useful to know the following terms:
 
 - You **build** an image from a Dockerfile
 - You **run** a container from the image
+
+This is what the flow looks like, from left to right:
+
+![](dockerfile-image-container.svg)
 
 ### For lambdr
 
@@ -110,8 +113,8 @@ CMD ["handler"]
 
 ### Instructions
 
-Because Dockerfiles are like recipes, they contain **instructions**. In this
-example there are instructions like `FROM` and `RUN`.
+Dockerfiles contain **instructions**. In this example there are instructions 
+like `FROM` and `RUN`.
 
 ### Base image and layers
 
@@ -133,7 +136,7 @@ Base images are hosted in repositories. In our example, the repository is
 environments. The image has a **name**, `r-ver`, and a **tag**, `4.4`.
 
 The instruction `FROM` simply tells the builder to download and use the base
-image.
+image as a starting point.
 
 This particular base image has a version of Linux (Ubuntu 'Jammy'), R, and
 the system dependencies required for using R. Information about the image was
@@ -195,7 +198,7 @@ copied into the image folder. `COPY` uses the same syntax as `cp`, i.e. `source`
 `destination`.
 
 Then, `chmod 755 -R` gets applied to the `/R` folder. In short, this just makes
-sure the files in the folder can be executed now that they are in the image.
+sure the files in the folder can be executed in the image.
 
 ### Runtime and handler
 
@@ -240,7 +243,9 @@ has sections about development versus deployment containers, and how to
 practically figure that stuff out for use with **lambdr**. We recommend reading
 the whole article.
 
-In preparation, you should look into the basics of how to run a Docker container
-interactively. There are tons and tons of tutorials both in text and video form,
-so just search around. The goal is just to get a feel for what it practically
-looks like.
+Before moving on to the article, you may also want to look into the basics of
+Docker more generally. You can get a good feel for what using Docker looks like
+in practice by watching
+[Docker Tutorial for Beginners](https://youtu.be/b0HMimUb4f0?si=W1wrIJgZ2XjADWWK)
+by [James Murphy](https://mcoding.io). Or, if you want a hands-on tutorial there
+is the official [Docker 101 Tutorial](https://www.docker.com/101-tutorial/).
