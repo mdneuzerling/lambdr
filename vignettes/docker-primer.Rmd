@@ -15,7 +15,7 @@ perhaps you are a "not-beginner"! For more thoughts on this topic see Meghan
 Harris's blog post [How I Became A “Not-Beginner” in R](https://thetidytrekker.com/post/how-i-became-a-not-beginner-in-r/not-beginner)]
 R user who has no (or minimal) experience with Docker.
 
-One of the main ways to create __AWS Lambda__ functions is with Docker images.
+One of the main ways to create _AWS Lambda_ functions is with Docker images.
 Don't worry if you don't know what that is yet. What's important to know
 is that **for lambdr to work you need to have a valid Docker image**.
 
@@ -31,7 +31,9 @@ An **image** is a bit like a simple, switched-off virtual computer. Or, as Docke
 "a standardized package that includes all of the files, binaries, libraries, and
 configurations to run a container."
 
+<center>
 ![](docker-image.svg)
+</center>
 
 And what's a **container**?
 [Well](https://docs.docker.com/guides/docker-concepts/the-basics/what-is-a-container/),
@@ -42,14 +44,18 @@ on and can run your R code. It's independent of your own computing environment,
 but you can give it access to things like directories, so that there's a live
 link between the file system in the container and your local code.
 
+<center>
 ![](docker-container.svg)
+</center>
 
 The image doesn't come from nowhere. It's created from a **Dockerfile**,
 [which is](https://docs.docker.com/guides/docker-concepts/building-images/writing-a-dockerfile/)
 "a text-based document" that "provides instructions to the image builder on the
 commands to run, files to copy, startup command, and more." 
 
+<center>
 ![](docker-dockerfile.svg)
+</center>
 
 It's also very useful to know the following terms:
 
@@ -58,7 +64,9 @@ It's also very useful to know the following terms:
 
 This is what the flow looks like, from left to right:
 
+<center>
 ![](dockerfile-image-container.svg)
+</center>
 
 ### For lambdr
 
@@ -204,7 +212,7 @@ sure the files in the folder can be executed in the image.
 
 The final instructions are `ENTRYPOINT` and `CMD`. At this point, all the R
 code, packages, and dependencies have been installed. All that's left is to tell
-__Lambda__ where to find the runtime interface client and `handler` function - 
+_Lambda_ where to find the runtime interface client and `handler` function - 
 both of which are new concepts explained below.
 
 ```{.dockerfile}
@@ -212,14 +220,14 @@ ENTRYPOINT Rscript R/runtime.R
 CMD ["handler"]
 ```
 
-The `runtime.R` file contains two things necessary for __Lambda__ to run:
+The `runtime.R` file contains two things necessary for _Lambda_ to run:
 
 1) A function called `handler()`
   - The orchestrating function that takes input, does stuff, and returns output
   - The equivalent to 'main' in other programming languages
 2) The `lambdr` function `lambdr::start_lambda()`
   - This starts the R runtime interface client, which will then listen for any
-incoming events and pass return values back out of the __Lambda__ function  
+incoming events and pass return values back out of the _Lambda_ function  
 
 An example `runtime.R` is given in the article
 [Placing an R Lambda Runtime in a Container](lambda-runtime-in-container.html).
@@ -227,7 +235,7 @@ For this introduction all you need to know is that `ENTRYPOINT` needs to
 execute `Rscript` on `R/runtime.R` so that `lambdr::start_lambda()` gets called.
 
 `CMD` simply takes the name of the handler function. You can call the handler
-whatever you like, but as there is only ever one handler per __Lambda__, by
+whatever you like, but as there is only ever one handler per _Lambda_, by
 convention we just call it `handler`. The `CMD` gets passed as an argument to
 `lambdr::start_lambda()`.
 
