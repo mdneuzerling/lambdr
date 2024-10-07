@@ -116,43 +116,31 @@ parity(8)
 
 This function can then be placed into a Docker image. An **example** is provided below, but the key components are:
 
-* Start from the `public.ecr.aws/lambda/provided:al2` parent image, which provides the basic components necessary to serve a Lambda
-* Install R and dependencies, both system dependencies and R packages, including the `lambdr` package
+* Start from a minimal Rocker parent image
+* Install package dependencies using `pak`, which also handles system dependencies.
 * Copy across `runtime.R` and any other necessary files
-* Generate a simple bootstrap which runs `runtime.R` with R
 * Set the handler as the `CMD`. The `lambdr` package interprets the handler as the name of the function to use, in this case, "parity". The `CMD` can also be set (or overriden) when setting up the Lambda in AWS.
 
 ```dockerfile
-FROM public.ecr.aws/lambda/provided:al2-x86_64
+FROM docker.io/rocker/r-ver:4.4
 
-ENV R_VERSION=4.0.3
+# curl is required for {pak}
+RUN apt-get update && apt-get -y install --no-install-recommends curl 
 
-RUN yum -y install wget git tar
+# options(warn=2) will make the build error out if package doesn't install
+RUN Rscript -e "options(warn = 2); install.packages('pak')"
 
-RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
-  && wget https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \
-  && yum -y install R-${R_VERSION}-1-1.x86_64.rpm \
-  && rm R-${R_VERSION}-1-1.x86_64.rpm
+# Using {pak} to install R packages: it resolves Ubuntu system dependencies AND
+# the R dependency tree. Other required packages can be installed here.
+RUN Rscript -e "pak::pak('lambdr')"
 
-ENV PATH="${PATH}:/opt/R/${R_VERSION}/bin/"
+RUN mkdir /R
+COPY runtime.R /R
+RUN chmod 755 -R /R
 
-# System requirements for R packages
-RUN yum -y install openssl-devel
-
-RUN Rscript -e "install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"
-RUN Rscript -e "remotes::install_github('mdneuzerling/lambdr')"
-
-RUN mkdir /lambda
-COPY runtime.R /lambda
-RUN chmod 755 -R /lambda
-
-RUN printf '#!/bin/sh\ncd /lambda\nRscript runtime.R' > /var/runtime/bootstrap \
-  && chmod +x /var/runtime/bootstrap
-
+ENTRYPOINT Rscript R/runtime.R
 CMD ["parity"]
 ```
-
-For production uses it's recommended to replace the "al2" tag above with a specific tag for the image.
 
 The image is built and uploaded to AWS Elastic Container Registry (ECR). First, a repository is created:
 
@@ -186,6 +174,8 @@ cat /tmp/response.json
 ```bash
 {"parity":"even"}
 ```
+
+A detailed guide on how to create these Dockerfiles, as well as a guide for those new to Docker, can be found in the vignettes.
 
 ---
 
