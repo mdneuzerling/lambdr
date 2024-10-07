@@ -55,6 +55,9 @@
       <a href="../articles/context.html">Using invocation context</a>
     </li>
     <li>
+      <a href="../articles/docker-primer.html">A Primer on Docker for lambdr</a>
+    </li>
+    <li>
       <a href="../articles/eventbridge-and-sns-invocations.html">EventBridge and SNS Invocations</a>
     </li>
     <li>
@@ -99,87 +102,682 @@
 
     
     
-<p>Consider the following <code>runtime.R</code> file:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">parity</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>parity <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">number</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="st">"even"</span> <span class="kw">else</span> <span class="st">"odd"</span><span class="op">)</span></span>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>This article shows how to bundle up your R code into a Docker
+container and deploy it as an <em>AWS Lambda</em> function using
+<strong>lambdr</strong>. We provide a self-contained working example
+that can be used as a test/template for your own project.</p>
+<p>It is not an exhaustive or authoritative resource on all things
+<em>AWS Lambda</em> and Docker. Rather, it is a guide intended to get
+you up and running.</p>
+<div class="section level3">
+<h3 id="pre-requisites">Pre-requisites<a class="anchor" aria-label="anchor" href="#pre-requisites"></a>
+</h3>
+<p>You will need an AWS account. Remember, <strong>you are responsible
+for the account and any billing costs that are incurred.</strong></p>
+<p>You need to be comfortable with R and have at least a vague
+understanding of Dockerfiles, Docker images, and containers. If you are
+not familiar with Docker, see the article <a href="docker-primer.html">A
+Primer on Docker for lambdr</a>.</p>
+<p>For AWS, you’ll need a vague understanding of one or more of the AWS
+Console, AWS CLI, or AWS CDK, depending on which deployment examples you
+intend to follow later in this article.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="minimal-deployment-ready-example">Minimal Deployment Ready Example<a class="anchor" aria-label="anchor" href="#minimal-deployment-ready-example"></a>
+</h2>
+<p>In this section you will see everything that goes into making an
+absolutely minimal deployment-ready R project with
+<strong>lambdr</strong>.</p>
+<p>Ideally, <em>Lambda</em> functions should be pretty simple and do
+their business briskly. In reality, they may take several minutes to run
+and interact with various other AWS resources such as databases and S3
+buckets.</p>
+<p>The example given here is basic enough to understand, and realistic
+enough to demonstrate some good project structure habits when making a
+<em>Lambda</em>. It purposefully <strong>doesn’t</strong> require access
+to other AWS resources, like S3 buckets or databases: Managing and
+granting permissions are far out of the scope of
+<strong>lambdr</strong>.</p>
+<div class="section level3">
+<h3 id="example-project-structure">Example project structure<a class="anchor" aria-label="anchor" href="#example-project-structure"></a>
+</h3>
+<p>The example project is called <strong>flags</strong>. When given a
+full or partial country name it queries the <a href="https://restcountries.com/" class="external-link">REST Countries</a> API and returns
+information about the country’s flag.</p>
+<pre><code>.
+├── Dockerfile
+└── R
+    ├── functions.R
+    └── runtime.R</code></pre>
+<p>The minimal structure for a project only needs to contain two
+elements</p>
+<ol style="list-style-type: decimal">
+<li>A directory <code>R/</code> containing the R scripts</li>
+<li>Dockerfile</li>
+</ol>
+<p>The Dockerfile packages up the R scripts in a Linux distribution with
+R, any required R packages, and system dependencies for both R and the R
+packages.</p>
+<p>One of the R scripts should always be called
+<code>runtime.R</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="project-file-contents">Project file contents<a class="anchor" aria-label="anchor" href="#project-file-contents"></a>
+</h3>
+<p>First let’s look at the R code.</p>
+<div class="section level4">
+<h4 id="functions-r">functions.R<a class="anchor" aria-label="anchor" href="#functions-r"></a>
+</h4>
+<p>The functions in this file get sourced and used in
+<code>runtime.R</code>.</p>
+<p>Don’t worry if you aren’t familiar with calling RESTful APIs. In
+summary, <code>create_request()</code> makes a request object to ask <a href="https://restcountries.com" class="external-link uri">https://restcountries.com</a> about a country’s flag. Then
+<code>perform_request()</code> sends the request to the website,
+checking the response with the helper function
+<code>unsuccessful()</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://httr2.r-lib.org" class="external-link">httr2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">create_request</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">country</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="st">"'country' must be a string containing a full or partial country name, e.g. 'ghana'"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">country</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">country</span> <span class="op">&lt;-</span> <span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/URLencode.html" class="external-link">URLencode</a></span><span class="op">(</span><span class="va">country</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">base_url</span> <span class="op">&lt;-</span> <span class="st">"https://restcountries.com/v3.1/name/"</span></span>
+<span></span>
+<span>  <span class="fu">httr2</span><span class="fu">::</span><span class="fu"><a href="https://httr2.r-lib.org/reference/request.html" class="external-link">request</a></span><span class="op">(</span><span class="va">base_url</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">httr2</span><span class="fu">::</span><span class="fu"><a href="https://httr2.r-lib.org/reference/req_user_agent.html" class="external-link">req_user_agent</a></span><span class="op">(</span></span>
+<span>      <span class="st">"lambdr example (https://github.com/mdneuzerling/lambdr/)"</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">httr2</span><span class="fu">::</span><span class="fu"><a href="https://httr2.r-lib.org/reference/req_url.html" class="external-link">req_url_path_append</a></span><span class="op">(</span><span class="va">country</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">httr2</span><span class="fu">::</span><span class="fu"><a href="https://httr2.r-lib.org/reference/req_url.html" class="external-link">req_url_query</a></span><span class="op">(</span>fields <span class="op">=</span> <span class="st">"flags"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="../reference/start_lambda.html">start_lambda</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>parity</code> function accepts a <code>number</code>
-argument and returns its parity as a named list, for example:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">parity</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co"># $parity</span></span>
-<span><span class="co"># [1] "odd"</span></span>
+<span><span class="va">unsuccessful</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">resp</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">body</span> <span class="op">&lt;-</span> <span class="fu">httr2</span><span class="fu">::</span><span class="fu"><a href="https://httr2.r-lib.org/reference/resp_body_raw.html" class="external-link">resp_body_json</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span></span>
+<span>  <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"\nHTTP %s: %s.\n"</span>, <span class="va">body</span><span class="op">$</span><span class="va">status</span>, <span class="va">body</span><span class="op">$</span><span class="va">message</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span></span>
+<span>    <span class="va">msg</span>,</span>
+<span>    <span class="st">"Check supplied country name is valid and/or the server status."</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span></span>
+<span><span class="va">perform_request</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">req</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">resp</span> <span class="op">&lt;-</span> <span class="va">req</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">httr2</span><span class="fu">::</span><span class="fu"><a href="https://httr2.r-lib.org/reference/req_error.html" class="external-link">req_error</a></span><span class="op">(</span>is_error <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">httr2</span><span class="fu">::</span><span class="fu"><a href="https://httr2.r-lib.org/reference/req_perform.html" class="external-link">req_perform</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">parity</span><span class="op">(</span><span class="fl">8</span><span class="op">)</span></span>
-<span><span class="co"># $parity</span></span>
-<span><span class="co"># [1] "even"</span></span></code></pre></div>
-<p>This function can then be placed into a Docker image. An
-<strong>example</strong> is provided below, but the key components
-are:</p>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">resp</span><span class="op">[[</span><span class="st">"status_code"</span><span class="op">]</span><span class="op">]</span> <span class="op">!=</span> <span class="fl">200L</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu">unsuccessful</span><span class="op">(</span><span class="va">resp</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu">httr2</span><span class="fu">::</span><span class="fu"><a href="https://httr2.r-lib.org/reference/resp_body_raw.html" class="external-link">resp_body_json</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="runtime-r">runtime.R<a class="anchor" aria-label="anchor" href="#runtime-r"></a>
+</h4>
+<p>This file orchestrates the rest of the R code and starts up the
+<strong>lambdr</strong> runtime interface client.</p>
+<p><code>runtime.R</code> is short and simple. There are three main
+sections</p>
+<ol style="list-style-type: decimal">
+<li>Set up: loading packages, sourcing functions, and indicating a
+logging threshold</li>
+<li>The <code>handler()</code> function definition</li>
+<li>Start <strong>lambdr</strong>
+</li>
+</ol>
+<p>Your <em>Lambda</em> function will likely<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> take a JSON payload
+with some inputs. <strong>lambdr</strong> will convert that JSON into an
+R list and pass the items to <code>handler()</code>.</p>
+<p>For example, a payload for this <code>flags</code> <em>Lambda</em>
+could be <code>{"country": "ghana"}</code>. <strong>lambdr</strong>
+would convert it to <code>list(country = "ghana")</code>, then pass it
+to <code>handler()</code> for us.</p>
+<p>Note that if <code><a href="../reference/start_lambda.html">lambdr::start_lambda()</a></code> is called
+interactively it will throw an error. This is intentional.
+<strong>lambdr</strong> relies on the presence of environment variables
+that are only available when in the deployed <em>Lambda</em> execution
+environment. However, you may want to test your code in interactive
+sessions during development, so we simply wrap the function in
+<code>if (!interactive())</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lambdr.mdneuzerling.com/">lambdr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://daroczig.github.io/logger/" class="external-link">logger</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"R"</span>, <span class="st">"functions.R"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">logger</span><span class="fu">::</span><span class="fu"><a href="https://daroczig.github.io/logger/reference/log_threshold.html" class="external-link">log_threshold</a></span><span class="op">(</span><span class="fu">logger</span><span class="fu">::</span><span class="va"><a href="https://daroczig.github.io/logger/reference/log_levels.html" class="external-link">DEBUG</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">handler</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">country</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">logger</span><span class="fu">::</span><span class="fu"><a href="https://daroczig.github.io/logger/reference/log_level.html" class="external-link">log_info</a></span><span class="op">(</span><span class="st">"Event received: "</span>, <span class="va">country</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">req</span> <span class="op">&lt;-</span> <span class="fu">create_request</span><span class="op">(</span><span class="va">country</span><span class="op">)</span></span>
+<span>  <span class="va">resp</span> <span class="op">&lt;-</span> <span class="fu">perform_request</span><span class="op">(</span><span class="va">req</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">lambdr</span><span class="fu">::</span><span class="fu"><a href="../reference/start_lambda.html">start_lambda</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="dockerfile">Dockerfile<a class="anchor" aria-label="anchor" href="#dockerfile"></a>
+</h4>
+<p>The Dockerfile builds on the one in <a href="docker-primer.html">A
+Primer on Docker for lambdr</a>. That article explains each item in the
+Dockerfile step-by-step. Here, we emphasise what makes the Dockerfile
+below production-ready.</p>
+<p>Essentially, it’s all about version control.</p>
+<p>Once the project is ready for deployment you should pin the base
+image to a specific version. To do this you provide the image’s
+<strong>digest</strong>, which is a hash value. Here we use
+<code>@sha256:429...</code> which is for the amd64 version of
+<code>rocker/r-ver:4.4</code> at time of writing. Using the tag is not
+sufficient because the image it refers to can be subject to change - but
+the image specified by the digest will not.</p>
+<p>To find a digest for an image you’ve already pulled you can use
+<code>docker images --digests</code>. Or you can get it from the
+repository where you found the image.</p>
+<p>The other version control aspect here is using the <a href="https://packagemanager.posit.co/client/#/repos/cran/setup" class="external-link">Posit
+Public Package Manager</a> to get amd64 Ubuntu binaries from a snapshot
+of CRAN. This is simple, but not necessary. For example, you could use
+<a href="https://rstudio.github.io/renv/index.html" class="external-link">renv</a> instead.
+But the point is, version the R packages - somehow!</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="kw">FROM</span> docker.io/rocker/r-ver:4.4@sha256:429c1a585ab3cd6b120fe870fc9ce4dc83f21793bf04d7fa2657346fffde28d1</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co"># options(warn=2) will make the build error out if package doesn't install</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"options(warn = 2); install.packages('pak')"</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co"># Using {pak} to install R packages: it resolves Ubuntu system dependencies AND</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co"># the R dependency tree</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"options( \ </span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="st">    warn = 2, </span><span class="dt">\</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="st">    repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/2024-07-06') </span><span class="dt">\</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="st">    ); \ </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="st">    pak::pak( \ </span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="st">    c( \ </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="st">    'httr2', </span><span class="dt">\</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="st">    'lambdr' </span><span class="dt">\</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="st">    ) </span><span class="dt">\</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="st">    )"</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co"># Lambda setup</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">mkdir</span> /R</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="kw">COPY</span> R/ /R</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">chmod</span> 755 <span class="at">-R</span> /R</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="kw">ENTRYPOINT</span> <span class="ex">Rscript</span> R/runtime.R</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"handler"</span>]</span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="completed-project">Completed project<a class="anchor" aria-label="anchor" href="#completed-project"></a>
+</h4>
+<p>That’s it! These three files are all you need</p>
+<pre><code>.
+├── Dockerfile
+└── R
+    ├── functions.R
+    └── runtime.R</code></pre>
+<p>The following sections expand on considerations such as local testing
+and how to deploy the project into AWS.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="choosing-base-images">Choosing base images<a class="anchor" aria-label="anchor" href="#choosing-base-images"></a>
+</h2>
+<p>For R you can use any base image you want. So long as you have all
+the system dependencies required for R and the R packages, you only need
+to have <strong>lambdr</strong> installed and used as in the minimal
+example given above.</p>
+<div class="section level3">
+<h3 id="do-use">Do use<a class="anchor" aria-label="anchor" href="#do-use"></a>
+</h3>
+<p>We recommend <a href="https://rocker-project.org/images/versioned/r-ver" class="external-link">Rocker’s
+r-ver</a> images.</p>
+<p>They offer a tested, versioned R stack. Newer versions can be used
+with the <a href="https://packagemanager.posit.co/client/#/repos/cran/setup" class="external-link">Posit
+Public Package Manager</a> to install Ubuntu binaries of packages as at
+a certain date on CRAN. They also allow use of <a href="https://pak.r-lib.org/" class="external-link">pak</a>, which makes life very convenient
+in terms of finding and installing R package system dependencies.</p>
+</div>
+<div class="section level3">
+<h3 id="do-not-use">Do not use<a class="anchor" aria-label="anchor" href="#do-not-use"></a>
+</h3>
+<p>The <a href="https://gallery.ecr.aws/lambda/provided" class="external-link">AWS Lambda
+‘provided’</a> images.</p>
+<p>They are minimal OS images. That means the base image is fairly
+small, which is positive. However, you have to install R and any
+dependencies yourself.</p>
+<p>More importantly, at time of writing the current OS in the newer
+images is Amazon Linux 2, which is not based on a singular Linux distro,
+but rather a blend of multiple. That makes installing R package binaries
+and system dependencies more challenging, and slow.</p>
+<p>The previous version of the OS (Amazon Linux 2023) is drastically
+different to Amazon Linux 2 and will no longer receive support from AWS
+by the end of summer 2025.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="dev-vs-deployment-dockerfiles">Dev vs deployment Dockerfiles<a class="anchor" aria-label="anchor" href="#dev-vs-deployment-dockerfiles"></a>
+</h2>
+<p>Up until this point we have only shown and discussed a Dockerfile for
+deployment. While you are doing development work, it is a good idea to
+have a dev Dockerfile.</p>
+<p>The dev Dockerfile should mimic the deployment one as much as
+possible, but will also have any extra features you need to make your
+life easier as a developer.</p>
+<div class="section level3">
+<h3 id="dockerfile-dev">Dockerfile.dev<a class="anchor" aria-label="anchor" href="#dockerfile-dev"></a>
+</h3>
+<p>The example given below can be added to the <code>flags</code>
+project</p>
+<pre><code>.
+├── Dockerfile
+├── Dockerfile.dev
+└── R
+    ├── functions.R
+    └── runtime.R</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="kw">FROM</span> ghcr.io/rocker-org/devcontainer/r-ver:4.4@sha256:e99cfe63efd5d79f44146d8be8206019fd7a7230116aa6488097ee660d6aa5dc</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># Install the Lambda Runtime Interface Emulator, which can be used for locally</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># invoking the function.</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># See https://github.com/aws/aws-lambda-runtime-interface-emulator for details</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="ex">apt-get</span> <span class="at">-y</span> install <span class="at">--no-install-recommends</span> curl </span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">curl</span> <span class="at">-Lo</span> /usr/local/bin/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    <span class="fu">chmod</span> +x /usr/local/bin/aws-lambda-rie</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># options(warn=2) will make the build error out if package doesn't install</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"options(warn = 2); install.packages('pak')"</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co"># Using {pak} to install R packages: it resolves Ubuntu system dependencies AND</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co"># the R dependency tree</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"options( \ </span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="st">    warn = 2, </span><span class="dt">\</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="st">    repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/2024-07-06') </span><span class="dt">\</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="st">    ); \ </span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="st">    pak::pak( \ </span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="st">    c( \ </span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="st">    'httr2', </span><span class="dt">\</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="st">    'lambdr' </span><span class="dt">\</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="st">    ) </span><span class="dt">\</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="st">    )"</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co"># Lambda setup</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">mkdir</span> /R</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co"># Needs to be set to use aws-lambda-rie. It is the path up to runtime.R</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="kw">ENV</span> LAMBDA_TASK_ROOT=<span class="st">"/R"</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co"># Optional for local testing</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co"># 900s, i.e. 15 min, the max time a lambda can run for.</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="kw">ENV</span> AWS_LAMBDA_FUNCTION_TIMEOUT=900</span></code></pre></div>
+<p>The differences as compared to the deployment Dockerfile are</p>
+<ol style="list-style-type: decimal">
+<li>Uses a Dev Container base image
 <ul>
-<li>Start from the <code>public.ecr.aws/lambda/provided:al2</code>
-parent image, which provides the basic components necessary to serve a
-Lambda</li>
-<li>Install R and dependencies, both system dependencies and R packages,
-including the <code>lambdr</code> package</li>
-<li>Copy across <code>runtime.R</code> and any other necessary
-files</li>
-<li>Generate a simple bootstrap which runs <code>runtime.R</code> with
-R</li>
-<li>Set the handler as the <code>CMD</code>. The <code>lambdr</code>
-package interprets the handler as the name of the function to use, in
-this case, “parity”. The <code>CMD</code> can also be set (or overriden)
-when setting up the Lambda in AWS.</li>
+<li>Adds some tooling</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="kw">FROM</span> public.ecr.aws/lambda/provided:al2</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="kw">ENV</span> R_VERSION=4.0.3</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">yum</span> <span class="at">-y</span> install wget git tar</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">yum</span> <span class="at">-y</span> install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm <span class="dt">\</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="fu">wget</span> https://cdn.rstudio.com/r/centos-7/pkgs/R-<span class="va">${R_VERSION}</span>-1-1.x86_64.rpm <span class="dt">\</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="ex">yum</span> <span class="at">-y</span> install R-<span class="va">${R_VERSION}</span>-1-1.x86_64.rpm <span class="dt">\</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> R-<span class="va">${R_VERSION}</span>-1-1.x86_64.rpm</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="kw">ENV</span> PATH=<span class="st">"${PATH}:/opt/R/${R_VERSION}/bin/"</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co"># System requirements for R packages</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">yum</span> <span class="at">-y</span> install openssl-devel</span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"remotes::install_github('mdneuzerling/lambdr')"</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">mkdir</span> /lambda</span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="kw">COPY</span> runtime.R /lambda</span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">chmod</span> 755 <span class="at">-R</span> /lambda</span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="kw">RUN</span> <span class="bu">printf</span> <span class="st">'#!/bin/sh\ncd /lambda\nRscript runtime.R'</span> <span class="op">&gt;</span> /var/runtime/bootstrap <span class="dt">\</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="fu">chmod</span> +x /var/runtime/bootstrap</span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a></span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"parity"</span>]</span></code></pre></div>
-<p>The image is built and uploaded to AWS Elastic Container Registry
-(ECR). First, a repository is created:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">aws</span> ecr create-repository <span class="at">--repository-name</span> parity-lambda <span class="at">--image-scanning-configuration</span> scanOnPush=true</span></code></pre></div>
-<p>This provides a URI, the resource identifier of the created
-repository. The image can now be pushed:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="ex">docker</span> tag mdneuzerling/r-on-lambda:latest {URI}/parity-lambda:latest</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login <span class="at">--username</span> AWS <span class="at">--password-stdin</span> {URI}</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="ex">docker</span> push {URI}/parity-lambda:latest</span></code></pre></div>
-<p>In either the AWS console or the command line, a Lambda can be
-created from this image. Call the Lambda “parity” to match the function
-name. Tests can be executed within the console. Alternatively the Lambda
-can be invoked from the CLI:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="ex">aws</span> lambda invoke <span class="at">--function-name</span> parity <span class="dt">\</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">--invocation-type</span> RequestResponse <span class="at">--payload</span> <span class="st">'{"number": 8}'</span> <span class="dt">\</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  /tmp/response.json <span class="at">--cli-binary-format</span> raw-in-base64-out</span></code></pre></div>
-<p>The output is now available in the generated file:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">cat</span> /tmp/response.json            </span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">{</span><span class="st">"parity"</span><span class="ex">:</span><span class="st">"even"</span><span class="ex">}</span></span></code></pre></div>
+</li>
+<li>Installs the Lambda Runtime Interface Emulator
+<ul>
+<li>The RIE opens up the possibility of locally testing the
+<em>Lambda</em> function</li>
+</ul>
+</li>
+<li>Doesn’t copy R files into the image
+<ul>
+<li>Instead, create a live link between system and container file
+systems at run time</li>
+</ul>
+</li>
+</ol>
+<div class="section level4">
+<h4 id="the-dev-container-base-image">The Dev Container base image<a class="anchor" aria-label="anchor" href="#the-dev-container-base-image"></a>
+</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="kw">FROM</span> ghcr.io/rocker-org/devcontainer/r-ver:4.4@sha256:e99cfe63efd5d79f44146d8be8206019fd7a7230116aa6488097ee660d6aa5dc</span></code></pre></div>
+<p>This time we are using a devcontainer base image, <a href="https://containers.dev/" class="external-link">which</a> “allows you to use a container
+as a full-featured development environment”. This is made by Rocker and
+it’s the same as the r-ver:4.4 image but with some extra tooling.</p>
+<p>The most valuable of these is having <a href="https://github.com/randy3k/radian" class="external-link">radian</a> and its dependencies
+installed, plus some of the other usual setup required to use VS Code as
+an IDE for R. Using the actual devcontainer VS Code extension is an
+exercise left for the reader, and with a word of warning: One of the
+authors of this vignette has seen some M2 MacBook Pros with 16GB of RAM
+struggling to run the devcontainer extension.</p>
+<p>If you prefer RStudio as your IDE as an alternative you could use a
+<a href="https://rocker-project.org/images/versioned/rstudio.html" class="external-link">Rocker
+RStudio Server</a> image.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="build-and-run-dev-container">Build and run dev container<a class="anchor" aria-label="anchor" href="#build-and-run-dev-container"></a>
+</h2>
+<p>While you’re developing it’s a good idea to work out of the dev
+container.</p>
+<p>One option for doing so is to have a “build script” that builds the
+image and runs a container.</p>
+<pre><code>.
+├── build.sh
+├── Dockerfile
+├── Dockerfile.dev
+└── R
+    ├── functions.R
+    └── runtime.R</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co">#!/bin/sh</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="ex">docker</span> stop flags <span class="kw">&amp;&amp;</span> <span class="ex">docker</span> container rm flags</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> flags:latest <span class="dt">\</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>             <span class="at">-f</span> Dockerfile.dev .</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="ex">docker</span> run <span class="dt">\</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    <span class="at">-p</span> 9000:8080 <span class="dt">\</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>    <span class="at">-it</span> <span class="dt">\</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>    <span class="at">--rm</span> <span class="dt">\</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>    <span class="at">-v</span> ~/.aws/:/root/.aws <span class="dt">\</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>    <span class="at">-v</span> ./R:/R <span class="dt">\</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    <span class="at">--name</span> flags <span class="dt">\</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    flags:latest <span class="dt">\</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>    bash</span></code></pre></div>
+<p>You might run this script by doing
+e.g. <code>bash build.sh</code></p>
+<p>If a container already exists it will be stopped and removed. Note
+that if there <strong>isn’t</strong> an image you’ll see an error
+<code>Error response from daemon: No such container: flags</code> – this
+is expected.</p>
+<p>The image will only build if <code>Dockerfile.dev</code> has been
+altered or is being built for the first time.</p>
+<p>The options being given to <code>docker run</code> are:</p>
+<ul>
+<li>
+<code>-p</code> Publishes port 9000 to host’s 8080. For local
+testing using the Lambda RIE (see below)</li>
+<li>
+<code>-it</code> Start the container with an interactive
+terminal</li>
+<li>
+<code>--rm</code> Remove the container when it is exited</li>
+<li>
+<code>-v</code> Mount. Creates a live link between the host and
+container file system
+<ul>
+<li>
+<code>~/.aws</code> makes AWS credentials available in the
+container. Can be useful if you need to use {<a href="https://www.paws-r-sdk.com/" class="external-link">paws</a>}. If you don’t need AWS
+creds in the container then you shouldn’t mount this volume</li>
+<li>
+<code>./R</code> contains the lambda code</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="local-testing-with-aws-rie">Local testing with AWS RIE<a class="anchor" aria-label="anchor" href="#local-testing-with-aws-rie"></a>
+</h2>
+<p>In the dev Dockerfile we installed the AWS Runtime Interface Emulator
+(RIE).</p>
+<p>The emulator gets as close to the environment of a <em>Lambda</em> as
+is possible without actually pushing up to AWS and invoking.</p>
+<p>Two small shell scripts in <code>local-testing</code> below, plus the
+build script from the previous section (required for port forwarding)
+are all we need to add:</p>
+<pre><code>.
+├── local-testing
+│   ├── event.sh
+│   └── start-rie.sh
+├── build.sh
+├── Dockerfile
+├── Dockerfile.dev
+└── R
+    ├── functions.R
+    └── runtime.R</code></pre>
+<p><code>start-rie.sh</code> starts the emulator with our handler:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="bu">exec</span> /usr/local/bin/aws-lambda-rie Rscript /R/runtime.R handler</span></code></pre></div>
+<p>Run <code>bash local-testing/start-rie.sh</code> from <strong>inside
+the running container</strong>. This will start the emulator, which runs
+an HTTP endpoint, similar to what happens in the deployed
+<em>Lambda</em>. The endpoint will be waiting for a payload to pass to
+the R code and this makes the container’s terminal busy. If you need to
+stop the process just press <code>Ctrl</code> + <code>C</code>.</p>
+<p>Sending a payload to the emulator is the equivalent of invoking the
+<em>Lambda</em>. This is done with <code>event.sh</code>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="va">port</span><span class="op">=</span><span class="st">"9000"</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="va">endpoint</span><span class="op">=</span><span class="st">"http://localhost:</span><span class="va">$port</span><span class="st">/2015-03-31/functions/function/invocations"</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-XPOST</span> <span class="va">$endpoint</span> <span class="at">-d</span> <span class="st">'{"country":"'"</span><span class="va">$1</span><span class="st">"'"}'</span></span></code></pre></div>
+<p>Simply run <code>bash local-testing/event.sh someCountry</code>
+replacing <code>someCountry</code> with a partial or full country name.
+The result will appear in your terminal. If you go look at the container
+terminal all the logs (equivalent to what would appear in
+<em>CloudWatch</em>) from the execution will be present. The RIE will
+run until you stop it with <code>Ctrl</code> + <code>C</code>.</p>
+<p>If your own <em>Lambda</em> doesn’t actually take any parameters then
+your payload should be an empty json:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="va">port</span><span class="op">=</span><span class="st">"9000"</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="va">endpoint</span><span class="op">=</span><span class="st">"http://localhost:</span><span class="va">$port</span><span class="st">/2015-03-31/functions/function/invocations"</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-XPOST</span> <span class="va">$endpoint</span> <span class="at">-d</span> <span class="st">'{}'</span></span></code></pre></div>
+<p>And finally, one more option if using the devcontainer VS Code
+extension. Because you can spawn multiple terminals from within the
+container, you can start the RIE <strong>and</strong> send it a payload
+from another terminal inside the container. In this case the port will
+be <code>8080</code>, which is easy to add logic for in
+<code>event.sh</code> because of the devcontainer envvar
+<code>$DEVCONTAINER</code>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$DEVCONTAINER</span><span class="st">"</span> <span class="ot">=</span> <span class="st">"TRUE"</span> <span class="bu">]</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="cf">then</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>    <span class="va">port</span><span class="op">=</span><span class="st">"8080"</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    <span class="va">port</span><span class="op">=</span><span class="st">"9000"</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="deployment">Deployment<a class="anchor" aria-label="anchor" href="#deployment"></a>
+</h2>
+<p>At this point, you will have <strong>at minimum</strong> a project
+with Dockerfile, some R code, and a <code>runtime.R</code> that starts
+<code>lambdr</code>:</p>
+<pre><code>.
+├── Dockerfile
+└── R
+    ├── functions.R
+    └── runtime.R</code></pre>
+<p>Deployment is the act of turning these files into an <em>AWS
+Lambda</em> function that can be invoked. Here we provide some rough
+instructions for two common ways of deploying: via the AWS Console (the
+website), and the AWS Cloud Development Kit (CDK).</p>
+<p><strong>For both options you will need to have the AWS CLI installed
+(<a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" class="external-link">instructions</a>)
+as a prerequisite</strong>. The CLI is how you interact with AWS from
+the terminal.</p>
+<div class="section level3">
+<h3 id="aws-console">AWS Console<a class="anchor" aria-label="anchor" href="#aws-console"></a>
+</h3>
+<p>The following instructions use the example project given earlier,
+<code>flags</code>.</p>
+<p>The steps are:</p>
+<ul>
+<li>Build the image</li>
+<li>Create a repository in the <em>AWS Elastic Container Registry</em>
+(ECR)</li>
+<li>Push the image to <em>ECR</em>
+</li>
+<li>Make the <em>Lambda</em> function from the image in
+<em>ECR</em>
+</li>
+</ul>
+<p>First, in a terminal <code>cd</code> to the project and build the
+image:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> flags:latest .</span></code></pre></div>
+<p>Then, create a repository in ECR either by using the CLI or the
+Console. If you do it in the Console you pretty much just go to the
+<em>ECR</em> service, click <code>Create</code>, and call it
+<code>flags</code>.</p>
+<p>Or you can use the CLI:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="ex">aws</span> ecr create-repository <span class="at">--repository-name</span> flags <span class="at">--image-scanning-configuration</span> scanOnPush=true</span></code></pre></div>
+<p>Make a note of the URI, which is the resource identifier of the
+created repository.</p>
+<p>The image can now be pushed to the repository. This part has to be
+done via the CLI. You can get all the commands ready-made for you via
+the Console by clicking on the repo name in <em>ECR</em>, then
+<code>View push commands</code>. Or, you can replace the username
+<code>123456789123</code> and the region <code>region-name-1</code> in
+the commands below to do the same thing.</p>
+<p>Note: You don’t need a Docker account for the
+<code>docker login</code> command.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="ex">docker</span> tag flags:latest 123456789123.dkr.ecr.region-name-1.amazonaws.com/flags</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="ex">aws</span> ecr get-login-password <span class="kw">|</span> <span class="ex">docker</span> login <span class="at">--username</span> AWS <span class="at">--password-stdin</span> 123456789123.dkr.ecr.region-name-1.amazonaws.com/flags</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="ex">docker</span> push 123456789123.dkr.ecr.region-name-1.amazonaws.com/flags:latest</span></code></pre></div>
+<p>Now that the image is in <em>ECR</em> it can be used to make the
+<em>Lambda</em> function. You could make it from the command line, but
+this requires an IAM Role to be configured and ready for the function.
+That is beyond the scope of lambdr. If you have a Role and prefer to use
+the CLI, see the examples in
+<code>aws lambda create-function help</code></p>
+<p>In the Console go to the <em>Lambda</em> service. Click
+<code>Create a function</code>. Choose the container image option, give
+it a name (<code>flags</code> is fine) and choose the image from the
+<em>ECR</em> repository. Everything else can be left default.</p>
+<p>It will take a minute for the function to be made.</p>
+<p>Once it is, you can test it by scrolling down and clicking on the
+<code>Test</code> tab. Edit the <code>Event JSON</code> to be
+<code>{"country": "namibia"}</code>, then click the orange
+<code>Test</code> button. It should be successful. To see the response
+click <code>Details</code>, beneath the big green tick.</p>
+<p>However, there’s a good chance of a timeout because the default value
+for a <em>Lambda</em> is only 3 seconds. To increase it, click on the
+<code>Configuration</code> tab, then <code>Edit</code>, and bump it up.
+10 seconds is fine in this case.</p>
+<p>Alternatively the <em>Lambda</em> can be invoked from the CLI:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="ex">aws</span> lambda invoke <span class="at">--function-name</span> flags <span class="dt">\</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>  <span class="at">--invocation-type</span> RequestResponse <span class="at">--payload</span> <span class="st">'{"country": "namibia"}'</span> <span class="dt">\</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>  /tmp/response.json <span class="at">--cli-binary-format</span> raw-in-base64-out</span></code></pre></div>
+<p>See the response with:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">cat</span> /tmp/response.json            </span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="ot">[</span><span class="fu">{</span><span class="dt">"flags"</span><span class="fu">:{</span><span class="dt">"png"</span><span class="fu">:</span><span class="st">"https://flagcdn.com/w320/na.png"</span><span class="fu">,</span><span class="dt">"svg"</span><span class="fu">:</span><span class="st">"https://flagcdn.com/na.svg"</span><span class="fu">,</span><span class="dt">"alt"</span><span class="fu">:</span><span class="st">"The flag of Namibia features a white-edged red diagonal band that extends from the lower hoist-side corner to the upper fly-side corner of the field. Above and beneath this band are a blue and green triangle respectively. A gold sun with twelve triangular rays is situated on the hoist side of the upper triangle."</span><span class="fu">}}</span><span class="ot">]</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="cloud-development-kit-cdk">Cloud Development Kit (CDK)<a class="anchor" aria-label="anchor" href="#cloud-development-kit-cdk"></a>
+</h3>
+<p>The CDK allows you to programatically create application stacks and
+all of the associated resources they need, like Lambdas, Step Functions,
+and so on. It’s an alternative to clicking around in the AWS Console and
+means that your stack can (theoretically) be rebuilt at any time with
+just a few commands.</p>
+<p><strong>First <a href="https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html" class="external-link">install
+the CDK CLI</a>.</strong></p>
+<p>Once the CDK CLI is installed:</p>
+<p>Make a directory somewhere called <code>LambdrExample</code>, then
+<code>cd</code> into the directory and run the following in the
+terminal:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="ex">cdk</span> init app <span class="at">--language</span> typescript</span></code></pre></div>
+<p>You will now have a bunch of files and folders containing boilerplate
+code and libraries. We’re only interested in the <code>bin</code> and
+<code>lib</code> directories. You also need to add a new directory
+called <code>lambda</code>, and to that, the <code>flags</code> project,
+like below:</p>
+<pre><code>.
+├── bin
+│  └── lambdr_example.ts
+├── lambda
+│  └── flags
+│     ├── Dockerfile
+│     └── R
+│        ├── functions.R
+│        └── runtime.R
+└── lib
+   └── lambdr_example-stack.ts</code></pre>
+<p>Replace the contents of <code>bin/lambdr_example.ts</code> with
+this:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co">#!/usr/bin/env node</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="im">import</span> <span class="st">"source-map-support/register"</span><span class="op">;</span></span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> cdk <span class="im">from</span> <span class="st">"aws-cdk-lib"</span><span class="op">;</span></span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="im">import</span> { LambdrExampleStack } <span class="im">from</span> <span class="st">"../lib/lambdr_example-stack.ts"</span><span class="op">;</span></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="kw">const</span> app <span class="op">=</span> <span class="kw">new</span> cdk<span class="op">.</span><span class="fu">App</span>()<span class="op">;</span></span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a><span class="kw">new</span> <span class="fu">LambdrExampleStack</span>(app<span class="op">,</span> <span class="st">"LambdrExampleStack"</span><span class="op">,</span> {</span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>  <span class="co">// Your account number and region go in the env below</span></span>
+<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a>  env<span class="op">:</span> { account<span class="op">:</span> <span class="st">"111122223333"</span><span class="op">,</span> region<span class="op">:</span> <span class="st">"my-region-1"</span> }<span class="op">,</span></span>
+<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<p>Replace the contents of <code>lib/lambdr_example-stack.ts</code> with
+this:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> cdk <span class="im">from</span> <span class="st">"aws-cdk-lib"</span><span class="op">;</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a><span class="im">import</span> { Construct } <span class="im">from</span> <span class="st">"constructs"</span><span class="op">;</span></span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> lambda <span class="im">from</span> <span class="st">"aws-cdk-lib/aws-lambda"</span><span class="op">;</span></span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a><span class="im">export</span> <span class="kw">class</span> LambdrExampleStack <span class="kw">extends</span> cdk<span class="op">.</span><span class="at">Stack</span> {</span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>  <span class="kw">constructor</span>(scope<span class="op">:</span> Construct<span class="op">,</span> id<span class="op">:</span> <span class="dt">string</span><span class="op">,</span> props<span class="op">?:</span> cdk<span class="op">.</span><span class="at">StackProps</span>) {</span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>    <span class="kw">super</span>(scope<span class="op">,</span> id<span class="op">,</span> props)<span class="op">;</span></span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">createFlagsLambda</span>()<span class="op">;</span></span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a>  }</span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a>  <span class="fu">createFlagsLambda</span>()<span class="op">:</span> lambda<span class="op">.</span><span class="at">IFunction</span> {</span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a>    <span class="kw">const</span> flagsLambda <span class="op">=</span> <span class="kw">new</span> lambda<span class="op">.</span><span class="fu">DockerImageFunction</span>(<span class="kw">this</span><span class="op">,</span> <span class="st">"flags"</span><span class="op">,</span> {</span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a>      functionName<span class="op">:</span> <span class="st">"flags"</span><span class="op">,</span></span>
+<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a>      code<span class="op">:</span> lambda<span class="op">.</span><span class="at">DockerImageCode</span><span class="op">.</span><span class="fu">fromImageAsset</span>(<span class="st">"lambda/flags"</span>)<span class="op">,</span></span>
+<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a>      timeout<span class="op">:</span> cdk<span class="op">.</span><span class="at">Duration</span><span class="op">.</span><span class="fu">seconds</span>(<span class="dv">15</span>)<span class="op">,</span></span>
+<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" tabindex="-1"></a>    <span class="cf">return</span> flagsLambda<span class="op">;</span></span>
+<span id="cb26-20"><a href="#cb26-20" tabindex="-1"></a>  }</span>
+<span id="cb26-21"><a href="#cb26-21" tabindex="-1"></a>}</span></code></pre></div>
+<p>You then need to run</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="ex">cdk</span> bootstrap</span></code></pre></div>
+<p>Followed by</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="ex">cdk</span> deploy</span></code></pre></div>
+<p>Some building will happen and then you will be prompted as to whether
+you wish to deploy a couple of changes. If you feel comfortable, enter
+<code>y</code> and hit return.</p>
+<p><em>Note: If you get a failure because no bucket and/or ECR
+repository exist, this is probably because you have previously
+bootstrapped your account and now have “stack drift”. To resolve this,
+delete the <code>CDKToolkit</code> stack from CloudFormation and
+re-bootstrap. For more information, see SO <a href="https://stackoverflow.com/questions/71280758/aws-cdk-bootstrap-itself-broken/71283964#71283964" class="external-link">here</a>.</em></p>
+<p>If all has gone well you should see a green tick and sparkles with
+deployment time.</p>
+<p>Test by invoking from the CLI:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="ex">aws</span> lambda invoke <span class="at">--function-name</span> flags <span class="dt">\</span></span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>  <span class="at">--invocation-type</span> RequestResponse <span class="at">--payload</span> <span class="st">'{"country": "namibia"}'</span> <span class="dt">\</span></span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>  /tmp/response.json <span class="at">--cli-binary-format</span> raw-in-base64-out</span></code></pre></div>
+<p>See the response with:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">cat</span> /tmp/response.json            </span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="ot">[</span><span class="fu">{</span><span class="dt">"flags"</span><span class="fu">:{</span><span class="dt">"png"</span><span class="fu">:</span><span class="st">"https://flagcdn.com/w320/na.png"</span><span class="fu">,</span><span class="dt">"svg"</span><span class="fu">:</span><span class="st">"https://flagcdn.com/na.svg"</span><span class="fu">,</span><span class="dt">"alt"</span><span class="fu">:</span><span class="st">"The flag of Namibia features a white-edged red diagonal band that extends from the lower hoist-side corner to the upper fly-side corner of the field. Above and beneath this band are a blue and green triangle respectively. A gold sun with twelve triangular rays is situated on the hoist side of the upper triangle."</span><span class="fu">}}</span><span class="ot">]</span></span></code></pre></div>
+<p>If you make changes to the Dockerfile or R code of the Lambda, simply
+re-deploy with another <code>cdk deploy</code>.</p>
+<p>Delete the CDK stack using Cloudformation via the AWS Console, or via
+the terminal with <code>cdk destroy</code>. You should also delete the
+ECR repository otherwise it will sit in your account and you will be
+charged for usage (a very small amount, but still).</p>
+</div>
+<div class="section level3">
+<h3 id="tidying-up-resources">Tidying up resources<a class="anchor" aria-label="anchor" href="#tidying-up-resources"></a>
+</h3>
+<p>To clean up the resources made using this guide, use the AWS Console
+to find and delete items in</p>
+<ul>
+<li>CloudFormation (the stack)</li>
+<li>ECR</li>
+<li>Lambda</li>
+</ul>
+</div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr>
+<ol>
+<li id="fn1"><p>Though typically <em>Lambdas</em> will take an input,
+you can make them to simply be invoked with no arguments, e.g. a
+<em>Lambda</em> that scrapes the same website every day and runs on a
+schedule.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -197,7 +795,7 @@ can be invoked from the CLI:</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer>
