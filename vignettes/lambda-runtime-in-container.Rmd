@@ -15,95 +15,737 @@ knitr::opts_chunk$set(
 )
 ```
 
-Consider the following `runtime.R` file:
+## Introduction
+
+This article shows how to bundle up your R code into a Docker container and
+deploy it as an _AWS Lambda_ function using **lambdr**. We provide a
+self-contained working example that can be used as a test/template for your
+own project.
+
+It is not an exhaustive or authoritative resource on all things _AWS Lambda_
+and Docker. Rather, it is a guide intended to get you up and running.
+
+### Pre-requisites
+
+You will need an AWS account. Remember, **you are responsible for the account
+and any billing costs that are incurred.**
+
+You need to be comfortable with R and have at least a vague understanding of
+Dockerfiles, Docker images, and containers. If you are not familiar with Docker,
+see the article [A Primer on Docker for lambdr](docker-primer.html).
+
+For AWS, you'll need a vague understanding of one or more of the AWS Console,
+AWS CLI, or AWS CDK, depending on which deployment examples you intend to follow
+later in this article.
+
+## Minimal Deployment Ready Example
+
+In this section you will see everything that goes into making an absolutely
+minimal deployment-ready R project with **lambdr**.
+
+Ideally, _Lambda_ functions should be pretty simple and do their business
+briskly. In reality, they may take several minutes to run and interact with
+various other AWS resources such as databases and S3 buckets.
+
+The example given here is basic enough to understand, and realistic enough to
+demonstrate some good project structure habits when making a _Lambda_. It
+purposefully **doesn't** require access to other AWS resources, like S3 buckets
+or databases: Managing and granting permissions are far out of the scope of
+**lambdr**.
+
+### Example project structure
+
+The example project is called **flags**. When given a full or partial country
+name it queries the [REST Countries](https://restcountries.com/) API and returns
+information about the country's flag.
+
+```
+.
+├── Dockerfile
+└── R
+    ├── functions.R
+    └── runtime.R
+```
+
+The minimal structure for a project only needs to contain two elements
+
+1) A directory `R/` containing the R scripts
+2) Dockerfile
+ 
+The Dockerfile packages up the R scripts in a Linux distribution with R, any
+required R packages, and system dependencies for both R and the R packages.
+
+One of the R scripts should always be called `runtime.R`.
+
+### Project file contents
+
+First let's look at the R code.
+
+#### functions.R
+
+The functions in this file get sourced and used in `runtime.R`.
+
+Don't worry if you aren't familiar with calling RESTful APIs. In summary,
+`create_request()` makes a request object to ask
+https://restcountries.com about a country's flag. Then `perform_request()` sends
+the request to the website, checking the response with the helper function
+`unsuccessful()`.
 
 ```r
-parity <- function(number) {
-  list(parity = if (as.integer(number) %% 2 == 0) "even" else "odd")
+library(httr2)
+
+create_request <- function(country) {
+  stopifnot("'country' must be a string containing a full or partial country name, e.g. 'ghana'" = nzchar(country))
+  country <- utils::URLencode(country)
+
+  base_url <- "https://restcountries.com/v3.1/name/"
+
+  httr2::request(base_url) |>
+    httr2::req_user_agent(
+      "lambdr example (https://github.com/mdneuzerling/lambdr/)"
+    ) |>
+    httr2::req_url_path_append(country) |>
+    httr2::req_url_query(fields = "flags")
 }
 
-lambdr::start_lambda()
+unsuccessful <- function(resp) {
+  body <- httr2::resp_body_json(resp)
+  msg <- sprintf("\nHTTP %s: %s.\n", body$status, body$message)
+  stop(
+    msg,
+    "Check supplied country name is valid and/or the server status."
+  )
+}
+
+perform_request <- function(req) {
+  resp <- req |>
+    httr2::req_error(is_error = \(x) FALSE) |>
+    httr2::req_perform()
+
+  if (resp[["status_code"]] != 200L) {
+    unsuccessful(resp)
+  }
+
+  return(httr2::resp_body_json(resp))
+}
 ```
 
-The `parity` function accepts a `number` argument and returns its parity as a named list, for example:
+#### runtime.R
+
+This file orchestrates the rest of the R code and starts up the **lambdr**
+runtime interface client. 
+
+`runtime.R` is short and simple. There are three main sections
+
+1) Set up: loading packages, sourcing functions, and indicating a logging
+threshold
+2) The `handler()` function definition
+3) Start **lambdr**
+
+Your _Lambda_ function will likely^[Though typically _Lambdas_ will take an
+input, you can make them to simply be invoked with no arguments, e.g. a
+_Lambda_ that scrapes the same website every day and runs on a schedule.] take
+a JSON payload with some inputs. **lambdr** will convert that JSON into an R
+list and pass the items to `handler()`.
+
+For example, a payload for this `flags` _Lambda_ could be
+`{"country": "ghana"}`. **lambdr** would convert it to `list(country = "ghana")`,
+then pass it to `handler()` for us. 
+
+Note that if `lambdr::start_lambda()` is called interactively it will throw an
+error. This is intentional. **lambdr** relies on the presence of environment
+variables that are only available when in the deployed _Lambda_ execution
+environment. However, you may want to test your code in interactive sessions
+during development, so we simply wrap the function in `if (!interactive())`.
 
 ```r
-parity(5)
-# $parity
-# [1] "odd"
+library(lambdr)
+library(logger)
+source(file.path("R", "functions.R"))
 
+logger::log_threshold(logger::DEBUG)
 
-parity(8)
-# $parity
-# [1] "even"
+handler <- function(country) {
+  logger::log_info("Event received: ", country)
+
+  req <- create_request(country)
+  resp <- perform_request(req)
+
+  return(resp)
+}
+
+if (!interactive()) {
+  lambdr::start_lambda()
+}
 ```
 
-This function can then be placed into a Docker image. An **example** is provided below, but the key components are:
+#### Dockerfile
 
-* Start from the `public.ecr.aws/lambda/provided:al2` parent image, which provides the basic components necessary to serve a Lambda
-* Install R and dependencies, both system dependencies and R packages, including the `lambdr` package
-* Copy across `runtime.R` and any other necessary files
-* Generate a simple bootstrap which runs `runtime.R` with R
-* Set the handler as the `CMD`. The `lambdr` package interprets the handler as the name of the function to use, in this case, "parity". The `CMD` can also be set (or overriden) when setting up the Lambda in AWS.
+The Dockerfile builds on the one in
+[A Primer on Docker for lambdr](docker-primer.html). That article explains each
+item in the Dockerfile step-by-step. Here, we emphasise what makes the
+Dockerfile below production-ready.
 
-```dockerfile
-FROM public.ecr.aws/lambda/provided:al2
+Essentially, it's all about version control.
 
-ENV R_VERSION=4.0.3
+Once the project is ready for deployment you should pin the base image to a
+specific version. To do this you provide the image's **digest**, which is a hash
+value. Here we use `@sha256:429...` which is for the amd64 version of
+`rocker/r-ver:4.4` at time of writing. Using the tag is not sufficient because
+the image it refers to can be subject to change - but the image specified by the
+digest will not.
 
-RUN yum -y install wget git tar
+To find a digest for an image you've already pulled you can use
+`docker images --digests`. Or you can get it from the repository where you found
+the image.
 
-RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
-  && wget https://cdn.rstudio.com/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \
-  && yum -y install R-${R_VERSION}-1-1.x86_64.rpm \
-  && rm R-${R_VERSION}-1-1.x86_64.rpm
+The other version control aspect here is using the 
+[Posit Public Package Manager](https://packagemanager.posit.co/client/#/repos/cran/setup)
+to get amd64 Ubuntu binaries from a snapshot of CRAN. This is simple, but not
+necessary. For example, you could use
+[renv](https://rstudio.github.io/renv/index.html) instead. But the point is, 
+version the R packages - somehow!
 
-ENV PATH="${PATH}:/opt/R/${R_VERSION}/bin/"
+```{.dockerfile}
+FROM docker.io/rocker/r-ver:4.4@sha256:429c1a585ab3cd6b120fe870fc9ce4dc83f21793bf04d7fa2657346fffde28d1
 
-# System requirements for R packages
-RUN yum -y install openssl-devel
+# options(warn=2) will make the build error out if package doesn't install
+RUN Rscript -e "options(warn = 2); install.packages('pak')"
+# Using {pak} to install R packages: it resolves Ubuntu system dependencies AND
+# the R dependency tree
+RUN Rscript -e "options( \ 
+    warn = 2, \
+    repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/2024-07-06') \
+    ); \ 
+    pak::pak( \ 
+    c( \ 
+    'httr2', \
+    'lambdr' \
+    ) \
+    )"
 
-RUN Rscript -e "install.packages(c('httr', 'jsonlite', 'logger', 'remotes'), repos = 'https://packagemanager.rstudio.com/all/__linux__/centos7/latest')"
-RUN Rscript -e "remotes::install_github('mdneuzerling/lambdr')"
+# Lambda setup
+RUN mkdir /R
+COPY R/ /R
+RUN chmod 755 -R /R
 
-RUN mkdir /lambda
-COPY runtime.R /lambda
-RUN chmod 755 -R /lambda
-
-RUN printf '#!/bin/sh\ncd /lambda\nRscript runtime.R' > /var/runtime/bootstrap \
-  && chmod +x /var/runtime/bootstrap
-
-CMD ["parity"]
+ENTRYPOINT Rscript R/runtime.R
+CMD ["handler"]
 ```
 
-The image is built and uploaded to AWS Elastic Container Registry (ECR). First, a repository is created:
+#### Completed project
+
+That's it! These three files are all you need
+
+```
+.
+├── Dockerfile
+└── R
+    ├── functions.R
+    └── runtime.R
+```
+
+The following sections expand on considerations such as local testing and how to
+deploy the project into AWS.
+
+## Choosing base images
+
+For R you can use any base image you want. So long as you have all the system
+dependencies required for R and the R packages, you only need to have **lambdr**
+installed and used as in the minimal example given above.
+
+### Do use
+
+We recommend [Rocker's r-ver](https://rocker-project.org/images/versioned/r-ver)
+images.
+
+They offer a tested, versioned R stack. Newer versions can be used with the 
+[Posit Public Package Manager](https://packagemanager.posit.co/client/#/repos/cran/setup)
+to install Ubuntu binaries of packages as at a certain date on CRAN. They also
+allow use of [pak](https://pak.r-lib.org/), which makes life very convenient in
+terms of finding and installing R package system dependencies.
+
+### Do not use
+
+The [AWS Lambda 'provided'](https://gallery.ecr.aws/lambda/provided) images. 
+
+They are minimal OS images. That means the base image is fairly small, which is
+positive. However, you have to install R and any dependencies yourself. 
+
+More importantly, at time of writing the current OS in the newer images is
+Amazon Linux 2, which is not based on a singular Linux distro, but rather a
+blend of multiple. That makes installing R package binaries and system
+dependencies more challenging, and slow.
+
+The previous version of the OS (Amazon Linux 2023) is drastically different to
+Amazon Linux 2 and will no longer receive support from AWS by the end of summer
+2025.
+
+## Dev vs deployment Dockerfiles
+
+Up until this point we have only shown and discussed a Dockerfile for
+deployment. While you are doing development work, it is a good idea to have a
+dev Dockerfile.
+
+The dev Dockerfile should mimic the deployment one as much as possible, but will
+also have any extra features you need to make your life easier as a developer.
+
+### Dockerfile.dev
+
+The example given below can be added to the `flags` project
+
+```
+.
+├── Dockerfile
+├── Dockerfile.dev
+└── R
+    ├── functions.R
+    └── runtime.R
+```
+
+```{.dockerfile}
+FROM ghcr.io/rocker-org/devcontainer/r-ver:4.4@sha256:e99cfe63efd5d79f44146d8be8206019fd7a7230116aa6488097ee660d6aa5dc
+
+# Install the Lambda Runtime Interface Emulator, which can be used for locally
+# invoking the function.
+# See https://github.com/aws/aws-lambda-runtime-interface-emulator for details
+RUN apt-get update && apt-get -y install --no-install-recommends curl 
+RUN curl -Lo /usr/local/bin/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && \
+    chmod +x /usr/local/bin/aws-lambda-rie
+
+# options(warn=2) will make the build error out if package doesn't install
+RUN Rscript -e "options(warn = 2); install.packages('pak')"
+# Using {pak} to install R packages: it resolves Ubuntu system dependencies AND
+# the R dependency tree
+RUN Rscript -e "options( \ 
+    warn = 2, \
+    repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/2024-07-06') \
+    ); \ 
+    pak::pak( \ 
+    c( \ 
+    'httr2', \
+    'lambdr' \
+    ) \
+    )"
+
+# Lambda setup
+RUN mkdir /R
+
+# Needs to be set to use aws-lambda-rie. It is the path up to runtime.R
+ENV LAMBDA_TASK_ROOT="/R"
+
+# Optional for local testing
+# 900s, i.e. 15 min, the max time a lambda can run for.
+ENV AWS_LAMBDA_FUNCTION_TIMEOUT=900
+```
+
+The differences as compared to the deployment Dockerfile are
+
+1) Uses a Dev Container base image
+   - Adds some tooling
+2) Installs the Lambda Runtime Interface Emulator
+   - The RIE opens up the possibility of locally testing the _Lambda_ function
+3) Doesn't copy R files into the image
+   - Instead, create a live link between system and container file
+  systems at run time
+
+#### The Dev Container base image
+
+```{.dockerfile}
+FROM ghcr.io/rocker-org/devcontainer/r-ver:4.4@sha256:e99cfe63efd5d79f44146d8be8206019fd7a7230116aa6488097ee660d6aa5dc
+```
+
+This time we are using a devcontainer base image, [which](https://containers.dev/)
+"allows you to use a container as a full-featured development environment".
+This is made by Rocker and it's the same as the r-ver:4.4 image but with some
+extra tooling.
+
+The most valuable of these is having [radian](https://github.com/randy3k/radian)
+and its dependencies installed, plus some of the other usual setup required to
+use VS Code as an IDE for R. Using the actual devcontainer VS Code extension is
+an exercise left for the reader, and with a word of warning: One of the authors
+of this vignette has seen some M2 MacBook Pros with 16GB of RAM struggling to
+run the devcontainer extension. 
+
+If you prefer RStudio as your IDE as an alternative you could use a
+[Rocker RStudio Server](https://rocker-project.org/images/versioned/rstudio.html)
+image. 
+
+## Build and run dev container
+
+While you're developing it's a good idea to work out of the dev container.
+
+One option for doing so is to have a "build script" that builds the image and
+runs a container.
+
+```
+.
+├── build.sh
+├── Dockerfile
+├── Dockerfile.dev
+└── R
+    ├── functions.R
+    └── runtime.R
+```
+
+```{.bash}
+#!/bin/sh
+docker stop flags && docker container rm flags
+
+docker build -t flags:latest \
+             -f Dockerfile.dev .
+
+docker run \
+    -p 9000:8080 \
+    -it \
+    --rm \
+    -v ~/.aws/:/root/.aws \
+    -v ./R:/R \
+    --name flags \
+    flags:latest \
+    bash
+```
+
+You might run this script by doing e.g. `bash build.sh`
+
+If a container already exists it will be stopped and removed. Note that if there
+**isn't** an image you'll see an error
+`Error response from daemon: No such container: flags` -- this is expected.
+
+The image will only build if `Dockerfile.dev` has been altered or is being built
+for the first time.
+
+The options being given to `docker run` are:
+
+- `-p` Publishes port 9000 to host's 8080. For local testing using the Lambda
+RIE (see below)
+- `-it` Start the container with an interactive terminal
+- `--rm` Remove the container when it is exited
+- `-v` Mount. Creates a live link between the host and container file system
+  - `~/.aws` makes AWS credentials available in the container. Can be useful if
+you need to use {[paws](https://www.paws-r-sdk.com/)}. If you don't need AWS
+creds in the container then you shouldn't mount this volume 
+  - `./R` contains the lambda code
+
+## Local testing with AWS RIE
+
+In the dev Dockerfile we installed the AWS Runtime Interface Emulator (RIE).
+
+The emulator gets as close to the environment of a _Lambda_ as is possible
+without actually pushing up to AWS and invoking.
+
+Two small shell scripts in `local-testing` below, plus the build script from the
+previous section (required for port forwarding) are all we need to add:
+
+```
+.
+├── local-testing
+│   ├── event.sh
+│   └── start-rie.sh
+├── build.sh
+├── Dockerfile
+├── Dockerfile.dev
+└── R
+    ├── functions.R
+    └── runtime.R
+```
+
+`start-rie.sh` starts the emulator with our handler:
+
+```{.bash}
+#!/bin/bash
+exec /usr/local/bin/aws-lambda-rie Rscript /R/runtime.R handler
+```
+
+Run `bash local-testing/start-rie.sh` from **inside the running container**.
+This will start the emulator, which runs an HTTP endpoint, similar to what
+happens in the deployed _Lambda_. The endpoint will be waiting for a payload
+to pass to the R code and this makes the container's terminal busy. If you need
+to stop the process just press `Ctrl` + `C`.
+
+Sending a payload to the emulator is the equivalent of invoking the _Lambda_.
+This is done with `event.sh`:
+
+```{.bash}
+#!/bin/bash
+port="9000"
+endpoint="http://localhost:$port/2015-03-31/functions/function/invocations"
+
+curl -XPOST $endpoint -d '{"country":"'"$1"'"}'
+```
+
+Simply run `bash local-testing/event.sh someCountry` replacing `someCountry`
+with a partial or full country name. The result will appear in your terminal. If
+you go look at the container terminal all the logs (equivalent to what would 
+appear in _CloudWatch_) from the execution will be present. The RIE will run
+until you stop it with `Ctrl` + `C`.
+
+If your own _Lambda_ doesn't actually take any parameters then your payload
+should be an empty json:
+
+```{.bash}
+#!/bin/bash
+port="9000"
+endpoint="http://localhost:$port/2015-03-31/functions/function/invocations"
+
+curl -XPOST $endpoint -d '{}'
+```
+
+And finally, one more option if using the devcontainer VS Code extension.
+Because you can spawn multiple terminals from within the container, you can
+start the RIE **and** send it a payload from another terminal inside the
+container. In this case the port will be `8080`, which is easy to add logic for
+in `event.sh` because of the devcontainer envvar `$DEVCONTAINER`:
+
+```{.bash}
+if [ "$DEVCONTAINER" = "TRUE" ]
+then
+    port="8080"
+else
+    port="9000"
+fi
+```
+
+## Deployment
+
+At this point, you will have **at minimum** a project with Dockerfile, some R
+code, and a `runtime.R` that starts `lambdr`: 
+
+```
+.
+├── Dockerfile
+└── R
+    ├── functions.R
+    └── runtime.R
+```
+
+Deployment is the act of turning these files into an _AWS Lambda_ function that
+can be invoked. Here we provide some rough instructions for two common ways of
+deploying: via the AWS Console (the website), and the AWS Cloud Development Kit
+(CDK).
+
+**For both options you will need to have the AWS CLI installed
+([instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
+as a prerequisite**. The CLI is how you interact with AWS from the terminal.
+
+### AWS Console
+
+The following instructions use the example project given earlier, `flags`. 
+
+The steps are:
+
+- Build the image
+- Create a repository in the _AWS Elastic Container Registry_ (ECR)
+- Push the image to _ECR_
+- Make the _Lambda_ function from the image in _ECR_
+
+First, in a terminal `cd` to the project and build the image:
+
+```{.bash}
+docker build -t flags:latest .
+```
+
+Then, create a repository in ECR either by using the CLI or the Console. If you
+do it in the Console you pretty much just go to the _ECR_ service, click
+`Create`, and call it `flags`.
+
+Or you can use the CLI:
 
 ```bash
-aws ecr create-repository --repository-name parity-lambda --image-scanning-configuration scanOnPush=true
+aws ecr create-repository --repository-name flags --image-scanning-configuration scanOnPush=true
 ```
 
-This provides a URI, the resource identifier of the created repository. The image can now be pushed:
+Make a note of the URI, which is the resource identifier of the created
+repository.
+
+The image can now be pushed to the repository. This part has to be done via the
+CLI. You can get all the commands ready-made for you via the Console by clicking
+on the repo name in _ECR_, then `View push commands`. Or, you can replace the
+username `123456789123` and the region `region-name-1` in the commands below to
+do the same thing.
+
+Note: You don't need a Docker account for the `docker login` command.
 
 ```bash
-docker tag mdneuzerling/r-on-lambda:latest {URI}/parity-lambda:latest
-aws ecr get-login-password | docker login --username AWS --password-stdin {URI}
-docker push {URI}/parity-lambda:latest
+docker tag flags:latest 123456789123.dkr.ecr.region-name-1.amazonaws.com/flags
+aws ecr get-login-password | docker login --username AWS --password-stdin 123456789123.dkr.ecr.region-name-1.amazonaws.com/flags
+docker push 123456789123.dkr.ecr.region-name-1.amazonaws.com/flags:latest
 ```
 
-In either the AWS console or the command line, a Lambda can be created from this image. Call the Lambda "parity" to match the function name. Tests can be executed within the console. Alternatively the Lambda can be invoked from the CLI:
+Now that the image is in _ECR_ it can be used to make the _Lambda_ function.
+You could make it from the command line, but this requires an IAM Role to be
+configured and ready for the function. That is beyond the scope of lambdr. If
+you have a Role and prefer to use the CLI, see the examples in
+`aws lambda create-function help`
 
-```bash
-aws lambda invoke --function-name parity \
-  --invocation-type RequestResponse --payload '{"number": 8}' \
+In the Console go to the _Lambda_ service. Click `Create a function`. Choose the
+container image option, give it a name (`flags` is fine) and choose the image
+from the _ECR_ repository. Everything else can be left default.
+
+It will take a minute for the function to be made.
+
+Once it is, you can test it by scrolling down and clicking on the `Test` tab. 
+Edit the `Event JSON` to be `{"country": "namibia"}`, then click the orange
+`Test` button. It should be successful. To see the response click `Details`,
+beneath the big green tick.
+
+However, there's a good chance of a timeout because the default value for a
+_Lambda_ is only 3 seconds. To increase it, click on the `Configuration` tab,
+then `Edit`, and bump it up. 10 seconds is fine in this case.
+
+Alternatively the _Lambda_ can be invoked from the CLI:
+
+```{.bash}
+aws lambda invoke --function-name flags \
+  --invocation-type RequestResponse --payload '{"country": "namibia"}' \
   /tmp/response.json --cli-binary-format raw-in-base64-out
 ```
 
-The output is now available in the generated file:
+See the response with:
 
-```bash
+```{.bash}
 cat /tmp/response.json            
 ```
 
-```bash
-{"parity":"even"}
+```{.json}
+[{"flags":{"png":"https://flagcdn.com/w320/na.png","svg":"https://flagcdn.com/na.svg","alt":"The flag of Namibia features a white-edged red diagonal band that extends from the lower hoist-side corner to the upper fly-side corner of the field. Above and beneath this band are a blue and green triangle respectively. A gold sun with twelve triangular rays is situated on the hoist side of the upper triangle."}}]
 ```
+
+### Cloud Development Kit (CDK)
+
+The CDK allows you to programatically create application stacks and all of the
+associated resources they need, like Lambdas, Step Functions, and so on. It's
+an alternative to clicking around in the AWS Console and means that your stack
+can (theoretically) be rebuilt at any time with just a few commands.
+
+**First [install the CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html).**
+
+Once the CDK CLI is installed:
+
+Make a directory somewhere called `LambdrExample`, then `cd` into the directory
+and run the following in the terminal:
+
+```{.bash}
+cdk init app --language typescript
+```
+
+You will now have a bunch of files and folders containing boilerplate code and 
+libraries. We're only interested in the `bin` and `lib` directories. You also
+need to add a new directory called `lambda`, and to that, the `flags` project,
+like below:
+
+```
+.
+├── bin
+│  └── lambdr_example.ts
+├── lambda
+│  └── flags
+│     ├── Dockerfile
+│     └── R
+│        ├── functions.R
+│        └── runtime.R
+└── lib
+   └── lambdr_example-stack.ts
+```
+
+Replace the contents of `bin/lambdr_example.ts` with this:
+
+
+```{.typescript}
+#!/usr/bin/env node
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
+import { LambdrExampleStack } from "../lib/lambdr_example-stack.ts";
+
+const app = new cdk.App();
+new LambdrExampleStack(app, "LambdrExampleStack", {
+  // Your account number and region go in the env below
+  env: { account: "111122223333", region: "my-region-1" },
+});
+```
+
+Replace the contents of  `lib/lambdr_example-stack.ts` with this:
+
+```{.typescript}
+import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+
+export class LambdrExampleStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    this.createFlagsLambda();
+  }
+
+  createFlagsLambda(): lambda.IFunction {
+    const flagsLambda = new lambda.DockerImageFunction(this, "flags", {
+      functionName: "flags",
+      code: lambda.DockerImageCode.fromImageAsset("lambda/flags"),
+      timeout: cdk.Duration.seconds(15),
+    });
+
+    return flagsLambda;
+  }
+}
+```
+
+You then need to run
+
+```{.bash}
+cdk bootstrap
+```
+
+Followed by
+
+```{.bash}
+cdk deploy
+```
+
+Some building will happen and then you will be prompted as to whether you wish
+to deploy a couple of changes. If you feel comfortable, enter `y` and hit
+return. 
+
+_Note: If you get a failure because no bucket and/or ECR repository exist, this
+is probably because you have previously bootstrapped your account and now have
+"stack drift". To resolve this, delete the `CDKToolkit` stack from
+CloudFormation and re-bootstrap. For more information, see SO
+[here](https://stackoverflow.com/questions/71280758/aws-cdk-bootstrap-itself-broken/71283964#71283964)._
+
+If all has gone well you should see a green tick and sparkles with deployment
+time.
+
+Test by invoking from the CLI:
+
+```{.bash}
+aws lambda invoke --function-name flags \
+  --invocation-type RequestResponse --payload '{"country": "namibia"}' \
+  /tmp/response.json --cli-binary-format raw-in-base64-out
+```
+
+See the response with:
+
+```{.bash}
+cat /tmp/response.json            
+```
+
+```{.json}
+[{"flags":{"png":"https://flagcdn.com/w320/na.png","svg":"https://flagcdn.com/na.svg","alt":"The flag of Namibia features a white-edged red diagonal band that extends from the lower hoist-side corner to the upper fly-side corner of the field. Above and beneath this band are a blue and green triangle respectively. A gold sun with twelve triangular rays is situated on the hoist side of the upper triangle."}}]
+```
+
+If you make changes to the Dockerfile or R code of the Lambda, simply re-deploy
+with another `cdk deploy`.
+
+Delete the CDK stack using Cloudformation via the AWS Console, or via the
+terminal with `cdk destroy`. You should also delete the ECR repository otherwise
+it will sit in your account and you will be charged for usage (a very small
+amount, but still).
+
+### Tidying up resources
+
+To clean up the resources made using this guide, use the AWS Console to find
+and delete items in
+
+- CloudFormation (the stack)
+- ECR
+- Lambda

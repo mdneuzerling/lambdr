@@ -1,0 +1,259 @@
+---
+title: "A Primer on Docker for lambdr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A Primer on Docker for lambdr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+This vignette is intended as a primer for the not-beginner^[If you're no longer
+a beginner, but aren't sure if you're an intermediate or advanced R programmer,
+perhaps you are a "not-beginner"! For more thoughts on this topic see Meghan
+Harris's blog post [How I Became A “Not-Beginner” in R](https://thetidytrekker.com/post/how-i-became-a-not-beginner-in-r/not-beginner)]
+R user who has no (or minimal) experience with Docker.
+
+One of the main ways to create _AWS Lambda_ functions is with Docker images.
+Don't worry if you don't know what that is yet. What's important to know
+is that **for lambdr to work you need to have a valid Docker image**.
+
+The sections that follow will explain what a Docker image is and how to make one
+for use with lambdr.
+
+## Images, containers, and Dockerfiles
+
+### Terminology
+
+An **image** is a bit like a simple, switched-off virtual computer. Or, as Docker
+[puts it](https://docs.docker.com/guides/docker-concepts/the-basics/what-is-an-image/),
+"a standardized package that includes all of the files, binaries, libraries, and
+configurations to run a container."
+
+<center>
+![](docker-image.svg)
+</center>
+
+And what's a **container**?
+[Well](https://docs.docker.com/guides/docker-concepts/the-basics/what-is-a-container/),
+"A container is simply an isolated process with all of the files it needs to
+run." That sounds kind of vague, and it is, so for the purposes of lambdr you
+can think of it as an instance of the virtual computer (image) that's switched
+on and can run your R code. It's independent of your own computing environment,
+but you can give it access to things like directories, so that there's a live
+link between the file system in the container and your local code.
+
+<center>
+![](docker-container.svg)
+</center>
+
+The image doesn't come from nowhere. It's created from a **Dockerfile**,
+[which is](https://docs.docker.com/guides/docker-concepts/building-images/writing-a-dockerfile/)
+"a text-based document" that "provides instructions to the image builder on the
+commands to run, files to copy, startup command, and more." 
+
+<center>
+![](docker-dockerfile.svg)
+</center>
+
+It's also very useful to know the following terms:
+
+- You **build** an image from a Dockerfile
+- You **run** a container from the image
+
+This is what the flow looks like, from left to right:
+
+<center>
+![](dockerfile-image-container.svg)
+</center>
+
+### For lambdr
+
+For your R process, the image needs to contain a Linux distribution, your code,
+R itself, the R packages your code needs, and any system dependencies for Linux
+that R and the R packages require.
+
+This is pretty similar to how most of us work locally. We have an operating
+system - typically macOS, Windows, or Linux. We install R. We install R
+packages. And we install any system dependencies that we need along the way,
+e.g. imagemagick, or Postgres.
+
+## Dockerfile example
+
+Below is an example of a Dockerfile that could be used with lambdr. The purpose
+is just to show a minimal example that explains the basic concepts. It is
+**not** as an example Dockerfile to be used in production.
+
+If you are confident that you understand Dockerfiles, images, and containers,
+and simply want a production-ready example to use as a reference, please see the
+article
+[Placing an R Lambda Runtime in a Container](lambda-runtime-in-container.html).
+
+### The Dockerfile
+
+Here is a full Dockerfile, followed by item-by-item explanations:
+
+```{.dockerfile}
+FROM docker.io/rocker/r-ver:4.4
+
+RUN Rscript -e "options(warn = 2); install.packages('pak')"
+
+RUN Rscript -e "options( \ 
+    warn = 2, \
+    repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/2024-07-30') \
+    ); \ 
+    pak::pak( \ 
+    c( \ 
+    'httr2', \
+    'lambdr' \
+    ) \
+    )"
+
+# Lambda setup
+RUN mkdir /R
+COPY R/ /R
+RUN chmod 755 -R /R
+
+ENTRYPOINT Rscript R/runtime.R
+CMD ["handler"]
+```
+
+### Instructions
+
+Dockerfiles contain **instructions**. In this example there are instructions 
+like `FROM` and `RUN`.
+
+### Base image and layers
+
+The first instruction is:
+
+```{.dockerfile}
+FROM docker.io/rocker/r-ver:4.4
+```
+
+To understand `FROM` you need to know that Docker images are built up of layers.
+Each layer is added to the ones that preceded it. This even includes images
+someone else has built and put online. That's great, because they can form the
+base on which you continue to build - which is also why they're known as
+**base images**.
+
+Base images are hosted in repositories. In our example, the repository is
+`docker.io`. The image in question is provided by
+[rocker](https://rocker-project.org/), who make reliable Docker containers for R
+environments. The image has a **name**, `r-ver`, and a **tag**, `4.4`.
+
+The instruction `FROM` simply tells the builder to download and use the base
+image as a starting point.
+
+This particular base image has a version of Linux (Ubuntu 'Jammy'), R, and
+the system dependencies required for using R. Information about the image was
+available on the rocker website (at time of writing). 
+
+### Installing packages
+
+The next instruction used is `RUN`. Every time `RUN` is used it makes a new
+image layer and executes whatever argument/s it has been given. 
+
+Here, it is used to install R packages - first [pak](https://pak.r-lib.org/),
+which is itself an R package manager, and then `httr2` and `lambdr` by
+using `pak`:
+
+```{.dockerfile}
+RUN Rscript -e "options(warn = 2); install.packages('pak')"
+
+RUN Rscript -e "options( \ 
+    warn = 2, \
+    repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/2024-07-30') \
+    ); \ 
+    pak::pak( \ 
+    c( \ 
+    'httr2', \
+    'lambdr' \
+    ) \
+    )"
+```
+
+This is probably not how you're used to executing R code. It looks like this for
+a few reasons.
+
+1) Using `Rscript`, which is "A binary front-end to R, for use in scripting
+applications". It can be given R files or, like in this case, in-line scripts to
+execute. Basically, it's a non-interactive method of executing R code
+2) Stringified R code littered with `\`. The `\` escapes any newlines
+
+A warning level and a 'special' CRAN repository are also supplied. These ensure
+that the Docker image will error out if there's a problem installing packages,
+and that the packages are the latest amd64 binary versions for Ubuntu 'Jammy' as
+at the date supplied. For more detail about why these are set, see 
+[Placing an R Lambda Runtime in a Container](lambda-runtime-in-container.html).
+
+For now, just know that `RUN` added two layers where R packages get installed.
+
+### Files and permissions
+
+In this section the `RUN` instruction is used again, alongside `COPY`:
+
+```{.dockerfile}
+# Lambda setup
+RUN mkdir /R
+COPY R/ /R
+RUN chmod 755 -R /R
+```
+
+A directory called `/R` is made in the image, then the local folder of R code is
+copied into the image folder. `COPY` uses the same syntax as `cp`, i.e. `source`
+`destination`.
+
+Then, `chmod 755 -R` gets applied to the `/R` folder. In short, this just makes
+sure the files in the folder can be executed in the image.
+
+### Runtime and handler
+
+The final instructions are `ENTRYPOINT` and `CMD`. At this point, all the R
+code, packages, and dependencies have been installed. All that's left is to tell
+_Lambda_ where to find the runtime interface client and `handler` function - 
+both of which are new concepts explained below.
+
+```{.dockerfile}
+ENTRYPOINT Rscript R/runtime.R
+CMD ["handler"]
+```
+
+The `runtime.R` file contains two things necessary for _Lambda_ to run:
+
+1) A function called `handler()`
+  - The orchestrating function that takes input, does stuff, and returns output
+  - The equivalent to 'main' in other programming languages
+2) The `lambdr` function `lambdr::start_lambda()`
+  - This starts the R runtime interface client, which will then listen for any
+incoming events and pass return values back out of the _Lambda_ function  
+
+An example `runtime.R` is given in the article
+[Placing an R Lambda Runtime in a Container](lambda-runtime-in-container.html).
+For this introduction all you need to know is that `ENTRYPOINT` needs to
+execute `Rscript` on `R/runtime.R` so that `lambdr::start_lambda()` gets called.
+
+`CMD` simply takes the name of the handler function. You can call the handler
+whatever you like, but as there is only ever one handler per _Lambda_, by
+convention we just call it `handler`. The `CMD` gets passed as an argument to
+`lambdr::start_lambda()`.
+
+## How to use the Dockerfile
+
+You're probably wondering "How do I use the Dockerfile!?"
+
+We won't get into that here. 
+
+Instead, the article
+[Placing an R Lambda Runtime in a Container](lambda-runtime-in-container.html)
+has sections about development versus deployment containers, and how to
+practically figure that stuff out for use with **lambdr**. We recommend reading
+the whole article.
+
+Before moving on to the article, you may also want to look into the basics of
+Docker more generally. You can get a good feel for what using Docker looks like
+in practice by watching
+[Docker Tutorial for Beginners](https://youtu.be/b0HMimUb4f0?si=W1wrIJgZ2XjADWWK)
+by [James Murphy](https://mcoding.io). Or, if you want a hands-on tutorial there
+is the official [Docker 101 Tutorial](https://www.docker.com/101-tutorial/).
