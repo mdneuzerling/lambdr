@@ -114,9 +114,9 @@ parity(8)
 # [1] "even"
 ```
 
-This function can then be placed into a Docker image. An **example** is provided below, but the key components are:
+This function can then be placed into a Docker image. An **example** Dockerfile is provided below, but the key components are:
 
-* Start from a minimal Rocker parent image
+* Start from a minimal Rocker parent image (**not** the Rocker tidyverse image)
 * Install package dependencies using `pak`, which also handles system dependencies.
 * Copy across `runtime.R` and any other necessary files
 * Set the handler as the `CMD`. The `lambdr` package interprets the handler as the name of the function to use, in this case, "parity". The `CMD` can also be set (or overriden) when setting up the Lambda in AWS.
@@ -150,8 +150,8 @@ aws ecr create-repository --repository-name parity-lambda --image-scanning-confi
 
 This provides a URI, the resource identifier of the created repository. The image can now be pushed:
 
-```bash
-docker build -f dockerfile -t r-on-lambda .   
+```bash 
+docker build --platform linux/amd64 -t r-on-lambda  . 
 docker tag mdneuzerling/r-on-lambda:latest {URI}/parity-lambda:latest
 aws ecr get-login-password | docker login --username AWS --password-stdin {URI}
 docker push {URI}/parity-lambda:latest
