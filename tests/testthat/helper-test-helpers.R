@@ -39,10 +39,7 @@ basic_lambda_config <- function(handler = "sqrt",
   }
 
   withr::with_envvar(env_vars,
-    withr::with_environment(
-      parent.frame(),
-      lambda_config(handler = direct_handler, ...)
-    )
+    lambda_config(handler = direct_handler, environ = parent.frame(), ...)
   )
 }
 

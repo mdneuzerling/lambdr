@@ -1,3 +1,7 @@
+# lambdr 1.2.6
+
+* Fixed an issue with a test helper that was causing tests to fail.
+
 # lambdr 1.2.5
 
 * Update docs to include information on Docker tags.
