@@ -25,7 +25,7 @@ Imports:
 Suggests: 
     withr,
     testthat (>= 3.0.0),
-    webmockr,
+    webmockr (>= 2.1.1.91),
     knitr,
     rmarkdown,
     lifecycle
