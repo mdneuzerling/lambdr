@@ -6,6 +6,24 @@ no_arguments <- function() {
   list(animal = "dog", breed = "corgi")
 }
 
+request_received <- function(
+  method = NULL,
+  url = NULL,
+  body = NULL,
+  min_requests = 1,
+  max_requests = Inf
+) {
+  received <- webmockr::request_registry_filter(
+    method = method,
+    url = url,
+    body = body
+  )
+
+  length(received) > 0 &&
+    received[[1]]$count >= min_requests &&
+    received[[1]]$count <= max_requests
+}
+
 expect_setup_failure <- function(endpoint_function, ...) {
   eval(bquote({
     expect_error(
@@ -78,12 +96,7 @@ mock_response <- function(input,
     timeout_seconds = timeout_seconds
   )
 
-  requests <- webmockr::request_registry()
-  n_responses <- requests$times_executed(
-    webmockr::RequestPattern$new("post", response_endpoint)
-  )
-
-  n_responses >= 1
+  request_received("post", response_endpoint)
 }
 
 mock_invocation_error <- function(input,
@@ -120,12 +133,7 @@ mock_invocation_error <- function(input,
 
   start_listening(config = config, timeout_seconds = timeout_seconds)
 
-  requests <- webmockr::request_registry()
-  n_responses <- requests$times_executed(
-    webmockr::RequestPattern$new("post", invocation_error_endpoint)
-  )
-
-  n_responses >= 1
+  request_received("post", invocation_error_endpoint)
 }
 
 trigger_initialisation_error <- function(expected_error,
@@ -190,10 +198,10 @@ trigger_initialisation_error <- function(expected_error,
     stop(error_message)
   }
 
-  requests <- webmockr::request_registry()
-  request_pattern <- webmockr::RequestPattern$new(
-    "post",
-    initialisation_error_endpoint
+  request_received(
+    method = "post",
+    url = initialisation_error_endpoint,
+    min_requests = 1,
+    max_requests = 1
   )
-  return(requests$times_executed(request_pattern) == 1)
 }

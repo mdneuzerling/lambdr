@@ -5,6 +5,7 @@ test_that("start_lambda starts lambda runtime", {
   # Make webmockr intercept HTTP requests
   webmockr::enable(quiet = TRUE)
   withr::defer(webmockr::disable(quiet = TRUE))
+  webmockr::request_registry_clear()
 
   invocation_endpoint <- get_next_invocation_endpoint(lambda_runtime_api)
   response_endpoint <- get_response_endpoint(
@@ -20,7 +21,7 @@ test_that("start_lambda starts lambda runtime", {
       status = 200
     )
 
-  # Mock the response endpoint. We expect a response of `2`.
+  # Mock the response endpoint. We expect a response of {"parity": "odd"}
   webmockr::stub_request("post", response_endpoint) %>%
     webmockr::wi_th(
       headers = default_response_headers,
@@ -37,10 +38,6 @@ test_that("start_lambda starts lambda runtime", {
     start_lambda(timeout_seconds = 0.5)
   )
 
-  requests <- webmockr::request_registry()
-  n_responses <- requests$times_executed(
-    webmockr::RequestPattern$new("post", response_endpoint)
-  )
-
-  expect_gte(n_responses, 1)
+  expect_true(request_received(method = "get", url = invocation_endpoint))
+  expect_true(request_received(method = "post", url = response_endpoint))
 })

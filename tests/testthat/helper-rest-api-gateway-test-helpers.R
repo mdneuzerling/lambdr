@@ -48,12 +48,7 @@ mock_rest_api_gateway_event <- function(query_parameters = NULL,
 
   start_listening(config = config, timeout_seconds = timeout_seconds)
 
-  requests <- webmockr::request_registry()
-  n_responses <- requests$times_executed(
-    webmockr::RequestPattern$new("post", response_endpoint)
-  )
-
-  n_responses >= 1
+  request_received("post", response_endpoint)
 }
 
 mock_rest_api_gateway_event_body <- function(query_parameters = NULL,
