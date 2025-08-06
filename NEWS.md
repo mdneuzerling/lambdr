@@ -1,3 +1,7 @@
+# lambdr 1.2.7
+
+* Removed webmockr::RequestPattern from all unit tests.
+
 # lambdr 1.2.6
 
 * Fixed an issue with a test helper that was causing tests to fail.

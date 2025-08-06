@@ -1,6 +1,6 @@
 Package: lambdr
 Title: Create a Runtime for Serving Containerised R Functions on 'AWS Lambda'
-Version: 1.2.6
+Version: 1.2.7
 Authors@R: 
     c(person(given = "David",
              family = "Neuzerling",
@@ -25,10 +25,11 @@ Imports:
 Suggests: 
     withr,
     testthat (>= 3.0.0),
-    webmockr,
+    webmockr (>= 2.1.1.91),
     knitr,
     rmarkdown,
     lifecycle
+Remotes: ropensci/webmockr
 Config/testthat/edition: 3
 URL: https://lambdr.mdneuzerling.com/,
     https://github.com/mdneuzerling/lambdr

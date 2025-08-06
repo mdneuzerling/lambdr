@@ -123,12 +123,9 @@ test_that("error occurs when request ID not in headers", {
     NA
   )
 
-  requests <- webmockr::request_registry()
-  n_responses <- requests$times_executed(
-    webmockr::RequestPattern$new("get", invocation_endpoint)
-  )
-
   # Should be more than 1 invocation, to prove the runtime didn't hang on one
   # failed invocation without a request_id
-  n_responses > 1
+  expect_true(
+    request_received("get", invocation_endpoint, min_requests = 2)
+  )
 })
