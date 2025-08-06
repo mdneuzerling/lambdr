@@ -29,6 +29,7 @@ Suggests:
     knitr,
     rmarkdown,
     lifecycle
+Remotes: ropensci/webmockr
 Config/testthat/edition: 3
 URL: https://lambdr.mdneuzerling.com/,
     https://github.com/mdneuzerling/lambdr
